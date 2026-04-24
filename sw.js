@@ -1,6 +1,6 @@
 // Amigo Pet — Service Worker
 // Versão incrementada para forçar atualização nos usuários que já abriram o app antes.
-const CACHE_NAME = 'amigopet-cache-v2';
+const CACHE_NAME = 'amigopet-cache-v3';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
