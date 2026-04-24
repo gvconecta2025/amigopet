@@ -32,7 +32,7 @@ self.addEventListener('activate', (event) => {
 
 // Estratégia Stale-While-Revalidate (Super Rápida)
 self.addEventListener('fetch', (event) => {
-  // Deixar que o SDK do Firebase trate dos pedidos à base de dados (que já está a usar enableIndexedDbPersistence)
+  // Ignora os pedidos do Firebase para que não haja conflitos de cache na base de dados
   if (event.request.url.includes('firestore.googleapis.com') || event.request.url.includes('identitytoolkit')) return;
 
   event.respondWith(
