@@ -46,15 +46,12 @@
     <meta name="theme-color" content="#0f766e">
     <link rel="apple-touch-icon" href="/image_322ea4.png">
 
-    <!-- Motor PWA Nativo com Redundância -->
+    <!-- Motor PWA Nativo -->
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/sw.js').catch(err => {
-                    console.warn('Arquivo sw.js físico falhou, ativando motor virtual de redundância...', err);
-                    const swCode = "self.addEventListener('install', (e) => self.skipWaiting()); self.addEventListener('activate', (e) => e.waitUntil(clients.claim())); self.addEventListener('fetch', (e) => {});";
-                    const swBlob = new Blob([swCode], {type: 'application/javascript'});
-                    navigator.serviceWorker.register(URL.createObjectURL(swBlob));
+                    console.warn('Arquivo sw.js físico falhou, verifique o GitHub.', err);
                 });
             });
         }
@@ -80,7 +77,7 @@
                 // Fallback amigável para iOS (iPhone) e navegadores sem suporte ao prompt automático
                 window.showSystemMessage(
                     "Instalar o Aplicativo", 
-                    "No Android: Procure 'Instalar Aplicativo' no menu do navegador (3 pontinhos).\n\nNo iPhone (iOS): Toque no botão 'Partilhar' (quadrado com seta) e escolha 'Adicionar à Tela de Início'.\n\nIsso vai instalar o Amigo Pet como um aplicativo completo no seu celular!", 
+                    "No Android: Procure 'Instalar Aplicativo' no menu do navegador (3 pontinhos).\n\nNo iPhone (iOS): Toque no botão 'Partilhar' (quadrado com seta) e escolha 'Adicionar à Tela de Início'.\n\nIsso vai instalar o Amigo Pet como um aplicativo completo no seu telemóvel!", 
                     "info"
                 );
             }
@@ -149,7 +146,7 @@
                 <h2 id="catalog-title" class="text-2xl font-black text-gray-800 flex items-center gap-2">
                     <i data-lucide="shopping-bag" class="w-6 h-6 text-teal-600"></i> Produtos
                 </h2>
-                <p id="catalog-subtitle" class="text-sm text-gray-500 font-medium">Encontre o que você precisa.</p>
+                <p id="catalog-subtitle" class="text-sm text-gray-500 font-medium">Encontre o que precisa.</p>
             </div>
 
             <!-- Filtros de Etiquetas Rápidas -->
@@ -191,8 +188,8 @@
                     <i data-lucide="shield-check" class="w-5 h-5 text-[#25D366]"></i> Como funciona?
                 </h3>
                 <p class="text-sm text-gray-500 leading-relaxed">
-                    Para garantir que você receba nossos avisos de forma rápida, utilizamos <strong>Grupos Silenciosos no WhatsApp</strong>. Somente nossa loja envia mensagens. <strong>Sem spam.</strong><br><br>
-                    <span class="font-bold text-teal-800">🔒 Privacidade garantida:</span> As configurações do grupo não permitem que seu número fique exposto para os outros membros.
+                    Para garantir que recebe os nossos avisos de forma rápida, utilizamos <strong>Grupos Silenciosos no WhatsApp</strong>. Somente a nossa loja envia mensagens. <strong>Sem spam.</strong><br><br>
+                    <span class="font-bold text-teal-800">🔒 Privacidade garantida:</span> As configurações do grupo não permitem que o seu número fique exposto para os outros membros.
                 </p>
             </div>
 
@@ -300,13 +297,14 @@
         </div>
     </div>
 
-    <!-- Modal: Editor de Item -->
+    <!-- Modal: Editor de Item (Com max-h-[90vh] para corrigir os botões no telemóvel) -->
     <div id="item-editor-modal" class="hidden fixed inset-0 z-[60] flex items-center justify-center modal-overlay px-2 py-4">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-full flex flex-col relative">
-            <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col relative">
+            <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl shrink-0">
                 <h3 id="item-editor-title" class="font-black text-gray-800">Novo Item</h3>
                 <button onclick="window.closeItemEditor()" class="text-gray-400 hover:text-gray-600"><i data-lucide="x" class="w-6 h-6"></i></button>
             </div>
+            
             <div class="p-5 flex-1 overflow-y-auto space-y-5">
                 <input type="hidden" id="edit-item-id">
                 
@@ -381,7 +379,8 @@
                     <textarea id="item-description" rows="3" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-teal-500 resize-none"></textarea>
                 </div>
             </div>
-            <div class="p-4 border-t border-gray-100 flex justify-between bg-white rounded-b-2xl">
+            
+            <div class="p-4 border-t border-gray-100 flex justify-between bg-white rounded-b-2xl shrink-0">
                 <button id="btn-delete-item" onclick="window.deleteItem()" class="hidden text-red-500 font-bold px-4 py-2 hover:bg-red-50 rounded-lg text-sm"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
                 <div class="flex gap-2 ml-auto">
                     <button onclick="window.closeItemEditor()" class="px-5 py-2 text-gray-500 font-bold text-sm">Cancelar</button>
@@ -391,14 +390,15 @@
         </div>
     </div>
 
-    <!-- Modal: Editor de Grupo -->
+    <!-- Modal: Editor de Grupo (Com max-h-[90vh]) -->
     <div id="group-editor-modal" class="hidden fixed inset-0 z-[60] flex items-center justify-center modal-overlay px-4 py-4">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm flex flex-col relative">
-            <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm max-h-[90vh] flex flex-col relative">
+            <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl shrink-0">
                 <h3 id="group-editor-title" class="font-black text-gray-800">Novo Grupo</h3>
                 <button onclick="window.closeGroupEditor()" class="text-gray-400 hover:text-gray-600"><i data-lucide="x" class="w-6 h-6"></i></button>
             </div>
-            <div class="p-5 flex-col gap-4 flex">
+            
+            <div class="p-5 flex-col gap-4 flex overflow-y-auto">
                 <input type="hidden" id="edit-group-id">
                 <div>
                     <label class="block text-xs font-black text-gray-500 uppercase tracking-widest mb-1">Nome do Grupo</label>
@@ -416,7 +416,8 @@
                     </div>
                 </div>
             </div>
-            <div class="p-4 border-t border-gray-100 flex justify-between bg-white rounded-b-2xl">
+            
+            <div class="p-4 border-t border-gray-100 flex justify-between bg-white rounded-b-2xl shrink-0">
                 <button id="btn-delete-group" onclick="window.deleteGroup()" class="hidden text-red-500 font-bold px-4 py-2 hover:bg-red-50 rounded-lg text-sm"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
                 <div class="flex gap-2 ml-auto">
                     <button onclick="window.closeGroupEditor()" class="px-4 py-2 text-gray-500 font-bold text-sm">Cancelar</button>
@@ -431,12 +432,12 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signInAnonymously, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, setDoc, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // ==========================================
         // CONFIGURAÇÕES DO LOJISTA
         // ==========================================
-        const ADMIN_EMAIL = "professoragiselle.edu2@gmail.com"; // <<-- COLOQUE SEU EMAIL AQUI
+        const ADMIN_EMAIL = "professoragiselle.edu2@gmail.com"; 
         
         const firebaseConfig = {
             apiKey: "AIzaSyDg2NQ4getGHRnx-F4a69r23LUr6iac7yE",
@@ -448,18 +449,24 @@
         };
         // ==========================================
 
-        const configToUse = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : firebaseConfig;
-        const app = initializeApp(configToUse);
+        const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'amigopet-d6992';
+        const appId = 'amigopet-d6992';
+
+        // Activar Memória Offline do Firestore
+        try {
+            enableIndexedDbPersistence(db).catch((err) => {
+                console.warn("Aviso de Persistência Offline:", err.code);
+            });
+        } catch(e) {}
 
         // ESTADO GLOBAL DO APP
         window.appItems = [];
         window.appGroups = [];
         window.appSettings = { 
-            whatsapp: "5533999069877", // Número Nativo Conforme Pedido
-            mapsUrl: "https://www.google.com/maps/search/?api=1&query=Rua+pedro+lessa+1372+vila+Bretas" // Localização Padrão
+            whatsapp: "5533999069877", 
+            mapsUrl: "https://www.google.com/maps/search/?api=1&query=Rua+pedro+lessa+1372+vila+Bretas"
         };
         window.currentUser = null;
 
@@ -469,7 +476,7 @@
         let currentSearchQuery = '';
         let currentHistory = [];
 
-        // DADOS DE EXEMPLO (Fallback caso o Firebase esteja vazio)
+        // DADOS DE EXEMPLO (Mocks para testes enquanto o DB está vazio)
         const mockDatabase = [
             { id: 'mock1', type: 'offer', vitrine: true, permanent: true, title: 'Combo Banho + Tosa Higiênica', description: 'Deixe seu pet limpinho e cheiroso com nosso combo especial. Inclui corte de unhas e limpeza de ouvidos.', price: 'R$ 79,90', originalPrice: 'R$ 110,00', image: 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?auto=format&fit=crop&q=80&w=800', youtubeUrl: '', tags: ['banho', 'tosa', 'combo', 'cães'] },
             { id: 'mock2', type: 'product', vitrine: false, permanent: true, title: 'Ração Premier Formula Cães Adultos 15kg', description: 'Alimento Super Premium para cães adultos de raças médias. Sabor Frango.', price: 'R$ 219,90', image: 'https://images.unsplash.com/photo-1589924691995-400dc9ce8226?auto=format&fit=crop&q=80&w=800', youtubeUrl: '', tags: ['ração', 'cães', 'alimentação'] },
@@ -537,7 +544,6 @@
             setTimeout(() => modal.classList.add('hidden'), 300);
         };
 
-
         // ==========================================
         // GATILHO SECRETO DO ADMIN (5 Clicks no Logo)
         // ==========================================
@@ -557,14 +563,14 @@
             if (window.currentUser && window.currentUser.email === ADMIN_EMAIL) {
                 window.openAdminDashboard();
             } else {
-                window.showSystemMessage("Área Restrita", "Acesso exclusivo para a equipe da loja.", "info", {
+                window.showSystemMessage("Área Restrita", "Acesso exclusivo para a equipa da loja.", "info", {
                     text: "Login Google", color: "bg-blue-600 hover:bg-blue-700", onClick: async () => {
                         const provider = new GoogleAuthProvider();
                         try {
                             const result = await signInWithPopup(auth, provider);
                             if(result.user.email !== ADMIN_EMAIL) {
-                                window.showSystemMessage("Acesso Negado", "Este email não possui permissão de administrador.", "error");
-                                await signInAnonymously(auth); // Volta para anônimo
+                                window.showSystemMessage("Acesso Negado", "Este e-mail não possui permissão de administrador.", "error");
+                                await signInAnonymously(auth); // Volta para anónimo
                             }
                         } catch (error) {
                             window.showSystemMessage("Erro", "Falha ao fazer login: " + error.message, "error");
@@ -588,24 +594,21 @@
             lucide.createIcons();
             
             try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token).catch(()=>signInAnonymously(auth));
-                } else {
-                    await signInAnonymously(auth);
-                }
+                // Iniciar autenticação anónima primeiro (para leitura)
+                await signInAnonymously(auth);
             } catch(e) { console.error("Auth erro:", e); }
 
             onAuthStateChanged(auth, (user) => {
                 window.currentUser = user;
-                if (!user) return; // Aguarda auth
+                if (!user) return; 
 
                 if(user.email === ADMIN_EMAIL && document.getElementById('admin-dashboard-modal').classList.contains('hidden') === false) {
-                    // Já logado
+                    // Já logado e no painel
                 } else if (user.email === ADMIN_EMAIL) {
                     window.openAdminDashboard();
                 }
 
-                // Listeners de Dados Reais
+                // Listeners de Dados (Atualização em Tempo Real)
                 onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'items'), (snapshot) => {
                     window.appItems = []; snapshot.forEach(doc => window.appItems.push({ id: doc.id, ...doc.data() }));
                     window.appItems.sort((a, b) => b.createdAt - a.createdAt);
@@ -635,7 +638,6 @@
             
             updateActiveNav();
         };
-
 
         // ==========================================
         // NAVEGAÇÃO PÚBLICA (UI DO CLIENTE)
@@ -697,18 +699,17 @@
         window.filterByTag = (tag) => { document.getElementById('searchInput').value = tag; currentSearchQuery = tag.toLowerCase(); renderCatalog(); };
         
         const filterItems = (items) => {
-            // Filtro de Texto e Tags
             let filtered = items;
             if(currentSearchQuery) {
                 filtered = items.filter(item => item.title.toLowerCase().includes(currentSearchQuery) || (item.tags && item.tags.some(t => t.toLowerCase().includes(currentSearchQuery))));
             }
             
-            // Filtro de Expiração (Público não vê itens expirados)
+            // Filtro de Expiração
             const now = Date.now();
             filtered = filtered.filter(item => {
                 if (item.permanent) return true;
                 if (item.expiresAt && item.expiresAt >= now) return true;
-                return false; // Expirou
+                return false; 
             });
             
             return filtered;
@@ -720,8 +721,8 @@
         window.renderFeed = () => {
             const container = document.getElementById('feed-container');
             const baseItems = window.appItems.length > 0 ? window.appItems : mockDatabase;
-            // Filtra os ativos E que foram marcados para aparecer na Vitrine
             let feedItems = filterItems(baseItems.filter(item => item.vitrine === true));
+            
             if(feedItems.length === 0) { container.innerHTML = `<p class="text-center py-10 text-gray-400">Nenhum destaque na vitrine no momento.</p>`; return; }
 
             container.innerHTML = feedItems.map(item => {
@@ -748,6 +749,7 @@
             const container = document.getElementById('catalog-container');
             const baseItems = window.appItems.length > 0 ? window.appItems : mockDatabase;
             let items = filterItems(baseItems.filter(item => currentSearchQuery ? (item.type === 'product' || item.type === 'service') : item.type === currentCatalogType));
+            
             if(items.length === 0) { container.innerHTML = `<div class="col-span-full py-10 text-center"><p class="text-gray-400">Nenhum item encontrado.</p></div>`; return; }
 
             container.innerHTML = items.map(item => `
@@ -762,6 +764,7 @@
             window.currentDetailId = id; 
             const baseItems = window.appItems.length > 0 ? window.appItems : mockDatabase;
             const item = baseItems.find(x => x.id === id); if(!item) return;
+            
             ['home-view', 'catalog-view', 'alerts-view'].forEach(vid => document.getElementById(vid).classList.add('hidden')); document.getElementById('detail-view').classList.remove('hidden'); currentView = 'detail'; window.scrollTo(0, 0);
             
             const container = document.getElementById('detail-container'); const waLink = generateWhatsAppLink(item);
@@ -779,7 +782,7 @@
                     <div class="flex items-end gap-3 mb-6"><span class="text-3xl font-black text-teal-700">${item.price}</span>${item.originalPrice ? `<span class="text-lg text-gray-400 line-through mb-1">${item.originalPrice}</span>` : ''}</div>
                     <p class="text-gray-600 leading-relaxed mb-8 whitespace-pre-wrap">${item.description}</p>
                     <a href="${waLink}" target="_blank" class="w-full flex justify-center items-center gap-2 bg-[#25D366] hover:bg-[#1ebd5a] text-white py-4 px-6 rounded-2xl font-black text-base sm:text-lg uppercase tracking-wide shadow-[0_10px_20px_rgba(37,211,102,0.3)] transition-all hover:-translate-y-1 active:scale-95 mb-4"><i data-lucide="${btnIcon}" class="w-6 h-6"></i> ${btnText}</a>
-                    <div class="text-center"><p class="text-xs text-gray-400 font-medium"><i data-lucide="info" class="w-3 h-3 inline"></i> Fale direto com nossa equipe pelo WhatsApp.</p></div>
+                    <div class="text-center"><p class="text-xs text-gray-400 font-medium"><i data-lucide="info" class="w-3 h-3 inline"></i> Fale direto com a nossa equipa pelo WhatsApp.</p></div>
                 </div>`;
             lucide.createIcons();
         };
@@ -937,18 +940,29 @@
             };
 
             try {
-                if (id) { await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'items', id), data); } 
-                else { await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'items'), { ...data, createdAt: Date.now() }); }
+                if (id) { 
+                    await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'items', id), data); 
+                } else { 
+                    await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'items'), { ...data, createdAt: Date.now() }); 
+                }
                 window.closeItemEditor();
-            } catch (e) { window.showSystemMessage("Erro", e.message, "error"); }
+                window.showSystemMessage("Sucesso", "O item foi salvo com sucesso no catálogo.", "success");
+            } catch (e) { 
+                window.showSystemMessage("Erro ao Guardar", e.message, "error"); 
+            }
         };
 
         window.deleteItem = () => {
             const id = document.getElementById('edit-item-id').value;
             window.showSystemMessage("Atenção", "Deseja excluir este item definitivamente?", "error", {
                 text: "Excluir", color: "bg-red-500 hover:bg-red-600", onClick: async () => {
-                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'items', id));
-                    window.closeItemEditor();
+                    try {
+                        await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'items', id));
+                        window.closeItemEditor();
+                        window.showSystemMessage("Excluído", "O item foi removido.", "success");
+                    } catch (e) {
+                        window.showSystemMessage("Erro", e.message, "error");
+                    }
                 }
             });
         };
