@@ -389,7 +389,7 @@
                 <button type="button" id="btn-delete-group" onclick="window.deleteGroup()" class="hidden text-red-500 font-bold px-4 py-2 hover:bg-red-50 rounded-lg text-sm"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
                 <div class="flex gap-2 ml-auto">
                     <button type="button" onclick="window.closeGroupEditor()" class="px-4 py-2 text-gray-500 font-bold text-sm">Cancelar</button>
-                    <button type="button" onclick="window.saveGroup()" class="px-6 py-2 bg-[#25D366] text-white rounded-xl font-black text-sm shadow-md hover:bg-[#1ebd5a]">Salvar</button>
+                    <button type="button" id="btn-save-group" onclick="window.saveGroup()" class="px-6 py-2 bg-[#25D366] text-white rounded-xl font-black text-sm shadow-md hover:bg-[#1ebd5a]">Salvar</button>
                 </div>
             </div>
         </div>
@@ -399,7 +399,8 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, signInAnonymously, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, setDoc, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        // NOTA: enableIndexedDbPersistence foi REMOVIDO daqui para evitar congelamentos (Lock) na base de dados
+        import { getFirestore, collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // ==========================================
         // CONFIGURAÇÕES DO LOJISTA
@@ -420,13 +421,6 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
         const appId = 'amigopet-d6992';
-
-        // Activar Memória Offline do Firestore
-        try {
-            enableIndexedDbPersistence(db).catch((err) => {
-                console.warn("Aviso de Persistência Offline:", err.code);
-            });
-        } catch(e) {}
 
         // ESTADO GLOBAL DO APP
         window.appItems = [];
@@ -798,13 +792,26 @@
 
         // --- CRUD SETTINGS ---
         window.saveSettings = async () => {
+            const btn = document.querySelector('button[onclick="window.saveSettings()"]');
+            const originalBtnText = btn ? btn.innerText : "Salvar Ajustes";
             try {
-                await setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'general'), {
-                    whatsapp: document.getElementById('admin-set-whatsapp').value,
-                    mapsUrl: document.getElementById('admin-set-maps').value
-                });
+                if(btn) { btn.innerText = "A guardar..."; btn.disabled = true; }
+                const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("O servidor demorou muito a responder. Verifique a sua ligação.")), 10000));
+                
+                await Promise.race([
+                    setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'general'), {
+                        whatsapp: document.getElementById('admin-set-whatsapp').value,
+                        mapsUrl: document.getElementById('admin-set-maps').value
+                    }),
+                    timeoutPromise
+                ]);
+                
                 window.showSystemMessage("Sucesso", "Ajustes salvos com sucesso!", "success");
-            } catch(e) { window.showSystemMessage("Erro", e.message, "error"); }
+            } catch(e) { 
+                window.showSystemMessage("Erro", e.message, "error"); 
+            } finally {
+                if(btn) { btn.innerText = originalBtnText; btn.disabled = false; }
+            }
         };
 
         // --- CRUD ITEMS ---
@@ -888,18 +895,20 @@
         window.closeItemEditor = () => document.getElementById('item-editor-modal').classList.add('hidden');
 
         window.saveItem = async () => {
+            const btn = document.getElementById('btn-save-item');
+            const originalBtnText = btn ? btn.innerText : "Salvar";
+
             try {
-                const btn = document.getElementById('btn-save-item');
-                const originalBtnText = btn.innerText;
-                
                 const titleVal = document.getElementById('item-title').value.trim();
                 if (!titleVal) {
                     window.showSystemMessage("Atenção", "Por favor, preencha o Título do item antes de guardar.", "error");
                     return;
                 }
 
-                btn.innerText = "A guardar...";
-                btn.disabled = true;
+                if (btn) {
+                    btn.innerText = "A guardar...";
+                    btn.disabled = true;
+                }
 
                 const id = document.getElementById('edit-item-id').value;
                 const tagsInput = document.getElementById('item-tags').value;
@@ -928,23 +937,33 @@
                     description: document.getElementById('item-description').value
                 };
 
+                const timeoutPromise = new Promise((_, reject) =>
+                    setTimeout(() => reject(new Error("O servidor demorou muito a responder. Verifique a sua conexão de internet e certifique-se de que as Regras do Firestore foram publicadas.")), 10000)
+                );
+
                 if (id) { 
-                    await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'items', id), data); 
+                    await Promise.race([
+                        updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'items', id), data),
+                        timeoutPromise
+                    ]);
                 } else { 
-                    await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'items'), { ...data, createdAt: Date.now() }); 
+                    await Promise.race([
+                        addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'items'), { ...data, createdAt: Date.now() }),
+                        timeoutPromise
+                    ]);
                 }
                 
                 window.closeItemEditor();
                 window.showSystemMessage("Sucesso", "O item foi salvo com sucesso no catálogo.", "success");
-                
-                btn.innerText = originalBtnText;
-                btn.disabled = false;
 
             } catch (e) { 
-                window.showSystemMessage("Erro ao Guardar", "Detalhe do erro: " + e.message + "\n\nVerifique se as Regras de Segurança do Firebase foram publicadas.", "error"); 
-                const btn = document.getElementById('btn-save-item');
-                if(btn) { btn.innerText = "Salvar"; btn.disabled = false; }
-            } 
+                window.showSystemMessage("Erro ao Guardar", "Detalhe do erro: " + e.message, "error"); 
+            } finally {
+                if (btn) {
+                    btn.innerText = originalBtnText;
+                    btn.disabled = false;
+                }
+            }
         };
 
         window.deleteItem = () => {
@@ -952,7 +971,11 @@
             window.showSystemMessage("Atenção", "Deseja excluir este item definitivamente?", "error", {
                 text: "Excluir", color: "bg-red-500 hover:bg-red-600", onClick: async () => {
                     try {
-                        await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'items', id));
+                        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Tempo limite excedido ao apagar.")), 10000));
+                        await Promise.race([
+                            deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'items', id)),
+                            timeoutPromise
+                        ]);
                         window.closeItemEditor();
                         window.showSystemMessage("Excluído", "O item foi removido.", "success");
                     } catch (e) {
@@ -998,25 +1021,42 @@
         window.closeGroupEditor = () => document.getElementById('group-editor-modal').classList.add('hidden');
 
         window.saveGroup = async () => {
+            const btn = document.getElementById('btn-save-group');
+            const originalBtnText = btn ? btn.innerText : "Salvar";
             try {
+                if(btn) { btn.innerText = "A guardar..."; btn.disabled = true; }
                 const id = document.getElementById('edit-group-id').value;
                 const data = {
                     name: document.getElementById('group-name').value,
                     link: document.getElementById('group-link').value,
                     status: document.querySelector('input[name="group_status"]:checked').value
                 };
-                if (id) { await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'groups', id), data); } 
-                else { await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'groups'), { ...data, createdAt: Date.now() }); }
+                
+                const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("O servidor demorou muito a responder.")), 10000));
+                
+                if (id) { 
+                    await Promise.race([ updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'groups', id), data), timeoutPromise ]); 
+                } else { 
+                    await Promise.race([ addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'groups'), { ...data, createdAt: Date.now() }), timeoutPromise ]); 
+                }
                 window.closeGroupEditor();
-            } catch (e) { window.showSystemMessage("Erro", e.message, "error"); }
+                window.showSystemMessage("Sucesso", "O grupo foi salvo.", "success");
+            } catch (e) { 
+                window.showSystemMessage("Erro", e.message, "error"); 
+            } finally {
+                if(btn) { btn.innerText = originalBtnText; btn.disabled = false; }
+            }
         };
 
         window.deleteGroup = () => {
             const id = document.getElementById('edit-group-id').value;
             window.showSystemMessage("Atenção", "Deseja excluir este grupo?", "error", {
                 text: "Excluir", color: "bg-red-500 hover:bg-red-600", onClick: async () => {
-                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'groups', id));
-                    window.closeGroupEditor();
+                    try {
+                        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("O servidor demorou muito a responder.")), 10000));
+                        await Promise.race([ deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'groups', id)), timeoutPromise ]);
+                        window.closeGroupEditor();
+                    } catch (e) { window.showSystemMessage("Erro", e.message, "error"); }
                 }
             });
         };
