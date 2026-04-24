@@ -41,33 +41,18 @@
         .modal-overlay { background-color: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px); }
     </style>
 
-    <!-- Motor PWA para Instalação -->
-    <script>
-        window.addEventListener('load', () => {
-            const manifest = {
-                name: "Amigo Pet",
-                short_name: "Amigo Pet",
-                start_url: window.location.pathname,
-                display: "standalone",
-                background_color: "#f8fafc",
-                theme_color: "#0f766e",
-                icons: [
-                    { src: "./image_322ea4.png", sizes: "192x192", type: "image/png" },
-                    { src: "./image_322ea4.png", sizes: "512x512", type: "image/png" }
-                ]
-            };
-            const manifestBlob = new Blob([JSON.stringify(manifest)], {type: 'application/manifest+json'});
-            const link = document.createElement('link');
-            link.rel = 'manifest';
-            link.href = URL.createObjectURL(manifestBlob);
-            document.head.appendChild(link);
+    <!-- Links Nativos do PWA -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#0f766e">
+    <link rel="apple-touch-icon" href="/image_322ea4.png">
 
-            if ('serviceWorker' in navigator) {
-                const swCode = `self.addEventListener('fetch', (e) => {});`;
-                const swBlob = new Blob([swCode], {type: 'application/javascript'});
-                navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(()=>{});
-            }
-        });
+    <!-- Motor PWA Nativo -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js').catch(err => console.log('Erro no SW:', err));
+            });
+        }
 
         let deferredPrompt;
         window.addEventListener('beforeinstallprompt', (e) => {
@@ -79,6 +64,7 @@
 
         window.installApp = async () => {
             if (deferredPrompt) {
+                // Fluxo Nativo Android (WebAPK)
                 deferredPrompt.prompt();
                 const { outcome } = await deferredPrompt.userChoice;
                 if (outcome === 'accepted') {
@@ -86,8 +72,12 @@
                 }
                 deferredPrompt = null;
             } else {
-                // Adicionado fallback para iOS e navegadores que não suportam o prompt automático
-                alert("Para instalar a aplicação: Toque no botão de 'Partilhar' do seu navegador (no iPhone) ou no 'Menu' (no Android) e escolha a opção 'Adicionar ao ecrã principal'.");
+                // Fallback amigável para iOS (iPhone) e navegadores sem suporte ao prompt automático
+                window.showSystemMessage(
+                    "Instalar o Aplicativo", 
+                    "No Android: Procure 'Instalar Aplicativo' no menu do navegador (3 pontinhos).\n\nNo iPhone (iOS): Toque no botão 'Partilhar' (quadrado com seta) e escolha 'Adicionar à Tela de Início'.\n\nIsso vai instalar o Amigo Pet como um aplicativo completo no seu celular!", 
+                    "info"
+                );
             }
         };
     </script>
@@ -113,7 +103,7 @@
             
             <!-- Botões do Cabeçalho -->
             <div class="flex items-center gap-2">
-                <!-- Removida a classe 'hidden' para estar sempre visível -->
+                <!-- Botão visível para incentivar a instalação PWA -->
                 <button id="install-btn" onclick="window.installApp()" class="px-3 py-1.5 bg-teal-50 text-teal-700 text-xs font-bold rounded-lg border border-teal-200 hover:bg-teal-100 transition-colors shadow-sm">
                     Instalar App
                 </button>
@@ -238,7 +228,7 @@
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 text-center transform scale-95 transition-transform duration-300" id="msg-modal-box">
             <div id="msg-icon" class="mx-auto w-12 h-12 rounded-full mb-4 flex items-center justify-center"></div>
             <h3 id="msg-title" class="text-xl font-black text-gray-800 mb-2"></h3>
-            <p id="msg-text" class="text-gray-600 text-sm mb-6"></p>
+            <p id="msg-text" class="text-gray-600 text-sm mb-6 whitespace-pre-wrap"></p>
             <div class="flex gap-3 justify-center" id="msg-buttons"></div>
         </div>
     </div>
