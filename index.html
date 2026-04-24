@@ -583,28 +583,36 @@
                 // Listeners de Dados (Atualização em Tempo Real)
                 onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'items'), (snapshot) => {
                     window.appItems = []; snapshot.forEach(doc => window.appItems.push({ id: doc.id, ...doc.data() }));
-                    window.appItems.sort((a, b) => b.createdAt - a.createdAt);
+                    window.appItems.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
                     if(currentView === 'home') renderFeed();
                     if(currentView === 'catalog') renderCatalog();
                     if(currentView === 'detail' && window.currentDetailId) openDetail(window.currentDetailId);
                     renderAdminItems();
+                }, (error) => {
+                    console.error("Erro no listener de items:", error);
                 });
 
                 onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'groups'), (snapshot) => {
                     window.appGroups = []; snapshot.forEach(doc => window.appGroups.push({ id: doc.id, ...doc.data() }));
-                    window.appGroups.sort((a, b) => b.createdAt - a.createdAt);
+                    window.appGroups.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
                     if(currentView === 'alerts') renderAlerts();
                     renderAdminGroups();
+                }, (error) => {
+                    console.error("Erro no listener de groups:", error);
                 });
 
                 onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'general'), (docSnap) => {
-                    if(docSnap.exists()) { 
+                    if(docSnap.exists()) {
                         const data = docSnap.data();
                         if(data.whatsapp) window.appSettings.whatsapp = data.whatsapp;
                         if(data.mapsUrl) window.appSettings.mapsUrl = data.mapsUrl;
                     }
-                    document.getElementById('admin-set-whatsapp').value = window.appSettings.whatsapp || '';
-                    document.getElementById('admin-set-maps').value = window.appSettings.mapsUrl || '';
+                    const waInput = document.getElementById('admin-set-whatsapp');
+                    const mapsInput = document.getElementById('admin-set-maps');
+                    if (waInput) waInput.value = window.appSettings.whatsapp || '';
+                    if (mapsInput) mapsInput.value = window.appSettings.mapsUrl || '';
+                }, (error) => {
+                    console.error("Erro no listener de settings:", error);
                 });
             });
         };
@@ -636,7 +644,12 @@
         };
 
         window.updateActiveNav = (view = currentView, type = currentCatalogType) => {
-            document.querySelectorAll('.nav-btn').forEach(btn => { btn.classList.remove('text-teal-700', 'text-[#25D366]'); btn.classList.add('text-gray-400'); btn.querySelector('i').classList.remove('scale-110'); });
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('text-teal-700', 'text-[#25D366]');
+                btn.classList.add('text-gray-400');
+                const icon = btn.querySelector('i');
+                if (icon) icon.classList.remove('scale-110');
+            });
             let activeBtn = null;
             if (view === 'home') activeBtn = document.getElementById('nav-home');
             else if (view === 'alerts') activeBtn = document.getElementById('nav-alerts');
@@ -646,7 +659,8 @@
             if (activeBtn) {
                 activeBtn.classList.remove('text-gray-400');
                 if(view === 'alerts') activeBtn.classList.add('text-[#25D366]'); else activeBtn.classList.add('text-teal-700');
-                activeBtn.querySelector('i').classList.add('scale-110');
+                const activeIcon = activeBtn.querySelector('i');
+                if (activeIcon) activeIcon.classList.add('scale-110');
             }
         };
 
@@ -698,7 +712,7 @@
                 const ytId = window.getYoutubeId(item.youtubeUrl);
                 const mediaHtml = ytId 
                     ? `<div class="aspect-[9/16] bg-black relative overflow-hidden group"><iframe class="absolute inset-0 w-full h-full pointer-events-none transform scale-[1.05]" src="https://www.youtube.com/embed/${ytId}?autoplay=1&mute=1&controls=0&modestbranding=1&rel=0&loop=1&playlist=${ytId}&playsinline=1" frameborder="0" allow="autoplay; encrypted-media"></iframe><div class="absolute inset-0 z-10 flex items-center justify-center bg-black/10 group-hover:bg-black/20 transition-colors"><div class="w-16 h-16 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center border border-white/30 group-hover:bg-white/30 transition-all shadow-2xl group-hover:scale-110"><svg class="w-7 h-7 text-white ml-1 shadow-sm" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div></div></div>` 
-                    : `<div class="aspect-square bg-gray-100 relative overflow-hidden"><img src="${window.getDriveImageUrl(item.image)}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" onerror="this.src='https://via.placeholder.com/600x600?text=Imagem'"></div>`;
+                    : `<div class="aspect-square bg-gray-100 relative overflow-hidden"><img src="${window.getDriveImageUrl(item.image)}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" onerror="this.onerror=null;this.src='https://placehold.co/600x600?text=Imagem'"></div>`;
 
                 return `
                 <div onclick="window.openDetail('${item.id}')" class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden cursor-pointer relative group">
@@ -724,7 +738,7 @@
             container.innerHTML = items.map(item => `
                 <div onclick="window.openDetail('${item.id}')" class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden cursor-pointer group flex flex-col h-full relative">
                     ${item.type === 'offer' ? `<div class="absolute top-2 right-2 bg-orange-500 text-white text-[9px] font-black px-2 py-0.5 rounded-md shadow uppercase tracking-wider z-10">Oferta</div>` : ''}
-                    <div class="aspect-square bg-gray-100 relative overflow-hidden"><img src="${window.getDriveImageUrl(item.image)}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.src='https://via.placeholder.com/300x300?text=Imagem'"></div>
+                    <div class="aspect-square bg-gray-100 relative overflow-hidden"><img src="${window.getDriveImageUrl(item.image)}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.onerror=null;this.src='https://placehold.co/300x300?text=Imagem'"></div>
                     <div class="p-3 flex flex-col flex-grow"><h3 class="text-sm font-bold text-gray-800 leading-tight mb-2 line-clamp-2">${item.title}</h3><div class="mt-auto"><p class="text-lg font-black text-teal-700">${item.price}</p></div></div>
                 </div>`).join('');
         };
@@ -741,7 +755,7 @@
             if(item.type === 'service') { btnText = "Agendar Horário"; btnIcon = "calendar-clock"; } else if(item.type === 'offer') { btnText = "Garantir Pelo WhatsApp"; btnIcon = "zap"; }
 
             const ytId = window.getYoutubeId(item.youtubeUrl);
-            const mediaHtml = ytId ? `<div class="aspect-[9/16] w-full relative bg-black"><iframe class="absolute inset-0 w-full h-full" src="https://www.youtube.com/embed/${ytId}?autoplay=1&mute=0&controls=1&modestbranding=1&rel=0&playsinline=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe></div>` : `<div class="aspect-square w-full relative bg-gray-100"><img src="${window.getDriveImageUrl(item.image)}" class="w-full h-full object-cover" onerror="this.src='https://via.placeholder.com/600x600?text=Imagem'"></div>`;
+            const mediaHtml = ytId ? `<div class="aspect-[9/16] w-full relative bg-black"><iframe class="absolute inset-0 w-full h-full" src="https://www.youtube.com/embed/${ytId}?autoplay=1&mute=0&controls=1&modestbranding=1&rel=0&playsinline=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe></div>` : `<div class="aspect-square w-full relative bg-gray-100"><img src="${window.getDriveImageUrl(item.image)}" class="w-full h-full object-cover" onerror="this.onerror=null;this.src='https://placehold.co/600x600?text=Imagem'"></div>`;
 
             container.innerHTML = `
                 <div class="relative">${mediaHtml}${item.type === 'offer' ? `<div class="absolute top-4 left-4 bg-orange-500 text-white text-xs font-black px-4 py-1.5 rounded-full shadow-lg uppercase tracking-wider z-10">Oferta</div>` : ''}</div>
@@ -830,7 +844,7 @@
 
                 return `
                 <div class="flex flex-col sm:flex-row gap-4 p-4 bg-white border ${isExpired ? 'border-red-200 bg-red-50/20' : 'border-gray-200'} rounded-xl shadow-sm cursor-pointer hover:border-teal-500 transition-colors" onclick="window.editItem('${item.id}')">
-                    <img src="${window.getDriveImageUrl(item.image)}" class="w-16 h-16 sm:w-16 sm:h-16 object-cover rounded-lg bg-gray-100 shrink-0" onerror="this.src='https://via.placeholder.com/100?text=Sem+Foto'">
+                    <img src="${window.getDriveImageUrl(item.image)}" class="w-16 h-16 sm:w-16 sm:h-16 object-cover rounded-lg bg-gray-100 shrink-0" onerror="this.onerror=null;this.src='https://placehold.co/100?text=Sem+Foto'">
                     <div class="flex-1 min-w-0 flex flex-col justify-center">
                         <p class="text-base font-bold text-gray-800 truncate">${item.title}</p>
                         <div class="flex items-center gap-2 mt-1">
