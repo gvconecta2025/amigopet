@@ -436,16 +436,15 @@
         // ==========================================
         // CONFIGURAÇÕES DO LOJISTA
         // ==========================================
-        const ADMIN_EMAIL = "seuemail@gmail.com"; // <<-- COLOQUE SEU EMAIL AQUI
+        const ADMIN_EMAIL = "professoragiselle.edu2@gmail.com"; // <<-- COLOQUE SEU EMAIL AQUI
         
         const firebaseConfig = {
-            // <<-- COLOQUE SUAS CHAVES DO FIREBASE AQUI
-            apiKey: "SUA_API_KEY",
-            authDomain: "SEU_DOMINIO",
-            projectId: "SEU_PROJECT_ID",
-            storageBucket: "SEU_BUCKET",
-            messagingSenderId: "SEU_SENDER",
-            appId: "SEU_APP_ID"
+            apiKey: "AIzaSyDg2NQ4getGHRnx-F4a69r23LUr6iac7yE",
+            authDomain: "amigopet-d6992.firebaseapp.com",
+            projectId: "amigopet-d6992",
+            storageBucket: "amigopet-d6992.firebasestorage.app",
+            messagingSenderId: "814082291596",
+            appId: "1:814082291596:web:653e165ec09b9825c0c8a9"
         };
         // ==========================================
 
@@ -453,7 +452,7 @@
         const app = initializeApp(configToUse);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'amigopet-app';
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'amigopet-d6992';
 
         // ESTADO GLOBAL DO APP
         window.appItems = [];
