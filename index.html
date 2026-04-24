@@ -437,13 +437,7 @@
         let currentSearchQuery = '';
         let currentHistory = [];
 
-        // DADOS DE EXEMPLO (Mocks para testes enquanto o DB está vazio)
-        const mockDatabase = [
-            { id: 'mock1', type: 'offer', vitrine: true, permanent: true, title: 'Combo Banho + Tosa Higiênica', description: 'Deixe seu pet limpinho e cheiroso com nosso combo especial. Inclui corte de unhas e limpeza de ouvidos.', price: 'R$ 79,90', originalPrice: 'R$ 110,00', image: 'https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?auto=format&fit=crop&q=80&w=800', youtubeUrl: '', tags: ['banho', 'tosa', 'combo', 'cães'] },
-            { id: 'mock2', type: 'product', vitrine: false, permanent: true, title: 'Ração Premier Formula Cães Adultos 15kg', description: 'Alimento Super Premium para cães adultos de raças médias. Sabor Frango.', price: 'R$ 219,90', image: 'https://images.unsplash.com/photo-1589924691995-400dc9ce8226?auto=format&fit=crop&q=80&w=800', youtubeUrl: '', tags: ['ração', 'cães', 'alimentação'] },
-            { id: 'mock3', type: 'service', vitrine: false, permanent: true, title: 'Consulta Veterinária', description: 'Atendimento clínico geral para cães e gatos. Avaliação completa da saúde do seu melhor amigo.', price: 'R$ 150,00', image: 'https://images.unsplash.com/photo-1628009368231-7bb7cb080d00?auto=format&fit=crop&q=80&w=800', youtubeUrl: '', tags: ['consulta', 'veterinário', 'saúde'] },
-            { id: 'mock4', type: 'offer', vitrine: true, permanent: false, expiresAt: Date.now() + 86400000, title: 'Caminha Nuvem G (Promoção)', description: 'A caminha mais confortável e quentinha para o seu pet relaxar.', price: 'R$ 89,90', originalPrice: 'R$ 149,90', image: 'https://images.unsplash.com/photo-1541599540903-216a46ca1dc0?auto=format&fit=crop&q=80&w=800', youtubeUrl: '', tags: ['acessórios', 'conforto'] }
-        ];
+        // DADOS DE EXEMPLO REMOVIDOS — agora o app só mostra itens reais do Firestore.
 
         // FUNÇÕES HELPER DE MÍDIA
         window.getDriveImageUrl = (url) => { 
@@ -703,8 +697,7 @@
         // ==========================================
         window.renderFeed = () => {
             const container = document.getElementById('feed-container');
-            const baseItems = window.appItems.length > 0 ? window.appItems : mockDatabase;
-            let feedItems = filterItems(baseItems.filter(item => item.vitrine === true));
+            let feedItems = filterItems(window.appItems.filter(item => item.vitrine === true));
             
             if(feedItems.length === 0) { container.innerHTML = `<p class="text-center py-10 text-gray-400">Nenhum destaque na vitrine no momento.</p>`; return; }
 
@@ -730,8 +723,7 @@
 
         window.renderCatalog = () => {
             const container = document.getElementById('catalog-container');
-            const baseItems = window.appItems.length > 0 ? window.appItems : mockDatabase;
-            let items = filterItems(baseItems.filter(item => currentSearchQuery ? (item.type === 'product' || item.type === 'service') : item.type === currentCatalogType));
+            let items = filterItems(window.appItems.filter(item => currentSearchQuery ? (item.type === 'product' || item.type === 'service') : item.type === currentCatalogType));
             
             if(items.length === 0) { container.innerHTML = `<div class="col-span-full py-10 text-center"><p class="text-gray-400">Nenhum item encontrado.</p></div>`; return; }
 
@@ -745,8 +737,7 @@
 
         window.openDetail = (id) => {
             window.currentDetailId = id; 
-            const baseItems = window.appItems.length > 0 ? window.appItems : mockDatabase;
-            const item = baseItems.find(x => x.id === id); if(!item) return;
+            const item = window.appItems.find(x => x.id === id); if(!item) return;
             
             ['home-view', 'catalog-view', 'alerts-view'].forEach(vid => document.getElementById(vid).classList.add('hidden')); document.getElementById('detail-view').classList.remove('hidden'); currentView = 'detail'; window.scrollTo(0, 0);
             
