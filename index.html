@@ -85,6 +85,9 @@
                     document.getElementById('install-btn').classList.add('hidden');
                 }
                 deferredPrompt = null;
+            } else {
+                // Adicionado fallback para iOS e navegadores que não suportam o prompt automático
+                alert("Para instalar a aplicação: Toque no botão de 'Partilhar' do seu navegador (no iPhone) ou no 'Menu' (no Android) e escolha a opção 'Adicionar ao ecrã principal'.");
             }
         };
     </script>
@@ -110,7 +113,8 @@
             
             <!-- Botões do Cabeçalho -->
             <div class="flex items-center gap-2">
-                <button id="install-btn" onclick="window.installApp()" class="hidden px-3 py-1.5 bg-teal-50 text-teal-700 text-xs font-bold rounded-lg border border-teal-200 hover:bg-teal-100 transition-colors shadow-sm">
+                <!-- Removida a classe 'hidden' para estar sempre visível -->
+                <button id="install-btn" onclick="window.installApp()" class="px-3 py-1.5 bg-teal-50 text-teal-700 text-xs font-bold rounded-lg border border-teal-200 hover:bg-teal-100 transition-colors shadow-sm">
                     Instalar App
                 </button>
                 <button onclick="window.openLocation()" class="p-2 text-gray-500 hover:text-teal-700 bg-gray-50 rounded-full transition-colors border border-gray-100 shadow-sm" title="Nossa Loja">
