@@ -219,21 +219,21 @@
                 <h2 class="font-black text-lg">Painel da Loja</h2>
             </div>
             <div class="flex items-center gap-4">
-                <button onclick="window.adminSignOut()" class="text-teal-200 hover:text-white"><i data-lucide="log-out" class="w-5 h-5"></i></button>
-                <button onclick="window.closeAdminDashboard()" class="bg-white text-teal-800 p-1.5 rounded-full hover:bg-teal-50"><i data-lucide="x" class="w-5 h-5"></i></button>
+                <button type="button" onclick="window.adminSignOut()" class="text-teal-200 hover:text-white"><i data-lucide="log-out" class="w-5 h-5"></i></button>
+                <button type="button" onclick="window.closeAdminDashboard()" class="bg-white text-teal-800 p-1.5 rounded-full hover:bg-teal-50"><i data-lucide="x" class="w-5 h-5"></i></button>
             </div>
         </div>
         
         <div class="bg-white border-b border-gray-200 px-2 flex overflow-x-auto no-scrollbar shadow-sm">
-            <button onclick="window.switchAdminTab('items')" id="tab-btn-items" class="px-4 py-3 text-sm font-black text-teal-700 border-b-2 border-teal-700 whitespace-nowrap">Gestão de Itens</button>
-            <button onclick="window.switchAdminTab('groups')" id="tab-btn-groups" class="px-4 py-3 text-sm font-bold text-gray-400 border-b-2 border-transparent whitespace-nowrap">Grupos VIP</button>
-            <button onclick="window.switchAdminTab('settings')" id="tab-btn-settings" class="px-4 py-3 text-sm font-bold text-gray-400 border-b-2 border-transparent whitespace-nowrap">Ajustes da Loja</button>
+            <button type="button" onclick="window.switchAdminTab('items')" id="tab-btn-items" class="px-4 py-3 text-sm font-black text-teal-700 border-b-2 border-teal-700 whitespace-nowrap">Gestão de Itens</button>
+            <button type="button" onclick="window.switchAdminTab('groups')" id="tab-btn-groups" class="px-4 py-3 text-sm font-bold text-gray-400 border-b-2 border-transparent whitespace-nowrap">Grupos VIP</button>
+            <button type="button" onclick="window.switchAdminTab('settings')" id="tab-btn-settings" class="px-4 py-3 text-sm font-bold text-gray-400 border-b-2 border-transparent whitespace-nowrap">Ajustes da Loja</button>
         </div>
 
         <div class="flex-grow overflow-y-auto p-4 pb-20">
             
             <div id="admin-tab-items" class="space-y-4">
-                <button onclick="window.openItemEditor()" class="w-full bg-teal-600 text-white py-3 rounded-xl font-black text-sm uppercase tracking-wide shadow-md flex items-center justify-center gap-2 hover:bg-teal-700">
+                <button type="button" onclick="window.openItemEditor()" class="w-full bg-teal-600 text-white py-3 rounded-xl font-black text-sm uppercase tracking-wide shadow-md flex items-center justify-center gap-2 hover:bg-teal-700">
                     <i data-lucide="plus" class="w-5 h-5"></i> Adicionar Novo Item
                 </button>
                 <div class="relative mb-4">
@@ -244,7 +244,7 @@
             </div>
 
             <div id="admin-tab-groups" class="hidden space-y-4">
-                <button onclick="window.openGroupEditor()" class="w-full bg-[#25D366] text-white py-3 rounded-xl font-black text-sm uppercase tracking-wide shadow-md flex items-center justify-center gap-2 hover:bg-[#1ebd5a]">
+                <button type="button" onclick="window.openGroupEditor()" class="w-full bg-[#25D366] text-white py-3 rounded-xl font-black text-sm uppercase tracking-wide shadow-md flex items-center justify-center gap-2 hover:bg-[#1ebd5a]">
                     <i data-lucide="plus" class="w-5 h-5"></i> Adicionar Grupo
                 </button>
                 <div id="admin-groups-list" class="flex flex-col gap-3"></div>
@@ -260,7 +260,7 @@
                     <p class="text-[10px] text-gray-400 mb-2">Para o botão de localização.</p>
                     <input type="text" id="admin-set-maps" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-teal-500 mb-6">
                     
-                    <button onclick="window.saveSettings()" class="w-full bg-teal-800 text-white py-3 rounded-xl font-black text-sm shadow-md hover:bg-teal-900">Salvar Ajustes</button>
+                    <button type="button" onclick="window.saveSettings()" class="w-full bg-teal-800 text-white py-3 rounded-xl font-black text-sm shadow-md hover:bg-teal-900">Salvar Ajustes</button>
                 </div>
             </div>
 
@@ -271,7 +271,7 @@
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col relative">
             <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl shrink-0">
                 <h3 id="item-editor-title" class="font-black text-gray-800">Novo Item</h3>
-                <button onclick="window.closeItemEditor()" class="text-gray-400 hover:text-gray-600"><i data-lucide="x" class="w-6 h-6"></i></button>
+                <button type="button" onclick="window.closeItemEditor()" class="text-gray-400 hover:text-gray-600"><i data-lucide="x" class="w-6 h-6"></i></button>
             </div>
             
             <div class="p-5 flex-1 overflow-y-auto space-y-5">
@@ -350,10 +350,10 @@
             </div>
             
             <div class="p-4 border-t border-gray-100 flex justify-between bg-white rounded-b-2xl shrink-0">
-                <button id="btn-delete-item" onclick="window.deleteItem()" class="hidden text-red-500 font-bold px-4 py-2 hover:bg-red-50 rounded-lg text-sm"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
+                <button type="button" id="btn-delete-item" onclick="window.deleteItem()" class="hidden text-red-500 font-bold px-4 py-2 hover:bg-red-50 rounded-lg text-sm"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
                 <div class="flex gap-2 ml-auto">
-                    <button onclick="window.closeItemEditor()" class="px-5 py-2 text-gray-500 font-bold text-sm">Cancelar</button>
-                    <button onclick="window.saveItem()" class="px-6 py-2 bg-teal-600 text-white rounded-xl font-black text-sm shadow-md hover:bg-teal-700">Salvar</button>
+                    <button type="button" onclick="window.closeItemEditor()" class="px-5 py-2 text-gray-500 font-bold text-sm">Cancelar</button>
+                    <button type="button" id="btn-save-item" onclick="window.saveItem()" class="px-6 py-2 bg-teal-600 text-white rounded-xl font-black text-sm shadow-md hover:bg-teal-700">Salvar</button>
                 </div>
             </div>
         </div>
@@ -363,7 +363,7 @@
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm max-h-[90vh] flex flex-col relative">
             <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl shrink-0">
                 <h3 id="group-editor-title" class="font-black text-gray-800">Novo Grupo</h3>
-                <button onclick="window.closeGroupEditor()" class="text-gray-400 hover:text-gray-600"><i data-lucide="x" class="w-6 h-6"></i></button>
+                <button type="button" onclick="window.closeGroupEditor()" class="text-gray-400 hover:text-gray-600"><i data-lucide="x" class="w-6 h-6"></i></button>
             </div>
             
             <div class="p-5 flex-col gap-4 flex overflow-y-auto">
@@ -386,10 +386,10 @@
             </div>
             
             <div class="p-4 border-t border-gray-100 flex justify-between bg-white rounded-b-2xl shrink-0">
-                <button id="btn-delete-group" onclick="window.deleteGroup()" class="hidden text-red-500 font-bold px-4 py-2 hover:bg-red-50 rounded-lg text-sm"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
+                <button type="button" id="btn-delete-group" onclick="window.deleteGroup()" class="hidden text-red-500 font-bold px-4 py-2 hover:bg-red-50 rounded-lg text-sm"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
                 <div class="flex gap-2 ml-auto">
-                    <button onclick="window.closeGroupEditor()" class="px-4 py-2 text-gray-500 font-bold text-sm">Cancelar</button>
-                    <button onclick="window.saveGroup()" class="px-6 py-2 bg-[#25D366] text-white rounded-xl font-black text-sm shadow-md hover:bg-[#1ebd5a]">Salvar</button>
+                    <button type="button" onclick="window.closeGroupEditor()" class="px-4 py-2 text-gray-500 font-bold text-sm">Cancelar</button>
+                    <button type="button" onclick="window.saveGroup()" class="px-6 py-2 bg-[#25D366] text-white rounded-xl font-black text-sm shadow-md hover:bg-[#1ebd5a]">Salvar</button>
                 </div>
             </div>
         </div>
@@ -888,57 +888,63 @@
         window.closeItemEditor = () => document.getElementById('item-editor-modal').classList.add('hidden');
 
         window.saveItem = async () => {
-            const btn = document.querySelector('button[onclick="window.saveItem()"]');
-            const originalBtnText = btn.innerText;
-            
-            const titleVal = document.getElementById('item-title').value.trim();
-            if (!titleVal) {
-                window.showSystemMessage("Atenção", "Por favor, preencha o Título do item antes de guardar.", "error");
-                return;
-            }
-
-            btn.innerText = "A guardar...";
-            btn.disabled = true;
-
-            const id = document.getElementById('edit-item-id').value;
-            const tagsInput = document.getElementById('item-tags').value;
-            const tagsArray = tagsInput.split(',').map(t => t.trim()).filter(t => t);
-            
-            const isPermanent = document.querySelector('input[name="item_permanent"]:checked').value === "true";
-            const expDateStr = document.getElementById('item-expiration').value;
-            let expiresAt = null;
-            if (!isPermanent && expDateStr) {
-                expiresAt = new Date(`${expDateStr}T23:59:59`).getTime();
-            }
-
-            const data = {
-                type: document.getElementById('item-type').value,
-                vitrine: document.getElementById('item-vitrine').checked,
-                permanent: isPermanent,
-                expiresAt: expiresAt,
-                title: titleVal,
-                price: document.getElementById('item-price').value,
-                originalPrice: document.getElementById('item-originalPrice').value,
-                image: document.getElementById('item-image').value,
-                youtubeUrl: document.getElementById('item-youtube').value,
-                tags: tagsArray,
-                description: document.getElementById('item-description').value
-            };
-
             try {
+                const btn = document.getElementById('btn-save-item');
+                const originalBtnText = btn.innerText;
+                
+                const titleVal = document.getElementById('item-title').value.trim();
+                if (!titleVal) {
+                    window.showSystemMessage("Atenção", "Por favor, preencha o Título do item antes de guardar.", "error");
+                    return;
+                }
+
+                btn.innerText = "A guardar...";
+                btn.disabled = true;
+
+                const id = document.getElementById('edit-item-id').value;
+                const tagsInput = document.getElementById('item-tags').value;
+                const tagsArray = tagsInput.split(',').map(t => t.trim()).filter(t => t);
+                
+                const permRadio = document.querySelector('input[name="item_permanent"]:checked');
+                const isPermanent = permRadio ? permRadio.value === "true" : true; 
+                
+                const expDateStr = document.getElementById('item-expiration').value;
+                let expiresAt = null;
+                if (!isPermanent && expDateStr) {
+                    expiresAt = new Date(`${expDateStr}T23:59:59`).getTime();
+                }
+
+                const data = {
+                    type: document.getElementById('item-type').value,
+                    vitrine: document.getElementById('item-vitrine').checked,
+                    permanent: isPermanent,
+                    expiresAt: expiresAt,
+                    title: titleVal,
+                    price: document.getElementById('item-price').value,
+                    originalPrice: document.getElementById('item-originalPrice').value,
+                    image: document.getElementById('item-image').value,
+                    youtubeUrl: document.getElementById('item-youtube').value,
+                    tags: tagsArray,
+                    description: document.getElementById('item-description').value
+                };
+
                 if (id) { 
                     await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'items', id), data); 
                 } else { 
                     await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'items'), { ...data, createdAt: Date.now() }); 
                 }
+                
                 window.closeItemEditor();
                 window.showSystemMessage("Sucesso", "O item foi salvo com sucesso no catálogo.", "success");
-            } catch (e) { 
-                window.showSystemMessage("Erro ao Guardar", "Erro: " + e.message + "\n\nVerifique se as Regras do Firestore foram publicadas.", "error"); 
-            } finally {
+                
                 btn.innerText = originalBtnText;
                 btn.disabled = false;
-            }
+
+            } catch (e) { 
+                window.showSystemMessage("Erro ao Guardar", "Detalhe do erro: " + e.message + "\n\nVerifique se as Regras de Segurança do Firebase foram publicadas.", "error"); 
+                const btn = document.getElementById('btn-save-item');
+                if(btn) { btn.innerText = "Salvar"; btn.disabled = false; }
+            } 
         };
 
         window.deleteItem = () => {
@@ -992,13 +998,13 @@
         window.closeGroupEditor = () => document.getElementById('group-editor-modal').classList.add('hidden');
 
         window.saveGroup = async () => {
-            const id = document.getElementById('edit-group-id').value;
-            const data = {
-                name: document.getElementById('group-name').value,
-                link: document.getElementById('group-link').value,
-                status: document.querySelector('input[name="group_status"]:checked').value
-            };
             try {
+                const id = document.getElementById('edit-group-id').value;
+                const data = {
+                    name: document.getElementById('group-name').value,
+                    link: document.getElementById('group-link').value,
+                    status: document.querySelector('input[name="group_status"]:checked').value
+                };
                 if (id) { await updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'groups', id), data); } 
                 else { await addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'groups'), { ...data, createdAt: Date.now() }); }
                 window.closeGroupEditor();
