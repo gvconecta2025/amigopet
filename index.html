@@ -263,8 +263,7 @@
         window.appGroups = [];
         window.appSettings = { 
             whatsapp: "5533999069877", 
-            mapsUrl: "https://www.google.com/maps/search/?api=1&query=Rua+pedro+lessa+1372+vila+Bretas",
-            storeName: "Amigo Pet"
+            mapsUrl: "https://www.google.com/maps/search/?api=1&query=Rua+pedro+lessa+1372+vila+Bretas"
         };
         window.cart = [];
 
@@ -413,7 +412,8 @@
                             window.appSettings.storeName = data.storeName;
                             const headerName = document.getElementById('header-store-name');
                             if(headerName) headerName.innerText = data.storeName;
-                            document.getElementById('page-title').innerText = data.storeName;
+                            const pageTitle = document.getElementById('page-title');
+                            if(pageTitle) pageTitle.innerText = data.storeName;
                         }
                     }
                 });
