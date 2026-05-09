@@ -265,7 +265,7 @@
             if (!container || !dotsContainer) return;
             const index = Math.round(container.scrollLeft / container.clientWidth);
             Array.from(dotsContainer.children).forEach((dot, i) => {
-                dot.className = i === index ? 'w-1.5 h-1.5 rounded-full bg-white transition-colors duration-300' : 'w-1.5 h-1.5 rounded-full bg-white/50 transition-colors duration-300';
+                dot.className = i === index ? 'w-2 h-2 rounded-full border border-black/20 bg-white transition-colors duration-300 shadow-md' : 'w-2 h-2 rounded-full border border-black/20 bg-white/50 transition-colors duration-300 shadow-md';
             });
         };
 
@@ -483,8 +483,8 @@
                         <div class="absolute top-2 left-2 bg-black/50 text-white text-[10px] font-bold px-2 py-1 rounded-md backdrop-blur-sm z-10 pointer-events-none flex items-center gap-1">
                             <i data-lucide="images" class="w-3 h-3"></i> ${images.length}
                         </div>
-                        <div id="dots-${carouselId}" class="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-10 pointer-events-none">
-                            ${images.map((_, i) => `<div class="w-1.5 h-1.5 rounded-full transition-colors duration-300 ${i === 0 ? 'bg-white' : 'bg-white/50'}"></div>`).join('')}
+                        <div id="dots-${carouselId}" class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-1.5 z-40 pointer-events-none">
+                            ${images.map((_, i) => `<div class="w-2 h-2 rounded-full border border-black/20 transition-colors duration-300 shadow-md ${i === 0 ? 'bg-white' : 'bg-white/50'}"></div>`).join('')}
                         </div>
                     </div>`;
                 } else {
@@ -558,8 +558,8 @@
                     <div class="absolute top-3 right-3 bg-black/50 text-white text-xs font-bold px-3 py-1.5 rounded-lg backdrop-blur-sm z-10 pointer-events-none flex items-center gap-1">
                         <i data-lucide="images" class="w-4 h-4"></i> ${images.length} fotos
                     </div>
-                    <div id="dots-${carouselId}" class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5 z-10 pointer-events-none">
-                        ${images.map((_, i) => `<div class="w-1.5 h-1.5 rounded-full transition-colors duration-300 ${i === 0 ? 'bg-white' : 'bg-white/50'}"></div>`).join('')}
+                    <div id="dots-${carouselId}" class="absolute bottom-5 left-1/2 transform -translate-x-1/2 flex gap-1.5 z-40 pointer-events-none">
+                        ${images.map((_, i) => `<div class="w-2 h-2 rounded-full border border-black/20 transition-colors duration-300 shadow-md ${i === 0 ? 'bg-white' : 'bg-white/50'}"></div>`).join('')}
                     </div>
                 </div>`;
             } else {
