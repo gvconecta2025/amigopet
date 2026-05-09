@@ -259,6 +259,16 @@
             }
         };
 
+        window.updateCarouselDots = (carouselId) => {
+            const container = document.getElementById(carouselId);
+            const dotsContainer = document.getElementById(`dots-${carouselId}`);
+            if (!container || !dotsContainer) return;
+            const index = Math.round(container.scrollLeft / container.clientWidth);
+            Array.from(dotsContainer.children).forEach((dot, i) => {
+                dot.className = i === index ? 'w-1.5 h-1.5 rounded-full bg-white transition-colors duration-300' : 'w-1.5 h-1.5 rounded-full bg-white/50 transition-colors duration-300';
+            });
+        };
+
         window.showSystemMessage = (title, text, type = 'info', actionBtn = null) => {
             const modal = document.getElementById('msg-modal');
             const box = document.getElementById('msg-modal-box');
@@ -463,7 +473,7 @@
                     const slides = images.map(img => `<img src="${window.getDriveImageUrl(img)}" class="w-full h-full object-cover flex-shrink-0 snap-center" onerror="this.onerror=null;this.src='https://placehold.co/600x600?text=Imagem'">`).join('');
                     mediaHtml = `
                     <div class="aspect-square bg-gray-100 relative overflow-hidden group">
-                        <div id="${carouselId}" class="flex w-full h-full overflow-x-auto snap-x snap-mandatory no-scrollbar scroll-smooth">${slides}</div>
+                        <div id="${carouselId}" class="flex w-full h-full overflow-x-auto snap-x snap-mandatory no-scrollbar scroll-smooth" onscroll="window.updateCarouselDots('${carouselId}')">${slides}</div>
                         <button onclick="event.stopPropagation(); window.scrollCarousel('${carouselId}', -1)" class="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-white/80 hover:bg-white text-gray-800 rounded-full flex items-center justify-center shadow backdrop-blur-sm transition-colors z-20">
                             <i data-lucide="chevron-left" class="w-5 h-5"></i>
                         </button>
@@ -472,6 +482,9 @@
                         </button>
                         <div class="absolute top-2 left-2 bg-black/50 text-white text-[10px] font-bold px-2 py-1 rounded-md backdrop-blur-sm z-10 pointer-events-none flex items-center gap-1">
                             <i data-lucide="images" class="w-3 h-3"></i> ${images.length}
+                        </div>
+                        <div id="dots-${carouselId}" class="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-10 pointer-events-none">
+                            ${images.map((_, i) => `<div class="w-1.5 h-1.5 rounded-full transition-colors duration-300 ${i === 0 ? 'bg-white' : 'bg-white/50'}"></div>`).join('')}
                         </div>
                     </div>`;
                 } else {
@@ -535,15 +548,18 @@
                 const slides = images.map(img => `<img src="${window.getDriveImageUrl(img)}" class="w-full h-full object-cover flex-shrink-0 snap-center" onerror="this.onerror=null;this.src='https://placehold.co/600x600?text=Imagem'">`).join('');
                 mediaHtml = `
                 <div class="aspect-square w-full relative bg-gray-100 overflow-hidden">
-                    <div id="${carouselId}" class="flex w-full h-full overflow-x-auto snap-x snap-mandatory no-scrollbar scroll-smooth">${slides}</div>
+                    <div id="${carouselId}" class="flex w-full h-full overflow-x-auto snap-x snap-mandatory no-scrollbar scroll-smooth" onscroll="window.updateCarouselDots('${carouselId}')">${slides}</div>
                     <button onclick="event.stopPropagation(); window.scrollCarousel('${carouselId}', -1)" class="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 hover:bg-white text-gray-800 rounded-full flex items-center justify-center shadow-md backdrop-blur-sm transition-colors z-20">
                         <i data-lucide="chevron-left" class="w-6 h-6"></i>
                     </button>
                     <button onclick="event.stopPropagation(); window.scrollCarousel('${carouselId}', 1)" class="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 hover:bg-white text-gray-800 rounded-full flex items-center justify-center shadow-md backdrop-blur-sm transition-colors z-20">
                         <i data-lucide="chevron-right" class="w-6 h-6"></i>
                     </button>
-                    <div class="absolute bottom-3 right-3 bg-black/50 text-white text-xs font-bold px-3 py-1.5 rounded-lg backdrop-blur-sm z-10 pointer-events-none flex items-center gap-1">
+                    <div class="absolute top-3 right-3 bg-black/50 text-white text-xs font-bold px-3 py-1.5 rounded-lg backdrop-blur-sm z-10 pointer-events-none flex items-center gap-1">
                         <i data-lucide="images" class="w-4 h-4"></i> ${images.length} fotos
+                    </div>
+                    <div id="dots-${carouselId}" class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5 z-10 pointer-events-none">
+                        ${images.map((_, i) => `<div class="w-1.5 h-1.5 rounded-full transition-colors duration-300 ${i === 0 ? 'bg-white' : 'bg-white/50'}"></div>`).join('')}
                     </div>
                 </div>`;
             } else {
