@@ -83,9 +83,9 @@
 
     <header class="bg-white shadow-sm sticky top-0 z-40 border-b border-gray-100">
         <div class="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
-            <button onclick="window.handleAdminTrigger()" class="flex items-center gap-3 focus:outline-none select-none">
+            <button onclick="window.showView('home'); window.handleAdminTrigger()" class="flex items-center gap-3 focus:outline-none select-none">
                 <img src="./image_322ea4.png" alt="Logótipo Amigo Pet" class="w-14 h-14 object-contain transition-transform active:scale-95 shrink-0 drop-shadow-sm">
-                <div class="text-left pointer-events-none hidden sm:block">
+                <div class="text-left pointer-events-none">
                     <h1 id="header-store-name" class="text-xl font-black text-teal-800 leading-none">Amigo Pet</h1>
                     <p class="text-[9px] text-gray-500 font-medium leading-tight mt-0.5"><i data-lucide="map-pin" class="w-3 h-3 inline"></i> Atendemos toda a cidade</p>
                 </div>
@@ -263,7 +263,8 @@
         window.appGroups = [];
         window.appSettings = { 
             whatsapp: "5533999069877", 
-            mapsUrl: "https://www.google.com/maps/search/?api=1&query=Rua+pedro+lessa+1372+vila+Bretas"
+            mapsUrl: "https://www.google.com/maps/search/?api=1&query=Rua+pedro+lessa+1372+vila+Bretas",
+            storeName: "Amigo Pet"
         };
         window.cart = [];
 
@@ -466,6 +467,12 @@
         };
 
         window.openLocation = () => window.open(window.appSettings.mapsUrl, '_blank');
+
+        window.generateWhatsAppLink = (item) => {
+            let numeroFormatado = window.appSettings.whatsapp.replace(/\D/g, ''); 
+            const texto = `Olá! Vi o item *${item.title}* no valor de *${item.price}* no App e gostaria de mais informações.`;
+            return `https://wa.me/${numeroFormatado}?text=${encodeURIComponent(texto)}`;
+        };
 
         window.handleSearch = (e) => {
             currentSearchQuery = e.target.value.toLowerCase();
