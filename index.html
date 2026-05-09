@@ -147,12 +147,12 @@
             </button>
         </aside>
 
-        <main class="flex-grow w-full max-w-3xl lg:max-w-none mx-auto pb-safe lg:pb-10 lg:pt-6 lg:pl-6">
+        <main class="flex-grow w-full max-w-3xl lg:max-w-none mx-auto pb-safe lg:pb-0 lg:pt-6 lg:pl-6">
 
             <div id="feeds-visibility-wrapper" class="w-full">
                 <div class="w-full lg:grid lg:grid-cols-3 lg:gap-6">
                     
-                    <div id="home-view" class="px-4 py-6 lg:px-0 lg:py-0 fade-enter lg-visible">
+                    <div id="home-view" class="px-4 py-6 lg:px-2 lg:py-0 fade-enter lg-visible lg:h-[calc(100vh-130px)] lg:overflow-y-auto no-scrollbar lg:pb-20">
                         <div class="mb-6 flex justify-between items-end">
                             <div>
                                 <h2 class="text-2xl font-black text-gray-800">Vitrine</h2>
@@ -162,7 +162,7 @@
                         <div id="feed-container" class="flex flex-col gap-6 lg:gap-4"></div>
                     </div>
 
-                    <div id="products-view" class="px-4 py-6 lg:px-0 lg:py-0 fade-enter hidden lg-visible">
+                    <div id="products-view" class="px-4 py-6 lg:px-2 lg:py-0 fade-enter hidden lg-visible lg:h-[calc(100vh-130px)] lg:overflow-y-auto no-scrollbar lg:pb-20">
                         <div class="mb-6">
                             <h2 class="text-2xl font-black text-gray-800 flex items-center gap-2">
                                 <i data-lucide="shopping-bag" class="w-6 h-6 text-teal-600"></i> Produtos
@@ -180,7 +180,7 @@
                         <div id="products-container" class="grid grid-cols-2 gap-4 lg:gap-3"></div>
                     </div>
 
-                    <div id="services-view" class="px-4 py-6 lg:px-0 lg:py-0 fade-enter hidden lg-visible">
+                    <div id="services-view" class="px-4 py-6 lg:px-2 lg:py-0 fade-enter hidden lg-visible lg:h-[calc(100vh-130px)] lg:overflow-y-auto no-scrollbar lg:pb-20">
                         <div class="mb-6">
                             <h2 class="text-2xl font-black text-gray-800 flex items-center gap-2">
                                 <i data-lucide="scissors" class="w-6 h-6 text-teal-600"></i> Serviços
@@ -194,7 +194,7 @@
                 </div>
             </div>
 
-            <div id="detail-view" class="px-4 py-6 lg:p-0 fade-enter hidden">
+            <div id="detail-view" class="px-4 py-6 lg:px-4 lg:py-2 fade-enter hidden lg:h-[calc(100vh-130px)] lg:overflow-y-auto no-scrollbar lg:pb-20">
                 <button onclick="window.goBack()" class="flex items-center gap-2 text-teal-700 font-bold mb-4 hover:opacity-80 transition-opacity">
                     <i data-lucide="arrow-left" class="w-5 h-5"></i> Voltar
                 </button>
@@ -202,7 +202,7 @@
                     </div>
             </div>
 
-            <div id="cart-view" class="px-4 py-6 lg:p-0 fade-enter hidden max-w-lg mx-auto lg:mx-0">
+            <div id="cart-view" class="px-4 py-6 lg:px-4 lg:py-2 fade-enter hidden max-w-lg mx-auto lg:mx-0 lg:h-[calc(100vh-130px)] lg:overflow-y-auto no-scrollbar lg:pb-20">
                 <div class="mb-6 flex items-center gap-3">
                     <button onclick="window.goBack()" class="text-teal-700 hover:opacity-80 transition-opacity">
                         <i data-lucide="arrow-left" class="w-6 h-6"></i>
@@ -236,7 +236,7 @@
                 </div>
             </div>
 
-            <div id="alerts-view" class="px-4 py-8 lg:p-0 fade-enter hidden max-w-lg mx-auto lg:mx-0">
+            <div id="alerts-view" class="px-4 py-8 lg:px-4 lg:py-2 fade-enter hidden max-w-lg mx-auto lg:mx-0 lg:h-[calc(100vh-130px)] lg:overflow-y-auto no-scrollbar lg:pb-20">
                 <div class="text-center mb-8">
                     <div class="w-20 h-20 bg-[#dcf8c6] text-[#25D366] rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-white shadow-md">
                         <i data-lucide="bell-ring" class="w-10 h-10"></i>
@@ -307,11 +307,9 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signInAnonymously, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, onAuthStateChanged, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, onSnapshot, doc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        const ADMIN_EMAIL = "professoragiselle.edu2@gmail.com"; 
-        
         const firebaseConfig = {
             apiKey: "AIzaSyDg2NQ4getGHRnx-F4a69r23LUr6iac7yE",
             authDomain: "amigopet-d6992.firebaseapp.com",
@@ -537,9 +535,9 @@
                 const prodEl = document.getElementById('products-view');
                 const servEl = document.getElementById('services-view');
 
-                if(homeEl) homeEl.className = `px-4 py-6 lg:px-0 lg:py-0 fade-enter lg-visible ${view === 'home' ? '' : 'hidden lg:block'}`;
-                if(prodEl) prodEl.className = `px-4 py-6 lg:px-0 lg:py-0 fade-enter lg-visible ${view === 'products' ? '' : 'hidden lg:block'}`;
-                if(servEl) servEl.className = `px-4 py-6 lg:px-0 lg:py-0 fade-enter lg-visible ${view === 'services' ? '' : 'hidden lg:block'}`;
+                if(homeEl) homeEl.className = `px-4 py-6 lg:px-2 lg:py-0 fade-enter lg-visible lg:h-[calc(100vh-130px)] lg:overflow-y-auto no-scrollbar lg:pb-20 ${view === 'home' ? '' : 'hidden lg:block'}`;
+                if(prodEl) prodEl.className = `px-4 py-6 lg:px-2 lg:py-0 fade-enter lg-visible lg:h-[calc(100vh-130px)] lg:overflow-y-auto no-scrollbar lg:pb-20 ${view === 'products' ? '' : 'hidden lg:block'}`;
+                if(servEl) servEl.className = `px-4 py-6 lg:px-2 lg:py-0 fade-enter lg-visible lg:h-[calc(100vh-130px)] lg:overflow-y-auto no-scrollbar lg:pb-20 ${view === 'services' ? '' : 'hidden lg:block'}`;
 
                 renderFeed(); renderProducts(); renderServices();
             } else {
@@ -592,12 +590,6 @@
         };
 
         window.openLocation = () => window.open(window.appSettings.mapsUrl, '_blank');
-
-        window.generateWhatsAppLink = (item) => {
-            let numeroFormatado = window.appSettings.whatsapp.replace(/\D/g, ''); 
-            const texto = `Olá! Vi o item *${item.title}* no valor de *${item.price}* no App e gostaria de mais informações.`;
-            return `https://wa.me/${numeroFormatado}?text=${encodeURIComponent(texto)}`;
-        };
 
         window.handleSearch = (e) => {
             currentSearchQuery = e.target.value.toLowerCase();
