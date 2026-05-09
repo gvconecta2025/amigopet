@@ -173,9 +173,14 @@
                     <span class="text-gray-500 font-bold">Total do Pedido:</span>
                     <span id="cart-total" class="text-2xl font-black text-teal-700">R$ 0,00</span>
                 </div>
-                <button onclick="window.checkoutWhatsApp()" class="w-full bg-[#25D366] hover:bg-[#1ebd5a] text-white py-4 rounded-xl font-black text-lg uppercase tracking-wide shadow-[0_5px_15px_rgba(37,211,102,0.3)] transition-all flex items-center justify-center gap-2">
-                    <i data-lucide="send" class="w-5 h-5"></i> Fechar Pedido
-                </button>
+                <div class="flex flex-col gap-3">
+                    <button onclick="window.checkoutWhatsApp()" class="w-full bg-[#25D366] hover:bg-[#1ebd5a] text-white py-4 rounded-xl font-black text-lg uppercase tracking-wide shadow-[0_5px_15px_rgba(37,211,102,0.3)] transition-all flex items-center justify-center gap-2">
+                        <i data-lucide="send" class="w-5 h-5"></i> Fechar Pedido
+                    </button>
+                    <button onclick="window.showView('catalog', 'product')" class="w-full bg-teal-50 hover:bg-teal-100 text-teal-700 py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2">
+                        <i data-lucide="shopping-bag" class="w-4 h-4"></i> Continuar Comprando
+                    </button>
+                </div>
             </div>
 
             <div id="cart-empty" class="text-center py-12">
@@ -239,7 +244,7 @@
             <div id="msg-icon" class="mx-auto w-12 h-12 rounded-full mb-4 flex items-center justify-center"></div>
             <h3 id="msg-title" class="text-xl font-black text-gray-800 mb-2"></h3>
             <p id="msg-text" class="text-gray-600 text-sm mb-6 whitespace-pre-wrap"></p>
-            <div class="flex gap-3 justify-center" id="msg-buttons"></div>
+            <div id="msg-buttons"></div>
         </div>
     </div>
 
@@ -327,7 +332,18 @@
 
             const btnContainer = document.getElementById('msg-buttons');
             btnContainer.innerHTML = '';
-            if(actionBtn) {
+            
+            if (Array.isArray(actionBtn)) {
+                btnContainer.className = "flex flex-col gap-2 w-full mt-2";
+                actionBtn.forEach(btn => {
+                    const btnEl = document.createElement('button');
+                    btnEl.className = "w-full py-3 rounded-xl font-black text-sm shadow-sm transition-all " + (btn.class || "bg-gray-100 text-gray-600 hover:bg-gray-200");
+                    btnEl.innerText = btn.text;
+                    btnEl.onclick = () => { window.closeSystemMessage(); if(btn.onClick) btn.onClick(); };
+                    btnContainer.appendChild(btnEl);
+                });
+            } else if(actionBtn) {
+                btnContainer.className = "flex gap-3 justify-center mt-2";
                 const btnOk = document.createElement('button');
                 btnOk.className = "flex-1 py-3 rounded-xl font-black text-sm text-white shadow-md transition-all " + (actionBtn.color || 'bg-teal-600 hover:bg-teal-700');
                 btnOk.innerText = actionBtn.text;
@@ -340,6 +356,7 @@
                 
                 btnContainer.appendChild(btnCancel); btnContainer.appendChild(btnOk);
             } else {
+                btnContainer.className = "flex gap-3 justify-center mt-2";
                 const btnOk = document.createElement('button');
                 btnOk.className = "w-full py-3 rounded-xl font-black text-sm text-white bg-gray-800 hover:bg-gray-900 shadow-md transition-colors";
                 btnOk.innerText = "Entendido";
@@ -518,9 +535,21 @@
                 window.cart.push({ ...item, quantity: 1 });
             }
             window.updateCartUI();
-            window.showSystemMessage("Adicionado", `${item.title} foi adicionado ao carrinho.`, "success", {
-                text: "Ver Carrinho", color: "bg-teal-600 hover:bg-teal-700", onClick: () => window.showView('cart')
-            });
+
+            const cancelLogic = () => {
+                const itemInCart = window.cart.find(x => x.id === id);
+                if(itemInCart) {
+                    if(itemInCart.quantity > 1) itemInCart.quantity -= 1;
+                    else window.cart = window.cart.filter(x => x.id !== id);
+                    window.updateCartUI();
+                }
+            };
+
+            window.showSystemMessage("Adicionado", `${item.title} foi adicionado ao carrinho.`, "success", [
+                { text: "Ver Carrinho", class: "bg-teal-600 hover:bg-teal-700 text-white", onClick: () => window.showView('cart') },
+                { text: "Continuar Comprando", class: "bg-teal-50 hover:bg-teal-100 text-teal-700", onClick: () => window.showView('catalog', 'product') },
+                { text: "Cancelar", class: "bg-gray-100 hover:bg-gray-200 text-gray-500", onClick: cancelLogic }
+            ]);
         };
 
         window.updateCartUI = () => {
