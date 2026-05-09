@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Painel da Loja - Amigo Pet</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        :root {
+            --cor-fundo: #f8fafc;
+            --cor-primaria: #0f766e; 
+            --cor-secundaria: #f59e0b; 
+            --cor-texto: #334155;
+            --cor-zap: #25D366;
+        }
+
+        body {
+            background-color: var(--cor-fundo);
+            color: var(--cor-texto);
+            font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        .pb-safe { padding-bottom: calc(80px + env(safe-area-inset-bottom)); }
+        .pt-safe { padding-top: env(safe-area-inset-top); }
+        .hidden { display: none !important; }
+        
+        /* Modal Overlay */
+        .modal-overlay { background-color: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px); }
+    </style>
+
+    <link rel="manifest" href="/manifest.json" crossorigin="use-credentials">
+    <meta name="theme-color" content="#0f766e">
+    <link rel="apple-touch-icon" href="/image_322ea4.png">
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js').catch(err => {
+                    console.warn('Arquivo sw.js físico falhou, verifique o GitHub.', err);
+                });
+            });
+        }
+    </script>
+</head>
+<body class="min-h-screen flex flex-col bg-gray-50">
+
+    <div id="msg-modal" class="hidden fixed inset-0 z-[9999] flex items-center justify-center modal-overlay px-4 transition-opacity duration-300">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 text-center transform transition-transform duration-300" id="msg-modal-box">
+            <div id="msg-icon" class="mx-auto w-12 h-12 rounded-full mb-4 flex items-center justify-center"></div>
+            <h3 id="msg-title" class="text-xl font-black text-gray-800 mb-2"></h3>
+            <p id="msg-text" class="text-gray-600 text-sm mb-6 whitespace-pre-wrap"></p>
+            <div class="flex gap-3 justify-center" id="msg-buttons"></div>
+        </div>
+    </div>
+
+    <div id="admin-dashboard-modal" class="hidden fixed inset-0 z-[50] flex flex-col bg-gray-50 slide-up-animation transition-transform duration-300">
+        <div class="bg-teal-800 text-white px-4 py-4 flex justify-between items-center shadow-md pt-safe">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center"><i data-lucide="shield" class="w-5 h-5"></i></div>
+                <h2 class="font-black text-lg">Painel da Loja</h2>
+            </div>
+            <div class="flex items-center gap-4">
+                <button type="button" onclick="window.adminSignOut()" class="text-teal-200 hover:text-white"><i data-lucide="log-out" class="w-5 h-5"></i></button>
+                <button type="button" onclick="window.closeAdminDashboard()" class="bg-white text-teal-800 p-1.5 rounded-full hover:bg-teal-50"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+        </div>
+        
+        <div class="bg-white border-b border-gray-200 px-2 flex overflow-x-auto no-scrollbar shadow-sm">
+            <button type="button" onclick="window.switchAdminTab('items')" id="tab-btn-items" class="px-4 py-3 text-sm font-black text-teal-700 border-b-2 border-teal-700 whitespace-nowrap">Gestão de Itens</button>
+            <button type="button" onclick="window.switchAdminTab('groups')" id="tab-btn-groups" class="px-4 py-3 text-sm font-bold text-gray-400 border-b-2 border-transparent whitespace-nowrap">Grupos VIP</button>
+            <button type="button" onclick="window.switchAdminTab('settings')" id="tab-btn-settings" class="px-4 py-3 text-sm font-bold text-gray-400 border-b-2 border-transparent whitespace-nowrap">Ajustes da Loja</button>
+        </div>
+
+        <div class="flex-grow overflow-y-auto p-4 pb-20">
+            
+            <div id="admin-tab-items" class="space-y-4">
+                <button type="button" onclick="window.openItemEditor()" class="w-full bg-teal-600 text-white py-3 rounded-xl font-black text-sm uppercase tracking-wide shadow-md flex items-center justify-center gap-2 hover:bg-teal-700">
+                    <i data-lucide="plus" class="w-5 h-5"></i> Adicionar Novo Item
+                </button>
+                <div class="relative mb-4">
+                    <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400"></i>
+                    <input type="text" id="adminSearchInput" onkeyup="window.renderAdminItems()" placeholder="Buscar no sistema..." class="w-full bg-white border border-gray-200 text-gray-700 text-sm rounded-xl pl-9 pr-4 py-2.5 outline-none">
+                </div>
+                <div id="admin-items-list" class="flex flex-col gap-3"></div>
+            </div>
+
+            <div id="admin-tab-groups" class="hidden space-y-4">
+                <button type="button" onclick="window.openGroupEditor()" class="w-full bg-[#25D366] text-white py-3 rounded-xl font-black text-sm uppercase tracking-wide shadow-md flex items-center justify-center gap-2 hover:bg-[#1ebd5a]">
+                    <i data-lucide="plus" class="w-5 h-5"></i> Adicionar Grupo
+                </button>
+                <div id="admin-groups-list" class="flex flex-col gap-3"></div>
+            </div>
+
+            <div id="admin-tab-settings" class="hidden space-y-4">
+                <div class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm">
+                    <label class="block text-xs font-black text-gray-500 uppercase tracking-widest mb-1">Nome da Loja</label>
+                    <input type="text" id="admin-set-storename" placeholder="Ex: Amigo Pet" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-teal-500 mb-4">
+                    
+                    <label class="block text-xs font-black text-gray-500 uppercase tracking-widest mb-1">WhatsApp da Loja</label>
+                    <p class="text-[10px] text-gray-400 mb-2">Apenas números com DDD.</p>
+                    <input type="text" id="admin-set-whatsapp" placeholder="Ex: 5533999069877" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-teal-500 mb-4">
+                    
+                    <label class="block text-xs font-black text-gray-500 uppercase tracking-widest mb-1">Link do Google Maps</label>
+                    <p class="text-[10px] text-gray-400 mb-2">Para o botão de localização.</p>
+                    <input type="text" id="admin-set-maps" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-teal-500 mb-6">
+                    
+                    <button type="button" onclick="window.saveSettings()" class="w-full bg-teal-800 text-white py-3 rounded-xl font-black text-sm shadow-md hover:bg-teal-900">Salvar Ajustes</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="item-editor-modal" class="hidden fixed inset-0 z-[60] flex items-center justify-center modal-overlay px-2 py-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col relative">
+            <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl shrink-0">
+                <h3 id="item-editor-title" class="font-black text-gray-800">Novo Item</h3>
+                <button type="button" onclick="window.closeItemEditor()" class="text-gray-400 hover:text-gray-600"><i data-lucide="x" class="w-6 h-6"></i></button>
+            </div>
+            
+            <div class="p-5 flex-1 overflow-y-auto space-y-5">
+                <input type="hidden" id="edit-item-id">
+                
+                <div>
+                    <label class="block text-xs font-black text-gray-500 uppercase tracking-widest mb-1">Classificação</label>
+                    <select id="item-type" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-sm font-bold text-teal-800 outline-none focus:border-teal-500">
+                        <option value="product">🛍️ Produto</option>
+                        <option value="service">✂️ Serviço</option>
+                        <option value="offer">⭐ Oferta (Exclusivo)</option>
+                    </select>
+                </div>
+
+                <div class="bg-teal-50 border border-teal-100 p-3 rounded-xl">
+                    <label class="flex items-center gap-2 font-bold text-sm text-teal-800 cursor-pointer">
+                        <input type="checkbox" id="item-vitrine" class="w-4 h-4 text-teal-600 focus:ring-teal-500">
+                        Destacar na Vitrine (Página Inicial)
+                    </label>
+                    <p class="text-[10px] text-teal-600 mt-1 ml-6">Se marcado, este item aparecerá logo na tela de destaques.</p>
+                </div>
+
+                <div class="bg-gray-50 border border-gray-200 p-3 rounded-xl">
+                    <label class="block text-xs font-black text-gray-500 uppercase tracking-widest mb-2">Validade da Postagem</label>
+                    <div class="flex gap-4">
+                        <label class="flex items-center gap-2 text-sm font-bold text-gray-700 cursor-pointer">
+                            <input type="radio" name="item_permanent" value="true" onchange="document.getElementById('date-container').classList.add('hidden')" checked class="w-4 h-4 text-teal-600"> 
+                            Permanente
+                        </label>
+                        <label class="flex items-center gap-2 text-sm font-bold text-gray-700 cursor-pointer">
+                            <input type="radio" name="item_permanent" value="false" onchange="document.getElementById('date-container').classList.remove('hidden')" class="w-4 h-4 text-teal-600"> 
+                            Temporário
+                        </label>
+                    </div>
+                    <div id="date-container" class="hidden mt-3">
+                        <label class="block text-[10px] font-bold text-gray-500 mb-1">Expira em (Último dia visível):</label>
+                        <input type="date" id="item-expiration" class="w-full bg-white border border-gray-200 rounded-xl px-3 py-2 text-sm outline-none focus:border-teal-500">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-black text-gray-500 uppercase tracking-widest mb-1">Título <span class="text-red-500">*</span></label>
+                    <input type="text" id="item-title" placeholder="Ex: Ração Golden 15kg" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-teal-500">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-black text-gray-500 uppercase tracking-widest mb-1">Preço (R$)</label>
+                        <input type="text" id="item-price" placeholder="Ex: R$ 149,90" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-sm font-black text-teal-700 outline-none focus:border-teal-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-black text-gray-500 uppercase tracking-widest mb-1">Preço Antigo (R$)</label>
+                        <input type="text" id="item-originalPrice" placeholder="Ex: R$ 180,00" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-500 line-through outline-none focus:border-teal-500">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-black text-gray-500 uppercase tracking-widest mb-1">Links das Imagens (Drive/Web - Até 5 fotos)</label>
+                    <div class="space-y-2">
+                        <input type="text" id="item-image-1" placeholder="URL da foto 1 (Principal)..." class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-teal-500">
+                        <input type="text" id="item-image-2" placeholder="URL da foto 2..." class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-teal-500">
+                        <input type="text" id="item-image-3" placeholder="URL da foto 3..." class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-teal-500">
+                        <input type="text" id="item-image-4" placeholder="URL da foto 4..." class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-teal-500">
+                        <input type="text" id="item-image-5" placeholder="URL da foto 5..." class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-teal-500">
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-xs font-black text-gray-500 uppercase tracking-widest mb-1">Vídeo YouTube (Opcional - Vertical 9:16)</label>
+                    <input type="text" id="item-youtube" placeholder="Link do YouTube Shorts..." class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-teal-500">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-black text-gray-500 uppercase tracking-widest mb-1">Etiquetas (Separadas por vírgula)</label>
+                    <input type="text" id="item-tags" placeholder="Ex: banho, tosa, promoção, cães" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-teal-500">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-black text-gray-500 uppercase tracking-widest mb-1">Descrição Detalhada</label>
+                    <textarea id="item-description" rows="3" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-teal-500 resize-none"></textarea>
+                </div>
+            </div>
+            
+            <div class="p-4 border-t border-gray-100 flex justify-between bg-white rounded-b-2xl shrink-0">
+                <button type="button" id="btn-delete-item" onclick="window.deleteItem()" class="hidden text-red-500 font-bold px-4 py-2 hover:bg-red-50 rounded-lg text-sm"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
+                <div class="flex gap-2 ml-auto">
+                    <button type="button" onclick="window.closeItemEditor()" class="px-5 py-2 text-gray-500 font-bold text-sm">Cancelar</button>
+                    <button type="button" id="btn-save-item" onclick="window.saveItem()" class="px-6 py-2 bg-teal-600 text-white rounded-xl font-black text-sm shadow-md hover:bg-teal-700">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="group-editor-modal" class="hidden fixed inset-0 z-[60] flex items-center justify-center modal-overlay px-4 py-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm max-h-[90vh] flex flex-col relative">
+            <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl shrink-0">
+                <h3 id="group-editor-title" class="font-black text-gray-800">Novo Grupo</h3>
+                <button type="button" onclick="window.closeGroupEditor()" class="text-gray-400 hover:text-gray-600"><i data-lucide="x" class="w-6 h-6"></i></button>
+            </div>
+            
+            <div class="p-5 flex-col gap-4 flex overflow-y-auto">
+                <input type="hidden" id="edit-group-id">
+                <div>
+                    <label class="block text-xs font-black text-gray-500 uppercase tracking-widest mb-1">Nome do Grupo</label>
+                    <input type="text" id="group-name" placeholder="Ex: Ofertas VIP 01" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-[#25D366]">
+                </div>
+                <div>
+                    <label class="block text-xs font-black text-gray-500 uppercase tracking-widest mb-1">Link do WhatsApp</label>
+                    <input type="text" id="group-link" placeholder="https://chat.whatsapp.com/..." class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-[#25D366]">
+                </div>
+                <div>
+                    <label class="block text-xs font-black text-gray-500 uppercase tracking-widest mb-2">Status</label>
+                    <div class="flex flex-col gap-2 bg-gray-50 p-3 rounded-xl border border-gray-200">
+                        <label class="flex items-center gap-2 cursor-pointer text-sm font-bold text-green-600"><input type="radio" name="group_status" value="open" id="g-open" checked> Vagas Abertas</label>
+                        <label class="flex items-center gap-2 cursor-pointer text-sm font-bold text-gray-500"><input type="radio" name="group_status" value="full" id="g-full"> Lotação Máxima</label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="p-4 border-t border-gray-100 flex justify-between bg-white rounded-b-2xl shrink-0">
+                <button type="button" id="btn-delete-group" onclick="window.deleteGroup()" class="hidden text-red-500 font-bold px-4 py-2 hover:bg-red-50 rounded-lg text-sm"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
+                <div class="flex gap-2 ml-auto">
+                    <button type="button" onclick="window.closeGroupEditor()" class="px-4 py-2 text-gray-500 font-bold text-sm">Cancelar</button>
+                    <button type="button" id="btn-save-group" onclick="window.saveGroup()" class="px-6 py-2 bg-[#25D366] text-white rounded-xl font-black text-sm shadow-md hover:bg-[#1ebd5a]">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const ADMIN_EMAIL = "professoragiselle.edu2@gmail.com"; 
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyDg2NQ4getGHRnx-F4a69r23LUr6iac7yE",
+            authDomain: "amigopet-d6992.firebaseapp.com",
+            projectId: "amigopet-d6992",
+            storageBucket: "amigopet-d6992.firebasestorage.app",
+            messagingSenderId: "814082291596",
+            appId: "1:814082291596:web:653e165ec09b9825c0c8a9"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = 'amigopet-d6992';
+
+        window.appItems = [];
+        window.appGroups = [];
+        window.appSettings = { 
+            whatsapp: "5533999069877", 
+            mapsUrl: "https://www.google.com/maps/search/?api=1&query=Rua+pedro+lessa+1372+vila+Bretas",
+            storeName: "Amigo Pet"
+        };
+        window.currentUser = null;
+
+        window.getDriveImageUrl = (url) => { 
+            if (!url) return ""; 
+            const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/); 
+            return match ? `https://lh3.googleusercontent.com/d/${match[1]}` : url; 
+        };
+
+        window.showSystemMessage = (title, text, type = 'info', actionBtn = null) => {
+            const modal = document.getElementById('msg-modal');
+            const box = document.getElementById('msg-modal-box');
+            document.getElementById('msg-title').innerText = title;
+            document.getElementById('msg-text').innerText = text;
+            
+            const iconDiv = document.getElementById('msg-icon');
+            if(type === 'error') { iconDiv.className = "mx-auto w-16 h-16 rounded-full mb-4 flex items-center justify-center bg-red-100 text-red-500"; iconDiv.innerHTML = '<i data-lucide="alert-triangle" class="w-8 h-8"></i>'; }
+            else if(type === 'success') { iconDiv.className = "mx-auto w-16 h-16 rounded-full mb-4 flex items-center justify-center bg-green-100 text-green-500"; iconDiv.innerHTML = '<i data-lucide="check-circle" class="w-8 h-8"></i>'; }
+            else { iconDiv.className = "mx-auto w-16 h-16 rounded-full mb-4 flex items-center justify-center bg-blue-100 text-blue-500"; iconDiv.innerHTML = '<i data-lucide="info" class="w-8 h-8"></i>'; }
+
+            const btnContainer = document.getElementById('msg-buttons');
+            btnContainer.innerHTML = '';
+            if(actionBtn) {
+                const btnOk = document.createElement('button');
+                btnOk.className = "flex-1 py-3 rounded-xl font-black text-sm text-white shadow-md transition-all " + (actionBtn.color || 'bg-teal-600 hover:bg-teal-700');
+                btnOk.innerText = actionBtn.text;
+                btnOk.onclick = () => { window.closeSystemMessage(); if(actionBtn.onClick) actionBtn.onClick(); };
+                
+                const btnCancel = document.createElement('button');
+                btnCancel.className = "flex-1 py-3 rounded-xl font-bold text-sm text-gray-500 bg-gray-100 hover:bg-gray-200 transition-colors";
+                btnCancel.innerText = "Cancelar";
+                btnCancel.onclick = window.closeSystemMessage;
+                
+                btnContainer.appendChild(btnCancel); btnContainer.appendChild(btnOk);
+            } else {
+                const btnOk = document.createElement('button');
+                btnOk.className = "w-full py-3 rounded-xl font-black text-sm text-white bg-gray-800 hover:bg-gray-900 shadow-md transition-colors";
+                btnOk.innerText = "Entendido";
+                btnOk.onclick = window.closeSystemMessage;
+                btnContainer.appendChild(btnOk);
+            }
+
+            modal.classList.remove('hidden');
+            setTimeout(() => { modal.classList.remove('opacity-0'); box.classList.remove('scale-95'); }, 10);
+            lucide.createIcons();
+        };
+
+        window.closeSystemMessage = () => {
+            const modal = document.getElementById('msg-modal');
+            const box = document.getElementById('msg-modal-box');
+            modal.classList.add('opacity-0'); box.classList.add('scale-95');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        };
+
+        window.triggerAdminLoginFlow = async () => {
+            window.showSystemMessage("Área Restrita", "Acesso exclusivo para a equipe da loja.", "info", {
+                text: "Login Google", color: "bg-blue-600 hover:bg-blue-700", onClick: async () => {
+                    const provider = new GoogleAuthProvider();
+                    try {
+                        const result = await signInWithPopup(auth, provider);
+                        if(result.user.email !== ADMIN_EMAIL) {
+                            window.showSystemMessage("Acesso Negado", "Este e-mail não possui permissão de administrador.", "error");
+                            await signOut(auth);
+                        } else {
+                            window.closeSystemMessage();
+                        }
+                    } catch (error) {
+                        window.showSystemMessage("Erro", "Falha ao fazer login: " + error.message, "error");
+                    }
+                }
+            });
+        };
+
+        window.adminSignOut = async () => {
+            await signOut(auth);
+            window.location.href = '/';
+        };
+
+        window.onload = async () => {
+            lucide.createIcons();
+
+            onAuthStateChanged(auth, async (user) => {
+                if (user && user.email === ADMIN_EMAIL) {
+                    window.currentUser = user;
+
+                    if (!window.isFirebaseListening) {
+                        window.isFirebaseListening = true;
+
+                        onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'items'), (snapshot) => {
+                            window.appItems = []; snapshot.forEach(doc => window.appItems.push({ id: doc.id, ...doc.data() }));
+                            window.appItems.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+                            renderAdminItems();
+                        }, (error) => {
+                            console.error("Erro no listener de items:", error);
+                        });
+
+                        onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'groups'), (snapshot) => {
+                            window.appGroups = []; snapshot.forEach(doc => window.appGroups.push({ id: doc.id, ...doc.data() }));
+                            window.appGroups.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+                            renderAdminGroups();
+                        }, (error) => {
+                            console.error("Erro no listener de groups:", error);
+                        });
+
+                        onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'general'), (docSnap) => {
+                            if(docSnap.exists()) {
+                                const data = docSnap.data();
+                                if(data.whatsapp) window.appSettings.whatsapp = data.whatsapp;
+                                if(data.mapsUrl) window.appSettings.mapsUrl = data.mapsUrl;
+                                if(data.storeName) window.appSettings.storeName = data.storeName;
+                            }
+                            const waInput = document.getElementById('admin-set-whatsapp');
+                            const mapsInput = document.getElementById('admin-set-maps');
+                            const nameInput = document.getElementById('admin-set-storename');
+                            if (waInput) waInput.value = window.appSettings.whatsapp || '';
+                            if (mapsInput) mapsInput.value = window.appSettings.mapsUrl || '';
+                            if (nameInput) nameInput.value = window.appSettings.storeName || '';
+                        }, (error) => {
+                            console.error("Erro no listener de settings:", error);
+                        });
+                    }
+                    window.openAdminDashboard();
+                } else {
+                    window.triggerAdminLoginFlow();
+                }
+            });
+        };
+
+        window.openAdminDashboard = () => {
+            const modal = document.getElementById('admin-dashboard-modal');
+            modal.classList.remove('hidden');
+            window.switchAdminTab('items');
+        };
+        
+        window.closeAdminDashboard = () => {
+            window.location.href = '/';
+        };
+
+        window.switchAdminTab = (tab) => {
+            ['items', 'groups', 'settings'].forEach(t => {
+                document.getElementById('admin-tab-'+t).classList.add('hidden');
+                document.getElementById('tab-btn-'+t).className = "px-4 py-3 text-sm font-bold text-gray-400 border-b-2 border-transparent whitespace-nowrap";
+            });
+            document.getElementById('admin-tab-'+tab).classList.remove('hidden');
+            document.getElementById('tab-btn-'+tab).className = "px-4 py-3 text-sm font-black text-teal-700 border-b-2 border-teal-700 whitespace-nowrap";
+        };
+
+        window.saveSettings = async () => {
+            const btn = document.querySelector('button[onclick="window.saveSettings()"]');
+            const originalBtnText = btn ? btn.innerText : "Salvar Ajustes";
+            try {
+                if(btn) { btn.innerText = "A guardar..."; btn.disabled = true; }
+                const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("O servidor demorou muito a responder. Verifique a sua ligação.")), 10000));
+                
+                await Promise.race([
+                    setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'general'), {
+                        whatsapp: document.getElementById('admin-set-whatsapp').value,
+                        mapsUrl: document.getElementById('admin-set-maps').value,
+                        storeName: document.getElementById('admin-set-storename').value
+                    }),
+                    timeoutPromise
+                ]);
+                
+                window.showSystemMessage("Sucesso", "Ajustes salvos com sucesso!", "success");
+            } catch(e) { 
+                window.showSystemMessage("Erro", e.message, "error"); 
+            } finally {
+                if(btn) { btn.innerText = originalBtnText; btn.disabled = false; }
+            }
+        };
+
+        window.renderAdminItems = () => {
+            const list = document.getElementById('admin-items-list');
+            const q = document.getElementById('adminSearchInput').value.toLowerCase();
+            const filtered = window.appItems.filter(i => i.title.toLowerCase().includes(q));
+            
+            list.innerHTML = filtered.map(item => {
+                let typeBadge = item.type === 'offer' ? 'bg-orange-100 text-orange-800' : (item.type === 'product' ? 'bg-teal-100 text-teal-800' : 'bg-blue-100 text-blue-800');
+                let lbl = item.type === 'offer' ? 'Oferta' : (item.type === 'product' ? 'Produto' : 'Serviço');
+                
+                let isExpired = (!item.permanent && item.expiresAt && item.expiresAt < Date.now());
+                let expInfo = item.permanent ? 'Permanente' : (isExpired ? '<span class="text-red-500 font-bold">Expirado</span>' : `Expira em ${new Date(item.expiresAt).toLocaleDateString('pt-BR')}`);
+                let vitrineInfo = item.vitrine ? '<span class="text-orange-500 font-bold"><i data-lucide="star" class="w-3 h-3 inline"></i> Vitrine</span>' : '<span class="text-gray-400">Oculto</span>';
+                
+                const imgUrl = item.images && item.images.length > 0 ? window.getDriveImageUrl(item.images[0]) : window.getDriveImageUrl(item.image);
+
+                return `
+                <div class="flex flex-col sm:flex-row gap-4 p-4 bg-white border ${isExpired ? 'border-red-200 bg-red-50/20' : 'border-gray-200'} rounded-xl shadow-sm cursor-pointer hover:border-teal-500 transition-colors" onclick="window.editItem('${item.id}')">
+                    <img src="${imgUrl}" class="w-16 h-16 sm:w-16 sm:h-16 object-cover rounded-lg bg-gray-100 shrink-0" onerror="this.onerror=null;this.src='https://placehold.co/100?text=Sem+Foto'">
+                    <div class="flex-1 min-w-0 flex flex-col justify-center">
+                        <p class="text-base font-bold text-gray-800 truncate">${item.title}</p>
+                        <div class="flex items-center gap-2 mt-1">
+                            <span class="text-[10px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider ${typeBadge}">${lbl}</span>
+                            <span class="text-sm font-black text-teal-700">${item.price}</span>
+                        </div>
+                    </div>
+                    <div class="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-center text-xs gap-2 pt-3 sm:pt-0 border-t sm:border-t-0 border-gray-100 sm:border-l sm:pl-4 shrink-0">
+                        <div>${vitrineInfo}</div>
+                        <div class="text-gray-500 text-[10px] uppercase font-bold tracking-widest">${expInfo}</div>
+                    </div>
+                </div>`;
+            }).join('') || '<p class="text-center text-gray-400 text-sm py-4">Nenhum item.</p>';
+            lucide.createIcons();
+        };
+
+        window.openItemEditor = () => {
+            document.getElementById('edit-item-id').value = '';
+            ['type', 'title', 'price', 'originalPrice', 'youtube', 'tags', 'description'].forEach(f => document.getElementById('item-'+f).value = '');
+            for(let i=1; i<=5; i++) document.getElementById('item-image-'+i).value = '';
+            document.getElementById('item-type').value = 'product';
+            document.getElementById('item-vitrine').checked = false;
+            document.querySelector('input[name="item_permanent"][value="true"]').checked = true;
+            document.getElementById('date-container').classList.add('hidden');
+            document.getElementById('item-expiration').value = '';
+
+            document.getElementById('item-editor-title').innerText = "Novo Item";
+            document.getElementById('btn-delete-item').classList.add('hidden');
+            document.getElementById('item-editor-modal').classList.remove('hidden');
+        };
+
+        window.editItem = (id) => {
+            const item = window.appItems.find(x => x.id === id);
+            document.getElementById('edit-item-id').value = item.id;
+            document.getElementById('item-type').value = item.type || 'product';
+            document.getElementById('item-vitrine').checked = item.vitrine === true;
+            
+            if (item.permanent || item.permanent === undefined) {
+                document.querySelector('input[name="item_permanent"][value="true"]').checked = true;
+                document.getElementById('date-container').classList.add('hidden');
+                document.getElementById('item-expiration').value = '';
+            } else {
+                document.querySelector('input[name="item_permanent"][value="false"]').checked = true;
+                document.getElementById('date-container').classList.remove('hidden');
+                if(item.expiresAt) {
+                    const dateObj = new Date(item.expiresAt);
+                    document.getElementById('item-expiration').value = dateObj.toISOString().split('T')[0];
+                }
+            }
+
+            document.getElementById('item-title').value = item.title || '';
+            document.getElementById('item-price').value = item.price || '';
+            document.getElementById('item-originalPrice').value = item.originalPrice || '';
+            document.getElementById('item-youtube').value = item.youtubeUrl || '';
+            document.getElementById('item-tags').value = (item.tags || []).join(', ');
+            document.getElementById('item-description').value = item.description || '';
+            
+            const images = item.images && item.images.length > 0 ? item.images : (item.image ? [item.image] : []);
+            for(let i=1; i<=5; i++) {
+                document.getElementById('item-image-'+i).value = images[i-1] || '';
+            }
+
+            document.getElementById('item-editor-title').innerText = "Editar Item";
+            document.getElementById('btn-delete-item').classList.remove('hidden');
+            document.getElementById('item-editor-modal').classList.remove('hidden');
+        };
+
+        window.closeItemEditor = () => document.getElementById('item-editor-modal').classList.add('hidden');
+
+        window.saveItem = async () => {
+            const btn = document.getElementById('btn-save-item');
+            const originalBtnText = btn ? btn.innerText : "Salvar";
+
+            try {
+                const titleVal = document.getElementById('item-title').value.trim();
+                if (!titleVal) {
+                    window.showSystemMessage("Atenção", "Por favor, preencha o Título do item antes de guardar.", "error");
+                    return;
+                }
+
+                if (btn) {
+                    btn.innerText = "A guardar...";
+                    btn.disabled = true;
+                }
+
+                const id = document.getElementById('edit-item-id').value;
+                const tagsInput = document.getElementById('item-tags').value;
+                const tagsArray = tagsInput.split(',').map(t => t.trim()).filter(t => t);
+                
+                const permRadio = document.querySelector('input[name="item_permanent"]:checked');
+                const isPermanent = permRadio ? permRadio.value === "true" : true; 
+                
+                const expDateStr = document.getElementById('item-expiration').value;
+                let expiresAt = null;
+                if (!isPermanent && expDateStr) {
+                    expiresAt = new Date(`${expDateStr}T23:59:59`).getTime();
+                }
+
+                const imagesArray = [];
+                for(let i=1; i<=5; i++) {
+                    const val = document.getElementById('item-image-'+i).value.trim();
+                    if(val) imagesArray.push(val);
+                }
+
+                const data = {
+                    type: document.getElementById('item-type').value,
+                    vitrine: document.getElementById('item-vitrine').checked,
+                    permanent: isPermanent,
+                    expiresAt: expiresAt,
+                    title: titleVal,
+                    price: document.getElementById('item-price').value,
+                    originalPrice: document.getElementById('item-originalPrice').value,
+                    images: imagesArray,
+                    image: imagesArray.length > 0 ? imagesArray[0] : '', 
+                    youtubeUrl: document.getElementById('item-youtube').value,
+                    tags: tagsArray,
+                    description: document.getElementById('item-description').value
+                };
+
+                const timeoutPromise = new Promise((_, reject) =>
+                    setTimeout(() => reject(new Error("O servidor demorou muito a responder. Verifique a sua conexão de internet e certifique-se de que as Regras do Firestore foram publicadas.")), 10000)
+                );
+
+                if (id) { 
+                    await Promise.race([
+                        updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'items', id), data),
+                        timeoutPromise
+                    ]);
+                } else { 
+                    await Promise.race([
+                        addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'items'), { ...data, createdAt: Date.now() }),
+                        timeoutPromise
+                    ]);
+                }
+                
+                window.closeItemEditor();
+                window.showSystemMessage("Sucesso", "O item foi salvo com sucesso no catálogo.", "success");
+
+            } catch (e) { 
+                window.showSystemMessage("Erro ao Guardar", "Detalhe do erro: " + e.message, "error"); 
+            } finally {
+                if (btn) {
+                    btn.innerText = originalBtnText;
+                    btn.disabled = false;
+                }
+            }
+        };
+
+        window.deleteItem = () => {
+            const id = document.getElementById('edit-item-id').value;
+            window.showSystemMessage("Atenção", "Deseja excluir este item definitivamente?", "error", {
+                text: "Excluir", color: "bg-red-500 hover:bg-red-600", onClick: async () => {
+                    try {
+                        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Tempo limite excedido ao apagar.")), 10000));
+                        await Promise.race([
+                            deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'items', id)),
+                            timeoutPromise
+                        ]);
+                        window.closeItemEditor();
+                        window.showSystemMessage("Excluído", "O item foi removido.", "success");
+                    } catch (e) {
+                        window.showSystemMessage("Erro", e.message, "error");
+                    }
+                }
+            });
+        };
+
+        window.renderAdminGroups = () => {
+            const list = document.getElementById('admin-groups-list');
+            list.innerHTML = window.appGroups.map(g => `
+                <div class="flex items-center gap-3 p-3 bg-white border border-gray-200 rounded-xl shadow-sm cursor-pointer hover:border-orange-500" onclick="window.editGroup('${g.id}')">
+                    <div class="w-10 h-10 rounded-full ${g.status === 'open' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-500'} flex items-center justify-center shrink-0"><i data-lucide="${g.status === 'open' ? 'message-circle' : 'lock'}" class="w-5 h-5"></i></div>
+                    <div class="flex-1 min-w-0"><p class="text-sm font-bold text-gray-800 truncate">${g.name}</p><p class="text-xs text-gray-500 truncate">${g.link}</p></div>
+                    <i data-lucide="edit-3" class="w-4 h-4 text-gray-400"></i>
+                </div>`).join('') || '<p class="text-center text-gray-400 text-sm py-4">Nenhum grupo.</p>';
+            lucide.createIcons();
+        };
+
+        window.openGroupEditor = () => {
+            document.getElementById('edit-group-id').value = '';
+            document.getElementById('group-name').value = '';
+            document.getElementById('group-link').value = '';
+            document.getElementById('g-open').checked = true;
+            document.getElementById('group-editor-title').innerText = "Novo Grupo";
+            document.getElementById('btn-delete-group').classList.add('hidden');
+            document.getElementById('group-editor-modal').classList.remove('hidden');
+        };
+
+        window.editGroup = (id) => {
+            const g = window.appGroups.find(x => x.id === id);
+            document.getElementById('edit-group-id').value = g.id;
+            document.getElementById('group-name').value = g.name || '';
+            document.getElementById('group-link').value = g.link || '';
+            if(g.status === 'full') document.getElementById('g-full').checked = true; else document.getElementById('g-open').checked = true;
+            document.getElementById('group-editor-title').innerText = "Editar Grupo";
+            document.getElementById('btn-delete-group').classList.remove('hidden');
+            document.getElementById('group-editor-modal').classList.remove('hidden');
+        };
+
+        window.closeGroupEditor = () => document.getElementById('group-editor-modal').classList.add('hidden');
+
+        window.saveGroup = async () => {
+            const btn = document.getElementById('btn-save-group');
+            const originalBtnText = btn ? btn.innerText : "Salvar";
+            try {
+                if(btn) { btn.innerText = "A guardar..."; btn.disabled = true; }
+                const id = document.getElementById('edit-group-id').value;
+                const data = {
+                    name: document.getElementById('group-name').value,
+                    link: document.getElementById('group-link').value,
+                    status: document.querySelector('input[name="group_status"]:checked').value
+                };
+                
+                const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("O servidor demorou muito a responder.")), 10000));
+                
+                if (id) { 
+                    await Promise.race([ updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'groups', id), data), timeoutPromise ]); 
+                } else { 
+                    await Promise.race([ addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'groups'), { ...data, createdAt: Date.now() }), timeoutPromise ]); 
+                }
+                window.closeGroupEditor();
+                window.showSystemMessage("Sucesso", "O grupo foi salvo.", "success");
+            } catch(e) { 
+                window.showSystemMessage("Erro", e.message, "error"); 
+            } finally {
+                if(btn) { btn.innerText = originalBtnText; btn.disabled = false; }
+            }
+        };
+
+        window.deleteGroup = () => {
+            const id = document.getElementById('edit-group-id').value;
+            window.showSystemMessage("Atenção", "Deseja excluir este grupo?", "error", {
+                text: "Excluir", color: "bg-red-500 hover:bg-red-600", onClick: async () => {
+                    try {
+                        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("O servidor demorou muito a responder.")), 10000));
+                        await Promise.race([ deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'groups', id)), timeoutPromise ]);
+                        window.closeGroupEditor();
+                    } catch (e) { window.showSystemMessage("Erro", e.message, "error"); }
+                }
+            });
+        };
+
+    </script>
+</body>
+</html>
