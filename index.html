@@ -347,6 +347,18 @@
             return num.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
         };
 
+        window.generateCodeId = (prefix, firebaseId) => {
+            if (!firebaseId) return prefix + "000";
+            let hash = 0;
+            for (let i = 0; i < firebaseId.length; i++) {
+                let char = firebaseId.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash; 
+            }
+            let shortNum = (Math.abs(hash) % 1000).toString().padStart(3, '0');
+            return prefix + shortNum;
+        };
+
         window.scrollCarousel = (id, direction) => {
             const container = document.getElementById(id);
             if (container) {
@@ -725,13 +737,16 @@
                 const itemPrice = window.parseCurrency(item.price);
                 const subtotal = itemPrice * item.quantity;
                 totalValue += subtotal;
-                text += `🐾 ${item.quantity}x *${item.title}*%0A  ID: ${item.id}%0A  Un: ${window.formatCurrency(itemPrice)} | Subtotal: ${window.formatCurrency(subtotal)}%0A%0A`;
+                
+                const shortItemId = window.generateCodeId('P', item.id);
+                
+                text += `🐾 ${item.quantity}x *${item.title}*%0A  ID: ${shortItemId}%0A  Un: ${window.formatCurrency(itemPrice)} | Subtotal: ${window.formatCurrency(subtotal)}%0A%0A`;
             });
 
-            const clientId = window.currentUser ? window.currentUser.uid : "Nao-identificado";
+            const shortClientId = window.currentUser ? window.generateCodeId('C', window.currentUser.uid) : "C000";
 
             text += `*Total do Pedido: ${window.formatCurrency(totalValue)}*%0A%0A`;
-            text += `👤 *Cliente ID:* ${clientId}%0A%0A`;
+            text += `👤 *Cliente ID:* ${shortClientId}%0A%0A`;
             text += `Qual o procedimento agora?`;
             
             let numeroFormatado = window.appSettings.whatsapp.replace(/\D/g, ''); 
@@ -793,83 +808,4 @@
             const container = document.getElementById('catalog-container');
             let items = filterItems(window.appItems.filter(item => currentSearchQuery ? (item.type === 'product' || item.type === 'service') : item.type === currentCatalogType));
             
-            if(items.length === 0) { container.innerHTML = `<div class="col-span-full py-10 text-center"><p class="text-gray-400">Nenhum item encontrado.</p></div>`; return; }
-
-            container.innerHTML = items.map(item => {
-                const imgUrl = item.images && item.images.length > 0 ? window.getDriveImageUrl(item.images[0]) : window.getDriveImageUrl(item.image);
-                const isCarousel = item.images && item.images.length > 1;
-
-                return `
-                <div onclick="window.openDetail('${item.id}')" class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden cursor-pointer group flex flex-col h-full relative">
-                    ${item.type === 'offer' ? `<div class="absolute top-2 right-2 bg-orange-500 text-white text-[9px] font-black px-2 py-0.5 rounded-md shadow uppercase tracking-wider z-10">Oferta</div>` : ''}
-                    ${isCarousel ? `<div class="absolute top-2 left-2 bg-black/50 text-white text-[9px] font-bold px-1.5 py-0.5 rounded z-10 pointer-events-none flex items-center gap-1"><i data-lucide="images" class="w-3 h-3"></i></div>` : ''}
-                    <div class="aspect-square bg-gray-100 relative overflow-hidden"><img src="${imgUrl}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.onerror=null;this.src='https://placehold.co/300x300?text=Imagem'"></div>
-                    <div class="p-3 flex flex-col flex-grow"><h3 class="text-sm font-bold text-gray-800 leading-tight mb-2 line-clamp-2">${item.title}</h3><div class="mt-auto"><p class="text-lg font-black text-teal-700">${item.price}</p></div></div>
-                </div>`;
-            }).join('');
-            lucide.createIcons();
-        };
-
-        window.openDetail = (id) => {
-            window.currentDetailId = id; 
-            const item = window.appItems.find(x => x.id === id); if(!item) return;
-            
-            ['home-view', 'catalog-view', 'alerts-view', 'cart-view'].forEach(vid => document.getElementById(vid).classList.add('hidden')); document.getElementById('detail-view').classList.remove('hidden'); currentView = 'detail'; window.scrollTo(0, 0);
-            
-            const container = document.getElementById('detail-container');
-
-            const ytId = window.getYoutubeId(item.youtubeUrl);
-            const images = item.images && item.images.length > 0 ? item.images : (item.image ? [item.image] : []);
-            let mediaHtml = '';
-
-            if (ytId) {
-                mediaHtml = `<div class="aspect-[9/16] w-full relative bg-black"><iframe class="absolute inset-0 w-full h-full" src="https://www.youtube.com/embed/${ytId}?autoplay=1&mute=0&controls=1&modestbranding=1&rel=0&playsinline=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe></div>`;
-            } else if (images.length > 1) {
-                const carouselId = `detail-carousel-${item.id}`;
-                const slides = images.map(img => `<img src="${window.getDriveImageUrl(img)}" class="w-full h-full object-cover flex-shrink-0 snap-center" onerror="this.onerror=null;this.src='https://placehold.co/600x600?text=Imagem'">`).join('');
-                mediaHtml = `
-                <div class="aspect-square w-full relative bg-gray-100 overflow-hidden">
-                    <div id="${carouselId}" class="flex w-full h-full overflow-x-auto snap-x snap-mandatory no-scrollbar scroll-smooth" onscroll="window.updateCarouselDots('${carouselId}')">${slides}</div>
-                    <button onclick="event.stopPropagation(); window.scrollCarousel('${carouselId}', -1)" class="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 hover:bg-white text-gray-800 rounded-full flex items-center justify-center shadow-md backdrop-blur-sm transition-colors z-20">
-                        <i data-lucide="chevron-left" class="w-6 h-6"></i>
-                    </button>
-                    <button onclick="event.stopPropagation(); window.scrollCarousel('${carouselId}', 1)" class="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 hover:bg-white text-gray-800 rounded-full flex items-center justify-center shadow-md backdrop-blur-sm transition-colors z-20">
-                        <i data-lucide="chevron-right" class="w-6 h-6"></i>
-                    </button>
-                    <div class="absolute top-3 right-3 bg-black/50 text-white text-xs font-bold px-3 py-1.5 rounded-lg backdrop-blur-sm z-10 pointer-events-none flex items-center gap-1">
-                        <i data-lucide="images" class="w-4 h-4"></i> ${images.length} fotos
-                    </div>
-                    <div id="dots-${carouselId}" class="absolute bottom-5 left-1/2 transform -translate-x-1/2 flex gap-1.5 z-40 pointer-events-none">
-                        ${images.map((_, i) => `<div class="w-2 h-2 rounded-full border border-black/20 transition-colors duration-300 shadow-md ${i === 0 ? 'bg-white' : 'bg-white/50'}"></div>`).join('')}
-                    </div>
-                </div>`;
-            } else {
-                const imgUrl = images.length === 1 ? window.getDriveImageUrl(images[0]) : 'https://placehold.co/600x600?text=Imagem';
-                mediaHtml = `<div class="aspect-square w-full relative bg-gray-100"><img src="${imgUrl}" class="w-full h-full object-cover" onerror="this.onerror=null;this.src='https://placehold.co/600x600?text=Imagem'"></div>`;
-            }
-
-            container.innerHTML = `
-                <div class="relative">${mediaHtml}${item.type === 'offer' ? `<div class="absolute top-4 left-4 bg-orange-500 text-white text-xs font-black px-4 py-1.5 rounded-full shadow-lg uppercase tracking-wider z-10">Oferta</div>` : ''}</div>
-                <div class="p-6">
-                    <div class="flex gap-2 mb-4 flex-wrap">${(item.tags||[]).map(tag => `<button onclick="window.filterByTag('${tag}'); window.showView('catalog', 'product')" class="text-xs bg-teal-50 border border-teal-200 text-teal-800 px-4 py-1.5 rounded-xl uppercase font-black tracking-widest shadow-sm cursor-pointer hover:bg-teal-100 transition-colors">${tag}</button>`).join('')}</div>
-                    <h1 class="text-2xl sm:text-3xl font-black text-gray-800 leading-tight mb-2">${item.title}</h1>
-                    <div class="flex items-end gap-3 mb-6"><span class="text-3xl font-black text-teal-700">${item.price}</span>${item.originalPrice ? `<span class="text-lg text-gray-400 line-through mb-1">${item.originalPrice}</span>` : ''}</div>
-                    <p class="text-gray-600 leading-relaxed mb-8 whitespace-pre-wrap">${item.description}</p>
-                    <button onclick="window.addToCart('${item.id}')" class="w-full flex justify-center items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white py-4 px-6 rounded-2xl font-black text-base sm:text-lg uppercase tracking-wide shadow-[0_10px_20px_rgba(15,118,110,0.3)] transition-all hover:-translate-y-1 active:scale-95 mb-4"><i data-lucide="shopping-cart" class="w-6 h-6"></i> Adicionar ao Carrinho</button>
-                </div>`;
-            lucide.createIcons();
-        };
-
-        window.renderAlerts = () => {
-            const container = document.getElementById('groups-container');
-            if(window.appGroups.length === 0) { container.innerHTML = `<p class="text-center text-gray-400">Nenhum grupo disponível.</p>`; return; }
-            container.innerHTML = window.appGroups.map(g => {
-                if(g.status === 'full') return `<a href="#" onclick="return false;" class="flex items-center justify-between bg-white p-4 rounded-xl shadow-sm border border-gray-200 opacity-60"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500"><i data-lucide="lock" class="w-5 h-5"></i></div><div><p class="font-bold text-gray-800">${g.name}</p><p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Lotação Máxima</p></div></div><button class="bg-gray-200 text-gray-500 px-4 py-2 rounded-lg text-sm font-bold cursor-not-allowed">Lotado</button></a>`;
-                return `<a href="${g.link.startsWith('http') ? g.link : 'https://'+g.link}" target="_blank" class="flex items-center justify-between bg-white p-4 rounded-xl shadow-sm border border-green-200 hover:border-green-500 transition-all group"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-[#dcf8c6] flex items-center justify-center text-[#25D366]"><i data-lucide="message-circle" class="w-5 h-5"></i></div><div><p class="font-bold text-gray-800">${g.name}</p><p class="text-[10px] text-[#25D366] font-bold uppercase tracking-widest">Vagas Abertas</p></div></div><button class="bg-[#25D366] text-white px-4 py-2 rounded-lg text-sm font-bold shadow-md hover:bg-[#1ebd5a] transition-colors">Entrar</button></a>`;
-            }).join('');
-            lucide.createIcons();
-        };
-
-    </script>
-</body>
-</html>
+            if(items.length === 0) { container.innerHTML = `<div class="col-span-full py-10 text-center"><p class="
