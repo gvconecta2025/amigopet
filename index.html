@@ -175,7 +175,7 @@
                     </button>
                     <div class="flex gap-3">
                         <button onclick="window.showView('catalog', 'product')" class="flex-1 bg-teal-50 hover:bg-teal-100 text-teal-700 py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2">
-                            <i data-lucide="shopping-bag" class="w-4 h-4"></i> Continuar Comprando
+                            <i data-lucide="shopping-bag" class="w-4 h-4"></i> Guardar Itens
                         </button>
                         <button onclick="window.clearCart()" class="flex-1 bg-red-50 hover:bg-red-100 text-red-600 py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2">
                             <i data-lucide="trash-2" class="w-4 h-4"></i> Esvaziar
@@ -260,11 +260,11 @@
             </div>
         </div>
         
-        <div class="bg-white border-b border-gray-200 px-2 flex justify-center overflow-x-auto no-scrollbar shadow-sm z-30 relative">
-            <div class="w-full max-w-5xl flex">
-                <button type="button" onclick="window.switchAdminTab('items')" id="tab-btn-items" class="px-4 py-3 text-sm font-black text-teal-700 border-b-2 border-teal-700 whitespace-nowrap">Gestão de Itens</button>
-                <button type="button" onclick="window.switchAdminTab('groups')" id="tab-btn-groups" class="px-4 py-3 text-sm font-bold text-gray-400 border-b-2 border-transparent whitespace-nowrap">Grupos VIP</button>
-                <button type="button" onclick="window.switchAdminTab('settings')" id="tab-btn-settings" class="px-4 py-3 text-sm font-bold text-gray-400 border-b-2 border-transparent whitespace-nowrap">Ajustes da Loja</button>
+        <div class="bg-white border-b border-gray-200 shadow-sm z-30 relative flex justify-center w-full">
+            <div class="w-full max-w-5xl flex overflow-x-auto no-scrollbar px-2">
+                <button type="button" onclick="window.switchAdminTab('items')" id="tab-btn-items" class="px-4 py-3 text-sm font-black text-teal-700 border-b-2 border-teal-700 whitespace-nowrap shrink-0">Gestão de Itens</button>
+                <button type="button" onclick="window.switchAdminTab('groups')" id="tab-btn-groups" class="px-4 py-3 text-sm font-bold text-gray-400 border-b-2 border-transparent whitespace-nowrap shrink-0">Grupos VIP</button>
+                <button type="button" onclick="window.switchAdminTab('settings')" id="tab-btn-settings" class="px-4 py-3 text-sm font-bold text-gray-400 border-b-2 border-transparent whitespace-nowrap shrink-0">Ajustes da Loja</button>
             </div>
         </div>
 
@@ -958,6 +958,7 @@
 
             document.getElementById('cart-total').innerText = window.formatCurrency(totalValue);
             
+            // Injeta o botão Esvaziar no carrinho dinamicamente se não existir
             if (!document.getElementById('btn-clear-cart')) {
                 const btnBox = summary.querySelector('.flex-col.gap-3');
                 if (btnBox) {
@@ -984,7 +985,7 @@
                     btnBox.appendChild(clearWrapper);
                 }
             }
-            
+
             lucide.createIcons();
         };
 
@@ -1069,7 +1070,7 @@
                 }
 
                 return `
-                <div onclick="window.openDetail('${item.id}')" class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden cursor-pointer relative group hover:border-teal-500 transition-colors">
+                <div onclick="window.openDetail('${item.id}')" class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden cursor-pointer relative group">
                     ${item.type === 'offer' ? `<div class="absolute top-4 right-4 bg-orange-500 text-white text-xs font-black px-4 py-1.5 rounded-full shadow-lg uppercase tracking-wider z-20">Oferta</div>` : ''}
                     ${mediaHtml}
                     <div class="p-5">
@@ -1096,7 +1097,7 @@
                 const isCarousel = item.images && item.images.length > 1;
 
                 return `
-                <div onclick="window.openDetail('${item.id}')" class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden cursor-pointer group flex flex-col h-full relative hover:border-teal-500 transition-colors">
+                <div onclick="window.openDetail('${item.id}')" class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden cursor-pointer group flex flex-col h-full relative">
                     ${item.type === 'offer' ? `<div class="absolute top-2 right-2 bg-orange-500 text-white text-[9px] font-black px-2 py-0.5 rounded-md shadow uppercase tracking-wider z-10">Oferta</div>` : ''}
                     ${isCarousel ? `<div class="absolute top-2 left-2 bg-black/50 text-white text-[9px] font-bold px-1.5 py-0.5 rounded z-10 pointer-events-none flex items-center gap-1"><i data-lucide="images" class="w-3 h-3"></i></div>` : ''}
                     <div class="aspect-square bg-white relative overflow-hidden border-b border-gray-50"><img src="${imgUrl}" class="w-full h-full object-contain bg-white group-hover:scale-105 transition-transform duration-500" onerror="this.onerror=null;this.src='https://placehold.co/300x300?text=Imagem'"></div>
@@ -1191,10 +1192,10 @@
         window.switchAdminTab = (tab) => {
             ['items', 'groups', 'settings'].forEach(t => {
                 document.getElementById('admin-tab-'+t).classList.add('hidden');
-                document.getElementById('tab-btn-'+t).className = "px-4 py-3 text-sm font-bold text-gray-400 border-b-2 border-transparent whitespace-nowrap";
+                document.getElementById('tab-btn-'+t).className = "px-4 py-3 text-sm font-bold text-gray-400 border-b-2 border-transparent whitespace-nowrap shrink-0";
             });
             document.getElementById('admin-tab-'+tab).classList.remove('hidden');
-            document.getElementById('tab-btn-'+tab).className = "px-4 py-3 text-sm font-black text-teal-700 border-b-2 border-teal-700 whitespace-nowrap";
+            document.getElementById('tab-btn-'+tab).className = "px-4 py-3 text-sm font-black text-teal-700 border-b-2 border-teal-700 whitespace-nowrap shrink-0";
             
             if(tab === 'items') window.renderAdminItems();
             if(tab === 'groups') window.renderAdminGroups();
