@@ -30,6 +30,12 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
+        .slide-up-animation { animation: slideUp 0.3s ease-out forwards; }
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         
@@ -234,7 +240,7 @@
             </button>
             <button onclick="window.showView('alerts')" id="nav-alerts" class="nav-btn flex flex-col items-center justify-center w-full h-full text-gray-400 hover:text-[#25D366] transition-colors">
                 <i data-lucide="bell" class="w-6 h-6 transition-transform"></i>
-                <span class="text-[10px] font-bold tracking-wide text-center leading-tight mt-1">Notícias</span>
+                <span class="text-[10px] font-bold tracking-wide text-center leading-tight mt-1">Seja<br>Notificado</span>
             </button>
         </div>
     </nav>
@@ -248,8 +254,8 @@
         </div>
     </div>
 
-    <div id="admin-dashboard-modal" class="hidden fixed inset-0 z-[50] flex flex-col bg-gray-50 slide-up-animation transition-transform duration-300">
-        <div class="bg-teal-800 text-white px-4 py-4 flex justify-between items-center shadow-md pt-safe">
+    <div id="admin-dashboard-modal" class="hidden fixed inset-0 z-[60] flex flex-col bg-gray-50 slide-up-animation transition-transform duration-300">
+        <div class="bg-teal-800 text-white px-4 py-4 flex justify-between items-center shadow-md pt-safe z-30">
             <div class="flex items-center gap-3">
                 <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center"><i data-lucide="shield" class="w-5 h-5"></i></div>
                 <h2 class="font-black text-lg">Painel da Loja</h2>
@@ -260,39 +266,72 @@
             </div>
         </div>
         
-        <div class="bg-white border-b border-gray-200 px-2 flex overflow-x-auto no-scrollbar shadow-sm shrink-0">
-            <button type="button" onclick="window.switchAdminTab('items')" id="tab-btn-items" class="px-4 py-3 text-sm font-black text-teal-700 border-b-2 border-teal-700 whitespace-nowrap">Gestão de Itens</button>
-            <button type="button" onclick="window.switchAdminTab('groups')" id="tab-btn-groups" class="px-4 py-3 text-sm font-bold text-gray-400 border-b-2 border-transparent whitespace-nowrap">Grupos VIP</button>
-            <button type="button" onclick="window.switchAdminTab('settings')" id="tab-btn-settings" class="px-4 py-3 text-sm font-bold text-gray-400 border-b-2 border-transparent whitespace-nowrap">Ajustes da Loja</button>
+        <div class="bg-white border-b border-gray-200 shadow-sm z-30 relative flex justify-center w-full">
+            <div class="w-full max-w-5xl flex overflow-x-auto no-scrollbar px-2">
+                <button type="button" onclick="window.switchAdminTab('items')" id="tab-btn-items" class="px-4 py-3 text-sm font-black text-teal-700 border-b-2 border-teal-700 whitespace-nowrap shrink-0">Gestão de Itens</button>
+                <button type="button" onclick="window.switchAdminTab('groups')" id="tab-btn-groups" class="px-4 py-3 text-sm font-bold text-gray-400 border-b-2 border-transparent whitespace-nowrap shrink-0">Grupos VIP</button>
+                <button type="button" onclick="window.switchAdminTab('settings')" id="tab-btn-settings" class="px-4 py-3 text-sm font-bold text-gray-400 border-b-2 border-transparent whitespace-nowrap shrink-0">Ajustes da Loja</button>
+            </div>
         </div>
 
-        <div class="flex-grow overflow-y-auto p-4 pb-20 relative">
-            <div id="admin-tab-items" class="space-y-4"></div>
-            <div id="admin-tab-groups" class="hidden space-y-4"></div>
-            <div id="admin-tab-settings" class="hidden space-y-4">
-                <div class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm">
-                    <label class="block text-xs font-black text-gray-500 uppercase tracking-widest mb-1">Nome da Loja</label>
-                    <input type="text" id="admin-set-storename" placeholder="Ex: Amigo Pet" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-teal-500 mb-4">
-                    
-                    <label class="block text-xs font-black text-gray-500 uppercase tracking-widest mb-1">WhatsApp da Loja</label>
-                    <p class="text-[10px] text-gray-400 mb-2">Apenas números com DDD.</p>
-                    <input type="text" id="admin-set-whatsapp" placeholder="Ex: 5533999069877" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-teal-500 mb-4">
-                    
-                    <label class="block text-xs font-black text-gray-500 uppercase tracking-widest mb-1">Link do Google Maps</label>
-                    <p class="text-[10px] text-gray-400 mb-2">Para o botão de localização.</p>
-                    <input type="text" id="admin-set-maps" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-teal-500 mb-4">
+        <div class="flex-grow overflow-y-auto px-4 pb-20 relative bg-gray-50">
+            <div class="max-w-5xl mx-auto w-full">
+                
+                <div id="admin-tab-items" class="pt-2">
+                    <div class="sticky top-0 bg-gray-50 z-20 pt-6 pb-4 shadow-sm border-b border-gray-200 mb-4 -mx-4 px-4 sm:mx-0 sm:px-0">
+                        <button type="button" onclick="window.openItemEditor()" class="w-full bg-teal-600 text-white py-3 rounded-xl font-black text-sm uppercase tracking-wide shadow-md flex items-center justify-center gap-2 hover:bg-teal-700 mb-4 transition-transform active:scale-95">
+                            <i data-lucide="plus" class="w-5 h-5"></i> Adicionar Novo Item
+                        </button>
+                        
+                        <div id="admin-metrics" class="flex justify-between items-center mb-4 bg-white p-3 rounded-xl border border-gray-200 shadow-sm text-xs">
+                            <div class="text-center w-full"><span class="block font-black text-teal-700 text-lg" id="metric-prod">0</span>Produtos</div>
+                            <div class="text-center w-full border-l border-r border-gray-100"><span class="block font-black text-blue-700 text-lg" id="metric-serv">0</span>Serviços</div>
+                            <div class="text-center w-full border-r border-gray-100"><span class="block font-black text-orange-600 text-lg" id="metric-ofert">0</span>Ofertas</div>
+                            <div class="text-center w-full"><span class="block font-black text-gray-700 text-lg" id="metric-total">0</span>Total</div>
+                        </div>
 
-                    <label class="block text-xs font-black text-gray-500 uppercase tracking-widest mb-1">Mensagem de Compartilhamento</label>
-                    <p class="text-[10px] text-gray-400 mb-2">Texto curto enviado ao partilhar o app.</p>
-                    <textarea id="admin-set-sharemsg" rows="2" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-teal-500 mb-6 resize-none"></textarea>
-                    
-                    <button type="button" onclick="window.saveSettings()" class="w-full bg-teal-800 text-white py-3 rounded-xl font-black text-sm shadow-md hover:bg-teal-900">Salvar Ajustes</button>
+                        <div class="relative">
+                            <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400"></i>
+                            <input type="text" id="adminSearchInput" onkeyup="window.renderAdminItems()" placeholder="Buscar no sistema..." class="w-full bg-white border border-gray-200 text-gray-700 text-sm rounded-xl pl-9 pr-4 py-2.5 outline-none shadow-sm focus:border-teal-500 transition-colors">
+                        </div>
+                    </div>
+
+                    <div id="admin-items-list" class="grid grid-cols-1 md:grid-cols-2 gap-4 pb-4"></div>
                 </div>
+
+                <div id="admin-tab-groups" class="hidden space-y-4 pt-6">
+                    <button type="button" onclick="window.openGroupEditor()" class="w-full bg-[#25D366] text-white py-3 rounded-xl font-black text-sm uppercase tracking-wide shadow-md flex items-center justify-center gap-2 hover:bg-[#1ebd5a]">
+                        <i data-lucide="plus" class="w-5 h-5"></i> Adicionar Grupo
+                    </button>
+                    <div id="admin-groups-list" class="flex flex-col gap-3"></div>
+                </div>
+
+                <div id="admin-tab-settings" class="hidden space-y-4 pt-6">
+                    <div class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm">
+                        <label class="block text-xs font-black text-gray-500 uppercase tracking-widest mb-1">Nome da Loja</label>
+                        <input type="text" id="admin-set-storename" placeholder="Ex: Amigo Pet" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-teal-500 mb-4">
+                        
+                        <label class="block text-xs font-black text-gray-500 uppercase tracking-widest mb-1">WhatsApp da Loja</label>
+                        <p class="text-[10px] text-gray-400 mb-2">Apenas números com DDD.</p>
+                        <input type="text" id="admin-set-whatsapp" placeholder="Ex: 5533999069877" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-teal-500 mb-4">
+                        
+                        <label class="block text-xs font-black text-gray-500 uppercase tracking-widest mb-1">Link do Google Maps</label>
+                        <p class="text-[10px] text-gray-400 mb-2">Para o botão de localização.</p>
+                        <input type="text" id="admin-set-maps" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-teal-500 mb-4">
+
+                        <label class="block text-xs font-black text-gray-500 uppercase tracking-widest mb-1">Mensagem de Compartilhamento</label>
+                        <p class="text-[10px] text-gray-400 mb-2">Texto curto enviado ao partilhar o app.</p>
+                        <textarea id="admin-set-sharemsg" rows="2" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-teal-500 mb-6 resize-none"></textarea>
+                        
+                        <button type="button" onclick="window.saveSettings()" class="w-full bg-teal-800 text-white py-3 rounded-xl font-black text-sm shadow-md hover:bg-teal-900">Salvar Ajustes</button>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
 
-    <div id="item-editor-modal" class="hidden fixed inset-0 z-[60] flex items-center justify-center modal-overlay px-2 py-4">
+    <div id="item-editor-modal" class="hidden fixed inset-0 z-[70] flex items-center justify-center modal-overlay px-2 py-4">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col relative">
             <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl shrink-0">
                 <h3 id="item-editor-title" class="font-black text-gray-800">Novo Item</h3>
@@ -302,6 +341,14 @@
             <div class="p-5 flex-1 overflow-y-auto space-y-5">
                 <input type="hidden" id="edit-item-id">
                 
+                <div class="bg-yellow-50 border border-yellow-200 p-3 rounded-xl">
+                    <label class="flex items-center gap-2 font-bold text-sm text-yellow-800 cursor-pointer">
+                        <input type="checkbox" id="item-draft" class="w-4 h-4 text-yellow-600 focus:ring-yellow-500">
+                        Salvar como Rascunho
+                    </label>
+                    <p class="text-[10px] text-yellow-600 mt-1 ml-6">Se marcado, o item ficará oculto para os clientes.</p>
+                </div>
+
                 <div>
                     <label class="block text-xs font-black text-gray-500 uppercase tracking-widest mb-1">Classificação</label>
                     <select id="item-type" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-sm font-bold text-teal-800 outline-none focus:border-teal-500">
@@ -354,13 +401,28 @@
                 </div>
 
                 <div>
+                    <label class="block text-xs font-black text-gray-500 uppercase tracking-widest mb-1">Pré-visualização das Imagens</label>
+                    <div class="aspect-square bg-white border border-gray-200 rounded-xl relative overflow-hidden group">
+                        <div id="editor-image-preview" class="flex w-full h-full overflow-x-auto snap-x snap-mandatory no-scrollbar scroll-smooth">
+                            <img src="https://placehold.co/600x600?text=Sem+Imagem" class="w-full h-full object-contain bg-white flex-shrink-0 snap-center">
+                        </div>
+                        <button type="button" onclick="window.scrollCarousel('editor-image-preview', -1)" class="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-white/80 hover:bg-white text-gray-800 rounded-full flex items-center justify-center shadow backdrop-blur-sm transition-colors z-20">
+                            <i data-lucide="chevron-left" class="w-5 h-5"></i>
+                        </button>
+                        <button type="button" onclick="window.scrollCarousel('editor-image-preview', 1)" class="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-white/80 hover:bg-white text-gray-800 rounded-full flex items-center justify-center shadow backdrop-blur-sm transition-colors z-20">
+                            <i data-lucide="chevron-right" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div>
                     <label class="block text-xs font-black text-gray-500 uppercase tracking-widest mb-1">Links das Imagens (Drive/Web - Até 5 fotos)</label>
                     <div class="space-y-2">
-                        <input type="text" id="item-image-1" placeholder="URL da foto 1 (Principal)..." class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-teal-500">
-                        <input type="text" id="item-image-2" placeholder="URL da foto 2..." class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-teal-500">
-                        <input type="text" id="item-image-3" placeholder="URL da foto 3..." class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-teal-500">
-                        <input type="text" id="item-image-4" placeholder="URL da foto 4..." class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-teal-500">
-                        <input type="text" id="item-image-5" placeholder="URL da foto 5..." class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-teal-500">
+                        <input type="text" id="item-image-1" oninput="window.updateEditorPreview()" placeholder="URL da foto 1 (Principal)..." class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-teal-500">
+                        <input type="text" id="item-image-2" oninput="window.updateEditorPreview()" placeholder="URL da foto 2..." class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-teal-500">
+                        <input type="text" id="item-image-3" oninput="window.updateEditorPreview()" placeholder="URL da foto 3..." class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-teal-500">
+                        <input type="text" id="item-image-4" oninput="window.updateEditorPreview()" placeholder="URL da foto 4..." class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-teal-500">
+                        <input type="text" id="item-image-5" oninput="window.updateEditorPreview()" placeholder="URL da foto 5..." class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-teal-500">
                     </div>
                 </div>
                 
@@ -390,7 +452,7 @@
         </div>
     </div>
 
-    <div id="group-editor-modal" class="hidden fixed inset-0 z-[60] flex items-center justify-center modal-overlay px-4 py-4">
+    <div id="group-editor-modal" class="hidden fixed inset-0 z-[70] flex items-center justify-center modal-overlay px-4 py-4">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm max-h-[90vh] flex flex-col relative">
             <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl shrink-0">
                 <h3 id="group-editor-title" class="font-black text-gray-800">Novo Grupo</h3>
@@ -458,6 +520,7 @@
         };
         window.cart = [];
         window.currentUser = null;
+        let isAdminView = false;
 
         let currentView = 'home';
         let currentCatalogType = 'product'; 
@@ -531,6 +594,19 @@
             });
         };
 
+        if(window.carouselInterval) clearInterval(window.carouselInterval);
+        window.carouselInterval = setInterval(() => {
+            document.querySelectorAll('.auto-carousel').forEach(container => {
+                if(container.matches(':hover')) return;
+                let maxScroll = container.scrollWidth - container.clientWidth;
+                if (container.scrollLeft >= maxScroll - 5) {
+                    container.scrollTo({left: 0, behavior: 'smooth'}); 
+                } else {
+                    container.scrollBy({ left: container.clientWidth, behavior: 'smooth' });
+                }
+            });
+        }, 3000);
+
         window.showSystemMessage = (title, text, type = 'info', actionBtn = null) => {
             const modal = document.getElementById('msg-modal');
             const box = document.getElementById('msg-modal-box');
@@ -594,10 +670,13 @@
                     const provider = new GoogleAuthProvider();
                     try {
                         const result = await signInWithPopup(auth, provider);
-                        if(result.user.email !== ADMIN_EMAIL) {
+                        const userEmail = (result.user.email || '').toLowerCase();
+                        const adminEmail = ADMIN_EMAIL.toLowerCase();
+                        
+                        if(userEmail !== adminEmail) {
                             window.showSystemMessage("Acesso Negado", "Este e-mail não possui permissão de administrador.", "error");
                             await signOut(auth);
-                            window.location.reload();
+                            setTimeout(() => window.location.reload(), 2500);
                         } else {
                             window.closeSystemMessage();
                             window.openAdminDashboard();
@@ -621,7 +700,8 @@
             clearTimeout(adminClickTimer);
             if (adminClickCount >= 5) {
                 adminClickCount = 0;
-                if(window.currentUser && window.currentUser.email === ADMIN_EMAIL) {
+                const isAlreadyAdmin = window.currentUser && (window.currentUser.email || '').toLowerCase() === ADMIN_EMAIL.toLowerCase();
+                if(isAlreadyAdmin) {
                     window.openAdminDashboard();
                 } else {
                     window.triggerAdminLoginFlow();
@@ -659,11 +739,11 @@
                     window.appItems = []; snapshot.forEach(doc => window.appItems.push({ id: doc.id, ...doc.data() }));
                     window.appItems.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
                     
-                    if(currentView === 'home') renderFeed();
-                    if(currentView === 'catalog') renderCatalog();
-                    if(currentView === 'detail' && window.currentDetailId) openDetail(window.currentDetailId);
-                    
-                    if(document.getElementById('admin-dashboard-modal') && !document.getElementById('admin-dashboard-modal').classList.contains('hidden')) {
+                    if(!isAdminView) {
+                        if(currentView === 'home') renderFeed();
+                        if(currentView === 'catalog') renderCatalog();
+                        if(currentView === 'detail' && window.currentDetailId) openDetail(window.currentDetailId);
+                    } else {
                         window.renderAdminItems();
                     }
                 });
@@ -671,10 +751,8 @@
                 onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'groups'), (snapshot) => {
                     window.appGroups = []; snapshot.forEach(doc => window.appGroups.push({ id: doc.id, ...doc.data() }));
                     window.appGroups.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-                    if(currentView === 'alerts') renderAlerts();
-                    if(document.getElementById('admin-dashboard-modal') && !document.getElementById('admin-dashboard-modal').classList.contains('hidden')) {
-                        window.renderAdminGroups();
-                    }
+                    if(currentView === 'alerts' && !isAdminView) renderAlerts();
+                    if(isAdminView) window.renderAdminGroups();
                 });
 
                 onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'general'), (docSnap) => {
@@ -692,17 +770,21 @@
                         if(data.shareMessage) window.appSettings.shareMessage = data.shareMessage;
                     }
                     
-                    const waInput = document.getElementById('admin-set-whatsapp');
-                    const mapsInput = document.getElementById('admin-set-maps');
-                    const nameInput = document.getElementById('admin-set-storename');
-                    const shareInput = document.getElementById('admin-set-sharemsg');
-                    if (waInput) waInput.value = window.appSettings.whatsapp || '';
-                    if (mapsInput) mapsInput.value = window.appSettings.mapsUrl || '';
-                    if (nameInput) nameInput.value = window.appSettings.storeName || '';
-                    if (shareInput) shareInput.value = window.appSettings.shareMessage || '';
+                    if(isAdminView) {
+                        const waInput = document.getElementById('admin-set-whatsapp');
+                        const mapsInput = document.getElementById('admin-set-maps');
+                        const nameInput = document.getElementById('admin-set-storename');
+                        const shareInput = document.getElementById('admin-set-sharemsg');
+                        if (waInput) waInput.value = window.appSettings.whatsapp || '';
+                        if (mapsInput) mapsInput.value = window.appSettings.mapsUrl || '';
+                        if (nameInput) nameInput.value = window.appSettings.storeName || '';
+                        if (shareInput) shareInput.value = window.appSettings.shareMessage || '';
+                    }
                 });
             });
         };
+
+        // ====== FUNÇÕES DA LOJA (CLIENTE) ======
 
         window.showView = (view, type = null) => {
             ['home-view', 'catalog-view', 'detail-view', 'alerts-view', 'cart-view'].forEach(id => document.getElementById(id).classList.add('hidden'));
@@ -763,7 +845,12 @@
             else if (currentView === 'catalog') renderCatalog();
             else if (currentView === 'home') renderFeed();
         };
-        window.filterByTag = (tag) => { document.getElementById('searchInput').value = tag; currentSearchQuery = tag.toLowerCase(); renderCatalog(); };
+        
+        window.filterByTag = (tag) => { 
+            document.getElementById('searchInput').value = tag; 
+            currentSearchQuery = tag.toLowerCase(); 
+            renderCatalog(); 
+        };
         
         const filterItems = (items) => {
             let filtered = items;
@@ -775,9 +862,9 @@
                 const q = currentSearchQuery.toLowerCase();
                 filtered = filtered.filter(item => {
                     const shortId = window.getShortId(item).toLowerCase();
-                    return item.title.toLowerCase().includes(q) || 
-                           (item.tags && item.tags.some(t => t.toLowerCase().includes(q))) ||
-                           shortId.includes(q);
+                    const titleMatch = (item.title || '').toLowerCase().includes(q);
+                    const tagMatch = item.tags && item.tags.some(t => (t || '').toLowerCase().includes(q));
+                    return titleMatch || tagMatch || shortId.includes(q);
                 });
             }
             const now = Date.now();
@@ -964,11 +1051,11 @@
                     </div>`;
                 } else {
                     const imgUrl = images.length === 1 ? window.getDriveImageUrl(images[0]) : 'https://placehold.co/600x600?text=Imagem';
-                    mediaHtml = `<div class="aspect-square w-full relative bg-white border border-gray-100"><img src="${imgUrl}" class="w-full h-full object-contain bg-white group-hover:scale-105 transition-transform duration-700" onerror="this.onerror=null;this.src='https://placehold.co/600x600?text=Imagem'"></div>`;
+                    mediaHtml = `<div class="aspect-square bg-white relative overflow-hidden border border-gray-100"><img src="${imgUrl}" class="w-full h-full object-contain bg-white group-hover:scale-105 transition-transform duration-700" onerror="this.onerror=null;this.src='https://placehold.co/600x600?text=Imagem'"></div>`;
                 }
 
                 return `
-                <div onclick="window.openDetail('${item.id}')" class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden cursor-pointer relative group">
+                <div onclick="window.openDetail('${item.id}')" class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden cursor-pointer relative group hover:border-teal-500 transition-colors">
                     ${item.type === 'offer' ? `<div class="absolute top-4 right-4 bg-orange-500 text-white text-xs font-black px-4 py-1.5 rounded-full shadow-lg uppercase tracking-wider z-20">Oferta</div>` : ''}
                     ${mediaHtml}
                     <div class="p-5">
@@ -1002,7 +1089,7 @@
                 const isCarousel = item.images && item.images.length > 1;
 
                 return `
-                <div onclick="window.openDetail('${item.id}')" class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden cursor-pointer group flex flex-col h-full relative">
+                <div onclick="window.openDetail('${item.id}')" class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden cursor-pointer group flex flex-col h-full relative hover:border-teal-500 transition-colors">
                     ${item.type === 'offer' ? `<div class="absolute top-2 right-2 bg-orange-500 text-white text-[9px] font-black px-2 py-0.5 rounded-md shadow uppercase tracking-wider z-10">Oferta</div>` : ''}
                     ${isCarousel ? `<div class="absolute top-2 left-2 bg-black/50 text-white text-[9px] font-bold px-1.5 py-0.5 rounded z-10 pointer-events-none flex items-center gap-1"><i data-lucide="images" class="w-3 h-3"></i></div>` : ''}
                     <div class="aspect-square bg-white relative overflow-hidden border-b border-gray-50"><img src="${imgUrl}" class="w-full h-full object-contain bg-white group-hover:scale-105 transition-transform duration-500" onerror="this.onerror=null;this.src='https://placehold.co/300x300?text=Imagem'"></div>
@@ -1071,9 +1158,60 @@
             lucide.createIcons();
         };
 
+        window.renderAlerts = () => {
+            const container = document.getElementById('groups-container');
+            if(window.appGroups.length === 0) { container.innerHTML = `<p class="text-center text-gray-400">Nenhum grupo disponível.</p>`; return; }
+            container.innerHTML = window.appGroups.map(g => {
+                if(g.status === 'full') return `<a href="#" onclick="return false;" class="flex items-center justify-between bg-white p-4 rounded-xl shadow-sm border border-gray-200 opacity-60"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500"><i data-lucide="lock" class="w-5 h-5"></i></div><div><p class="font-bold text-gray-800">${g.name}</p><p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Lotação Máxima</p></div></div><button class="bg-gray-200 text-gray-500 px-4 py-2 rounded-lg text-sm font-bold cursor-not-allowed">Lotado</button></a>`;
+                return `<a href="${g.link.startsWith('http') ? g.link : 'https://'+g.link}" target="_blank" class="flex items-center justify-between bg-white p-4 rounded-xl shadow-sm border border-green-200 hover:border-green-500 transition-all group"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-[#dcf8c6] flex items-center justify-center text-[#25D366]"><i data-lucide="message-circle" class="w-5 h-5"></i></div><div><p class="font-bold text-gray-800">${g.name}</p><p class="text-[10px] text-[#25D366] font-bold uppercase tracking-widest">Vagas Abertas</p></div></div><button class="bg-[#25D366] text-white px-4 py-2 rounded-lg text-sm font-bold shadow-md hover:bg-[#1ebd5a] transition-colors">Entrar</button></a>`;
+            }).join('');
+            lucide.createIcons();
+        };
+
+        // ====== FUNÇÕES DO PAINEL DE ADMINISTRAÇÃO ======
+
+        window.openAdminDashboard = () => {
+            isAdminView = true;
+            const modal = document.getElementById('admin-dashboard-modal');
+            modal.classList.remove('hidden');
+            window.switchAdminTab('items');
+        };
+        
+        window.closeAdminDashboard = () => {
+            window.location.reload(); 
+        };
+
+        window.switchAdminTab = (tab) => {
+            ['items', 'groups', 'settings'].forEach(t => {
+                document.getElementById('admin-tab-'+t).classList.add('hidden');
+                document.getElementById('tab-btn-'+t).className = "px-4 py-3 text-sm font-bold text-gray-400 border-b-2 border-transparent whitespace-nowrap shrink-0";
+            });
+            document.getElementById('admin-tab-'+tab).classList.remove('hidden');
+            document.getElementById('tab-btn-'+tab).className = "px-4 py-3 text-sm font-black text-teal-700 border-b-2 border-teal-700 whitespace-nowrap shrink-0";
+            
+            if(tab === 'items') window.renderAdminItems();
+            if(tab === 'groups') window.renderAdminGroups();
+        };
+
+        window.updateEditorPreview = () => {
+            const container = document.getElementById('editor-image-preview');
+            let images = [];
+            for(let i=1; i<=5; i++) {
+                const url = document.getElementById('item-image-'+i).value.trim();
+                if(url) images.push(window.getDriveImageUrl(url));
+            }
+            if(images.length === 0) {
+                container.innerHTML = `<img src="https://placehold.co/600x600?text=Sem+Imagem" class="w-full h-full object-contain bg-white flex-shrink-0 snap-center">`;
+            } else {
+                container.innerHTML = images.map(img => `<img src="${img}" class="w-full h-full object-contain bg-white flex-shrink-0 snap-center" onerror="this.onerror=null;this.src='https://placehold.co/600x600?text=Erro'">`).join('');
+            }
+            lucide.createIcons();
+        };
+
         window.renderAdminItems = () => {
             const list = document.getElementById('admin-items-list');
-            const q = document.getElementById('adminSearchInput').value.toLowerCase();
+            const searchEl = document.getElementById('adminSearchInput');
+            const q = searchEl ? searchEl.value.toLowerCase() : '';
             
             // Calculo dos Indicadores
             const total = window.appItems.length;
@@ -1081,14 +1219,20 @@
             const servCount = window.appItems.filter(i => i.type === 'service').length;
             const offerCount = window.appItems.filter(i => i.type === 'offer').length;
 
-            document.getElementById('metric-total').innerText = total;
-            document.getElementById('metric-prod').innerText = prodCount;
-            document.getElementById('metric-serv').innerText = servCount;
-            document.getElementById('metric-ofert').innerText = offerCount;
+            const mTotal = document.getElementById('metric-total');
+            const mProd = document.getElementById('metric-prod');
+            const mServ = document.getElementById('metric-serv');
+            const mOfert = document.getElementById('metric-ofert');
+
+            if(mTotal) mTotal.innerText = total;
+            if(mProd) mProd.innerText = prodCount;
+            if(mServ) mServ.innerText = servCount;
+            if(mOfert) mOfert.innerText = offerCount;
 
             const filtered = window.appItems.filter(i => {
                 const shortId = window.getShortId(i).toLowerCase();
-                return i.title.toLowerCase().includes(q) || shortId.includes(q);
+                const titleStr = (i.title || '').toLowerCase();
+                return titleStr.includes(q) || shortId.includes(q);
             });
             
             list.innerHTML = filtered.map(item => {
@@ -1107,13 +1251,13 @@
                     <img src="${imgUrl}" class="w-16 h-16 sm:w-16 sm:h-16 object-contain bg-white rounded-lg border border-gray-100 shrink-0" onerror="this.onerror=null;this.src='https://placehold.co/100?text=Sem+Foto'">
                     <div class="flex-1 min-w-0 flex flex-col justify-center">
                         <div class="flex justify-between items-start">
-                            <p class="text-base font-bold text-gray-800 truncate pr-2">${item.title}</p>
+                            <p class="text-base font-bold text-gray-800 truncate pr-2">${item.title || 'Sem título'}</p>
                             <span class="text-[10px] font-black text-gray-500 bg-gray-100 px-2 py-0.5 rounded-md">ID: ${window.getShortId(item)}</span>
                         </div>
                         <div class="flex items-center gap-2 mt-1">
                             <span class="text-[10px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider ${typeBadge}">${lbl}</span>
                             ${draftInfo}
-                            <span class="text-sm font-black text-teal-700 ml-auto">${item.price}</span>
+                            <span class="text-sm font-black text-teal-700 ml-auto">${item.price || ''}</span>
                         </div>
                     </div>
                     <div class="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-center text-xs gap-2 pt-3 sm:pt-0 border-t sm:border-t-0 border-gray-100 sm:border-l sm:pl-4 shrink-0">
@@ -1208,7 +1352,7 @@
                 }
             }
 
-            document.getElementById('item-title').value = item.title + " (Cópia)";
+            document.getElementById('item-title').value = (item.title || '') + " (Cópia)";
             document.getElementById('item-price').value = item.price || '';
             document.getElementById('item-originalPrice').value = item.originalPrice || '';
             document.getElementById('item-youtube').value = item.youtubeUrl || '';
@@ -1306,6 +1450,81 @@
                     } catch (e) {
                         window.showSystemMessage("Erro", e.message, "error");
                     }
+                }
+            });
+        };
+
+        window.renderAdminGroups = () => {
+            const list = document.getElementById('admin-groups-list');
+            list.innerHTML = window.appGroups.map(g => `
+                <div class="flex items-center gap-3 p-3 bg-white border border-gray-200 rounded-xl shadow-sm cursor-pointer hover:border-orange-500" onclick="window.editGroup('${g.id}')">
+                    <div class="w-10 h-10 rounded-full ${g.status === 'open' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-500'} flex items-center justify-center shrink-0"><i data-lucide="${g.status === 'open' ? 'message-circle' : 'lock'}" class="w-5 h-5"></i></div>
+                    <div class="flex-1 min-w-0"><p class="text-sm font-bold text-gray-800 truncate">${g.name}</p><p class="text-xs text-gray-500 truncate">${g.link}</p></div>
+                    <i data-lucide="edit-3" class="w-4 h-4 text-gray-400"></i>
+                </div>`).join('') || '<p class="text-center text-gray-400 text-sm py-4">Nenhum grupo.</p>';
+            lucide.createIcons();
+        };
+
+        window.openGroupEditor = () => {
+            document.getElementById('edit-group-id').value = '';
+            document.getElementById('group-name').value = '';
+            document.getElementById('group-link').value = '';
+            document.getElementById('g-open').checked = true;
+            document.getElementById('group-editor-title').innerText = "Novo Grupo";
+            document.getElementById('btn-delete-group').classList.add('hidden');
+            document.getElementById('group-editor-modal').classList.remove('hidden');
+        };
+
+        window.editGroup = (id) => {
+            const g = window.appGroups.find(x => x.id === id);
+            document.getElementById('edit-group-id').value = g.id;
+            document.getElementById('group-name').value = g.name || '';
+            document.getElementById('group-link').value = g.link || '';
+            if(g.status === 'full') document.getElementById('g-full').checked = true; else document.getElementById('g-open').checked = true;
+            document.getElementById('group-editor-title').innerText = "Editar Grupo";
+            document.getElementById('btn-delete-group').classList.remove('hidden');
+            document.getElementById('group-editor-modal').classList.remove('hidden');
+        };
+
+        window.closeGroupEditor = () => document.getElementById('group-editor-modal').classList.add('hidden');
+
+        window.saveGroup = async () => {
+            const btn = document.getElementById('btn-save-group');
+            const originalBtnText = btn ? btn.innerText : "Salvar";
+            try {
+                if(btn) { btn.innerText = "A guardar..."; btn.disabled = true; }
+                const id = document.getElementById('edit-group-id').value;
+                const data = {
+                    name: document.getElementById('group-name').value,
+                    link: document.getElementById('group-link').value,
+                    status: document.querySelector('input[name="group_status"]:checked').value
+                };
+                
+                const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("O servidor demorou muito a responder.")), 10000));
+                
+                if (id) { 
+                    await Promise.race([ updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'groups', id), data), timeoutPromise ]); 
+                } else { 
+                    await Promise.race([ addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'groups'), { ...data, createdAt: Date.now() }), timeoutPromise ]); 
+                }
+                window.closeGroupEditor();
+                window.showSystemMessage("Sucesso", "O grupo foi salvo.", "success");
+            } catch (e) { 
+                window.showSystemMessage("Erro", e.message, "error"); 
+            } finally {
+                if(btn) { btn.innerText = originalBtnText; btn.disabled = false; }
+            }
+        };
+
+        window.deleteGroup = () => {
+            const id = document.getElementById('edit-group-id').value;
+            window.showSystemMessage("Atenção", "Deseja excluir este grupo?", "error", {
+                text: "Excluir", color: "bg-red-500 hover:bg-red-600", onClick: async () => {
+                    try {
+                        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("O servidor demorou muito a responder.")), 10000));
+                        await Promise.race([ deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'groups', id)), timeoutPromise ]);
+                        window.closeGroupEditor();
+                    } catch (e) { window.showSystemMessage("Erro", e.message, "error"); }
                 }
             });
         };
