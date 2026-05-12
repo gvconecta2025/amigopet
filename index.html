@@ -125,7 +125,8 @@
                     <p class="text-sm text-gray-500 font-medium">Destaques e novidades para o seu pet.</p>
                 </div>
             </div>
-            <div id="feed-container" class="flex flex-col gap-6"></div>
+            <div id="feed-container" class="flex flex-col gap-6">
+                </div>
         </div>
 
         <div id="catalog-view" class="px-4 py-6 fade-enter hidden">
@@ -144,14 +145,16 @@
                 <button onclick="window.filterByTag('higiene')" class="px-4 py-1.5 bg-gray-200 text-gray-700 hover:bg-gray-300 text-xs font-bold rounded-full whitespace-nowrap transition-colors">Higiene</button>
             </div>
             
-            <div id="catalog-container" class="grid grid-cols-2 md:grid-cols-3 gap-4"></div>
+            <div id="catalog-container" class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                </div>
         </div>
 
         <div id="detail-view" class="px-4 py-6 fade-enter hidden">
             <button onclick="window.goBack()" class="flex items-center gap-2 text-teal-700 font-bold mb-4 hover:opacity-80 transition-opacity">
                 <i data-lucide="arrow-left" class="w-5 h-5"></i> Voltar
             </button>
-            <div id="detail-container" class="bg-white rounded-3xl shadow-lg border border-gray-100 overflow-hidden"></div>
+            <div id="detail-container" class="bg-white rounded-3xl shadow-lg border border-gray-100 overflow-hidden">
+                </div>
         </div>
 
         <div id="cart-view" class="px-4 py-6 fade-enter hidden">
@@ -162,7 +165,8 @@
                 <h2 class="text-2xl font-black text-gray-800">Seu Carrinho</h2>
             </div>
             
-            <div id="cart-items-container" class="flex flex-col gap-4 mb-6"></div>
+            <div id="cart-items-container" class="flex flex-col gap-4 mb-6">
+                </div>
 
             <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 hidden" id="cart-summary">
                 <div class="flex justify-between items-center mb-6">
@@ -213,7 +217,8 @@
             </div>
 
             <h3 class="text-lg font-black text-gray-800 mb-4 text-center">Escolha um grupo para entrar:</h3>
-            <div id="groups-container" class="flex flex-col gap-3"></div>
+            <div id="groups-container" class="flex flex-col gap-3">
+                </div>
         </div>
 
     </main>
@@ -588,14 +593,13 @@
             });
         };
 
-        // Motor Global de Carrosséis Automáticos (3 segundos)
         if(window.carouselInterval) clearInterval(window.carouselInterval);
         window.carouselInterval = setInterval(() => {
             document.querySelectorAll('.auto-carousel').forEach(container => {
-                if(container.matches(':hover')) return; // Pausa se o rato estiver em cima
+                if(container.matches(':hover')) return; 
                 let maxScroll = container.scrollWidth - container.clientWidth;
                 if (container.scrollLeft >= maxScroll - 5) {
-                    container.scrollTo({left: 0, behavior: 'smooth'}); // Volta ao início
+                    container.scrollTo({left: 0, behavior: 'smooth'}); 
                 } else {
                     container.scrollBy({ left: container.clientWidth, behavior: 'smooth' });
                 }
@@ -701,6 +705,45 @@
             adminClickTimer = setTimeout(() => adminClickCount = 0, 1500);
         };
 
+        window.shareApp = () => {
+            const storeName = window.appSettings.storeName || "Amigo Pet";
+            const shareMsg = window.appSettings.shareMessage || "Atendemos toda a cidade com entrega rápida. Rações, acessórios e serviços de estética animal.";
+            const appUrl = window.location.href;
+            const text = `🐾 *${storeName}* - O melhor para o seu melhor amigo!\n\n${shareMsg}\n\n📲 Acesse a nossa loja e faça o seu pedido agora pelo aplicativo:\n👉 ${appUrl}`;
+            const encodedText = encodeURIComponent(text);
+            window.open(`https://wa.me/?text=${encodedText}`, '_blank');
+        };
+
+        window.saveSettings = async () => {
+            const btn = document.querySelector('button[onclick="window.saveSettings()"]');
+            const originalBtnText = btn ? btn.innerText : "Salvar Ajustes";
+            try {
+                if(btn) { btn.innerText = "A guardar..."; btn.disabled = true; }
+                const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("O servidor demorou muito a responder.")), 10000));
+                
+                const waVal = document.getElementById('admin-set-whatsapp') ? document.getElementById('admin-set-whatsapp').value : window.appSettings.whatsapp;
+                const mapVal = document.getElementById('admin-set-maps') ? document.getElementById('admin-set-maps').value : window.appSettings.mapsUrl;
+                const nameVal = document.getElementById('admin-set-storename') ? document.getElementById('admin-set-storename').value : window.appSettings.storeName;
+                const shareVal = document.getElementById('admin-set-sharemsg') ? document.getElementById('admin-set-sharemsg').value : window.appSettings.shareMessage;
+
+                await Promise.race([
+                    setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'general'), {
+                        whatsapp: waVal,
+                        mapsUrl: mapVal,
+                        storeName: nameVal,
+                        shareMessage: shareVal
+                    }),
+                    timeoutPromise
+                ]);
+                
+                window.showSystemMessage("Sucesso", "Ajustes salvos com sucesso!", "success");
+            } catch(e) { 
+                window.showSystemMessage("Erro", e.message, "error"); 
+            } finally {
+                if(btn) { btn.innerText = originalBtnText; btn.disabled = false; }
+            }
+        };
+
         window.onload = async () => {
             window.loadCartLocally();
             lucide.createIcons();
@@ -775,8 +818,6 @@
             });
         };
 
-        // ====== FUNÇÕES DA LOJA (CLIENTE) ======
-
         window.showView = (view, type = null) => {
             ['home-view', 'catalog-view', 'detail-view', 'alerts-view', 'cart-view'].forEach(id => document.getElementById(id).classList.add('hidden'));
             if(view !== 'detail' && view !== 'cart') { document.getElementById('searchInput').value = ''; currentSearchQuery = ''; }
@@ -836,12 +877,16 @@
             else if (currentView === 'catalog') renderCatalog();
             else if (currentView === 'home') renderFeed();
         };
-        window.filterByTag = (tag) => { document.getElementById('searchInput').value = tag; currentSearchQuery = tag.toLowerCase(); renderCatalog(); };
+        
+        window.filterByTag = (tag) => { 
+            document.getElementById('searchInput').value = tag; 
+            currentSearchQuery = tag.toLowerCase(); 
+            renderCatalog(); 
+        };
         
         const filterItems = (items) => {
             let filtered = items;
             
-            // Exclui rascunhos da visualização do cliente
             filtered = filtered.filter(item => !item.draft);
 
             if(currentSearchQuery) {
@@ -958,7 +1003,6 @@
 
             document.getElementById('cart-total').innerText = window.formatCurrency(totalValue);
             
-            // Injeta o botão Esvaziar no carrinho dinamicamente se não existir
             if (!document.getElementById('btn-clear-cart')) {
                 const btnBox = summary.querySelector('.flex-col.gap-3');
                 if (btnBox) {
