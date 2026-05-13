@@ -576,6 +576,7 @@
         import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+        // CONFIGURAÇÕES GLOBAIS
         const ADMIN_EMAIL = "professoragiselle.edu2@gmail.com"; 
         const IMGBB_API_KEY = "eb75e9530b3092570067d4e63d367ad2";
         
@@ -613,6 +614,7 @@
             document.getElementById('uploader-modal').classList.remove('hidden');
             window.resetUploader();
             
+            // Adicionar evento de arrastar e soltar (Drag and Drop)
             const dropZone = document.getElementById('upload-status-area');
             dropZone.ondragover = (e) => { e.preventDefault(); dropZone.classList.add('bg-teal-200'); };
             dropZone.ondragleave = (e) => { e.preventDefault(); dropZone.classList.remove('bg-teal-200'); };
@@ -818,13 +820,14 @@
             });
         };
 
+        // Motor Global de Carrosséis Automáticos (3 segundos)
         if(window.carouselInterval) clearInterval(window.carouselInterval);
         window.carouselInterval = setInterval(() => {
             document.querySelectorAll('.auto-carousel').forEach(container => {
-                if(container.matches(':hover')) return;
+                if(container.matches(':hover')) return; // Pausa se o rato estiver em cima
                 let maxScroll = container.scrollWidth - container.clientWidth;
                 if (container.scrollLeft >= maxScroll - 5) {
-                    container.scrollTo({left: 0, behavior: 'smooth'}); 
+                    container.scrollTo({left: 0, behavior: 'smooth'}); // Volta ao início
                 } else {
                     container.scrollBy({ left: container.clientWidth, behavior: 'smooth' });
                 }
@@ -833,10 +836,15 @@
 
         window.showToast = (msg) => {
             let toast = document.getElementById('toast-msg');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'toast-msg';
+                toast.className = 'fixed bottom-24 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-5 py-2.5 rounded-full shadow-2xl text-sm font-bold flex items-center gap-2 z-[9999] transition-all duration-300 opacity-0 translate-y-4 pointer-events-none';
+                document.body.appendChild(toast);
+            }
             toast.innerHTML = `<i data-lucide="check-circle" class="w-5 h-5 text-[#25D366]"></i> ${msg}`;
-            lucide.createIcons();
+            if (window.lucide) window.lucide.createIcons();
 
-            toast.classList.remove('pointer-events-none');
             setTimeout(() => {
                 toast.classList.remove('opacity-0', 'translate-y-4');
                 toast.classList.add('opacity-100', 'translate-y-0');
@@ -845,7 +853,6 @@
             setTimeout(() => {
                 toast.classList.remove('opacity-100', 'translate-y-0');
                 toast.classList.add('opacity-0', 'translate-y-4');
-                toast.classList.add('pointer-events-none');
             }, 3000);
         };
 
@@ -896,7 +903,7 @@
 
             modal.classList.remove('hidden');
             setTimeout(() => { modal.classList.remove('opacity-0'); box.classList.remove('scale-95'); }, 10);
-            lucide.createIcons();
+            if (window.lucide) window.lucide.createIcons();
         };
 
         window.closeSystemMessage = () => {
@@ -954,10 +961,11 @@
 
         window.onload = async () => {
             window.loadCartLocally();
-            lucide.createIcons();
+            if (window.lucide) window.lucide.createIcons();
             
-            renderFeed();
-            updateActiveNav();
+            // Correção de Escopo Vital (Adicionado window. para evitar ReferenceError no modo estrito)
+            window.renderFeed();
+            window.updateActiveNav();
             window.updateCartUI();
             
             try {
@@ -982,9 +990,9 @@
                     window.appItems.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
                     
                     if(!isAdminView) {
-                        if(currentView === 'home') renderFeed();
-                        if(currentView === 'catalog') renderCatalog();
-                        if(currentView === 'detail' && window.currentDetailId) openDetail(window.currentDetailId);
+                        if(currentView === 'home') window.renderFeed();
+                        if(currentView === 'catalog') window.renderCatalog();
+                        if(currentView === 'detail' && window.currentDetailId) window.openDetail(window.currentDetailId);
                     } else {
                         window.renderAdminItems();
                     }
@@ -993,7 +1001,7 @@
                 onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'groups'), (snapshot) => {
                     window.appGroups = []; snapshot.forEach(doc => window.appGroups.push({ id: doc.id, ...doc.data() }));
                     window.appGroups.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-                    if(currentView === 'alerts' && !isAdminView) renderAlerts();
+                    if(currentView === 'alerts' && !isAdminView) window.renderAlerts();
                     if(isAdminView) window.renderAdminGroups();
                 });
 
@@ -1032,24 +1040,24 @@
             ['home-view', 'catalog-view', 'detail-view', 'alerts-view', 'cart-view'].forEach(id => document.getElementById(id).classList.add('hidden'));
             if(view !== 'detail' && view !== 'cart') { document.getElementById('searchInput').value = ''; currentSearchQuery = ''; }
 
-            if (view === 'home') { document.getElementById('home-view').classList.remove('hidden'); renderFeed(); currentHistory = ['home']; } 
+            if (view === 'home') { document.getElementById('home-view').classList.remove('hidden'); window.renderFeed(); currentHistory = ['home']; } 
             else if (view === 'catalog') {
                 currentCatalogType = type;
                 const titleObj = document.getElementById('catalog-title'); const subObj = document.getElementById('catalog-subtitle');
                 if(type === 'product') { titleObj.innerHTML = `<i data-lucide="shopping-bag" class="w-6 h-6 text-teal-600"></i> Produtos`; subObj.innerText = "Nossa vitrine de rações, brinquedos e acessórios."; } 
                 else { titleObj.innerHTML = `<i data-lucide="scissors" class="w-6 h-6 text-teal-600"></i> Serviços`; subObj.innerText = "Banho, tosa, veterinário e muito mais."; }
-                document.getElementById('catalog-view').classList.remove('hidden'); renderCatalog(); currentHistory = ['catalog', type]; lucide.createIcons();
+                document.getElementById('catalog-view').classList.remove('hidden'); window.renderCatalog(); currentHistory = ['catalog', type]; if (window.lucide) window.lucide.createIcons();
             }
-            else if (view === 'alerts') { document.getElementById('alerts-view').classList.remove('hidden'); renderAlerts(); currentHistory = ['alerts']; }
+            else if (view === 'alerts') { document.getElementById('alerts-view').classList.remove('hidden'); window.renderAlerts(); currentHistory = ['alerts']; }
             else if (view === 'cart') { document.getElementById('cart-view').classList.remove('hidden'); window.updateCartUI(); currentHistory = ['cart']; }
             
-            currentView = view; updateActiveNav(view, type); window.scrollTo(0, 0);
+            currentView = view; window.updateActiveNav(view, type); window.scrollTo(0, 0);
         };
 
         window.goBack = () => {
-            if(currentHistory[0] === 'home') showView('home');
-            else if(currentHistory[0] === 'catalog') showView('catalog', currentHistory[1]);
-            else showView('home'); 
+            if(currentHistory[0] === 'home') window.showView('home');
+            else if(currentHistory[0] === 'catalog') window.showView('catalog', currentHistory[1]);
+            else window.showView('home'); 
         };
 
         window.updateActiveNav = (view = currentView, type = currentCatalogType) => {
@@ -1098,15 +1106,15 @@
 
         window.handleSearch = (e) => {
             currentSearchQuery = e.target.value.toLowerCase();
-            if((currentView === 'home' || currentView === 'alerts') && currentSearchQuery.length > 0) showView('catalog', 'product');
-            else if (currentView === 'catalog') renderCatalog();
-            else if (currentView === 'home') renderFeed();
+            if((currentView === 'home' || currentView === 'alerts') && currentSearchQuery.length > 0) window.showView('catalog', 'product');
+            else if (currentView === 'catalog') window.renderCatalog();
+            else if (currentView === 'home') window.renderFeed();
         };
         
         window.filterByTag = (tag) => { 
             document.getElementById('searchInput').value = tag; 
             currentSearchQuery = tag.toLowerCase(); 
-            renderCatalog(); 
+            window.renderCatalog(); 
         };
         
         const filterItems = (items) => {
@@ -1228,7 +1236,7 @@
             }).join('');
 
             document.getElementById('cart-total').innerText = window.formatCurrency(totalValue);
-            lucide.createIcons();
+            if (window.lucide) window.lucide.createIcons();
         };
 
         window.changeQuantity = (id, delta) => {
@@ -1332,7 +1340,7 @@
                         </div>
                     </div>
                 </div>`}).join('');
-            lucide.createIcons();
+            if (window.lucide) window.lucide.createIcons();
         };
 
         window.renderCatalog = () => {
@@ -1359,7 +1367,7 @@
                     </div>
                 </div>`;
             }).join('');
-            lucide.createIcons();
+            if (window.lucide) window.lucide.createIcons();
         };
 
         window.openDetail = (id) => {
@@ -1412,7 +1420,7 @@
                     <p class="text-gray-600 leading-relaxed mb-8 whitespace-pre-wrap">${item.description}</p>
                     <button onclick="window.addToCart('${item.id}')" class="w-full flex justify-center items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white py-4 px-6 rounded-2xl font-black text-base sm:text-lg uppercase tracking-wide shadow-[0_10px_20px_rgba(15,118,110,0.3)] transition-all hover:-translate-y-1 active:scale-95 mb-4"><i data-lucide="shopping-cart" class="w-6 h-6 pointer-events-none"></i> Adicionar ao Carrinho</button>
                 </div>`;
-            lucide.createIcons();
+            if (window.lucide) window.lucide.createIcons();
         };
 
         window.renderAlerts = () => {
@@ -1422,7 +1430,7 @@
                 if(g.status === 'full') return `<a href="#" onclick="return false;" class="flex items-center justify-between bg-white p-4 rounded-xl shadow-sm border border-gray-200 opacity-60"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500"><i data-lucide="lock" class="w-5 h-5"></i></div><div><p class="font-bold text-gray-800">${g.name}</p><p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Lotação Máxima</p></div></div><button class="bg-gray-200 text-gray-500 px-4 py-2 rounded-lg text-sm font-bold cursor-not-allowed">Lotado</button></a>`;
                 return `<a href="${g.link.startsWith('http') ? g.link : 'https://'+g.link}" target="_blank" class="flex items-center justify-between bg-white p-4 rounded-xl shadow-sm border border-green-200 hover:border-green-500 transition-all group"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-[#dcf8c6] flex items-center justify-center text-[#25D366]"><i data-lucide="message-circle" class="w-5 h-5"></i></div><div><p class="font-bold text-gray-800">${g.name}</p><p class="text-[10px] text-[#25D366] font-bold uppercase tracking-widest">Vagas Abertas</p></div></div><button class="bg-[#25D366] text-white px-4 py-2 rounded-lg text-sm font-bold shadow-md hover:bg-[#1ebd5a] transition-colors">Entrar</button></a>`;
             }).join('');
-            lucide.createIcons();
+            if (window.lucide) window.lucide.createIcons();
         };
 
         // ====== FUNÇÕES DO PAINEL DE ADMINISTRAÇÃO ======
@@ -1462,7 +1470,7 @@
             } else {
                 container.innerHTML = images.map(img => `<img src="${img}" class="w-full h-full object-contain bg-white flex-shrink-0 snap-center" onerror="this.onerror=null;this.src='https://placehold.co/600x600?text=Erro'">`).join('');
             }
-            lucide.createIcons();
+            if (window.lucide) window.lucide.createIcons();
         };
 
         window.renderAdminItems = () => {
@@ -1527,7 +1535,7 @@
                     </div>
                 </div>`;
             }).join('') || '<p class="text-center text-gray-400 text-sm py-4">Nenhum item.</p>';
-            lucide.createIcons();
+            if (window.lucide) window.lucide.createIcons();
         };
 
         window.openItemEditor = () => {
@@ -1718,7 +1726,7 @@
                     <div class="flex-1 min-w-0"><p class="text-sm font-bold text-gray-800 truncate">${g.name}</p><p class="text-xs text-gray-500 truncate">${g.link}</p></div>
                     <i data-lucide="edit-3" class="w-4 h-4 text-gray-400"></i>
                 </div>`).join('') || '<p class="text-center text-gray-400 text-sm py-4">Nenhum grupo.</p>';
-            lucide.createIcons();
+            if (window.lucide) window.lucide.createIcons();
         };
 
         window.openGroupEditor = () => {
@@ -1784,6 +1792,36 @@
                     } catch (e) { window.showSystemMessage("Erro", e.message, "error"); }
                 }
             });
+        };
+
+        window.saveSettings = async () => {
+            const btn = document.getElementById('btn-save-settings');
+            const originalBtnText = btn ? btn.innerText : "Salvar Ajustes";
+            try {
+                if(btn) { btn.innerText = "A guardar..."; btn.disabled = true; }
+                const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("O servidor demorou muito a responder.")), 10000));
+                
+                const waVal = document.getElementById('admin-set-whatsapp') ? document.getElementById('admin-set-whatsapp').value : window.appSettings.whatsapp;
+                const mapVal = document.getElementById('admin-set-maps') ? document.getElementById('admin-set-maps').value : window.appSettings.mapsUrl;
+                const nameVal = document.getElementById('admin-set-storename') ? document.getElementById('admin-set-storename').value : window.appSettings.storeName;
+                const shareVal = document.getElementById('admin-set-sharemsg') ? document.getElementById('admin-set-sharemsg').value : window.appSettings.shareMessage;
+
+                await Promise.race([
+                    setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'general'), {
+                        whatsapp: waVal,
+                        mapsUrl: mapVal,
+                        storeName: nameVal,
+                        shareMessage: shareVal
+                    }),
+                    timeoutPromise
+                ]);
+                
+                window.showToast("Ajustes Salvos!");
+            } catch(e) { 
+                window.showSystemMessage("Erro", e.message, "error"); 
+            } finally {
+                if(btn) { btn.innerText = originalBtnText; btn.disabled = false; }
+            }
         };
 
     </script>
