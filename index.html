@@ -256,7 +256,7 @@
 
     <div id="admin-dashboard-modal" class="hidden fixed inset-0 z-[50] flex flex-col bg-gray-50 slide-up-animation transition-transform duration-300">
         
-        <div class="bg-teal-800 text-white px-4 py-4 flex justify-between items-center shadow-md pt-safe z-30">
+        <div class="bg-teal-800 text-white px-4 py-4 flex justify-between items-center shadow-md pt-safe z-30 shrink-0">
             <div class="flex items-center gap-3">
                 <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center"><i data-lucide="shield" class="w-5 h-5"></i></div>
                 <h2 class="font-black text-lg">Painel da Loja</h2>
@@ -267,7 +267,7 @@
             </div>
         </div>
         
-        <div class="bg-white border-b border-gray-200 shadow-sm z-30 relative flex justify-center w-full">
+        <div class="bg-white border-b border-gray-200 shadow-sm z-30 relative flex justify-center w-full shrink-0">
             <div class="w-full max-w-5xl flex overflow-x-auto no-scrollbar px-2">
                 <button type="button" onclick="window.switchAdminTab('items')" id="tab-btn-items" class="px-4 py-3 text-sm font-black text-teal-700 border-b-2 border-teal-700 whitespace-nowrap shrink-0">Gestão de Itens</button>
                 <button type="button" onclick="window.switchAdminTab('groups')" id="tab-btn-groups" class="px-4 py-3 text-sm font-bold text-gray-400 border-b-2 border-transparent whitespace-nowrap shrink-0">Grupos VIP</button>
@@ -453,7 +453,7 @@
         </div>
     </div>
 
-    <div id="group-editor-modal" class="hidden fixed inset-0 z-[60] flex items-center justify-center modal-overlay px-4 py-4">
+    <div id="group-editor-modal" class="hidden fixed inset-0 z-[70] flex items-center justify-center modal-overlay px-4 py-4">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm max-h-[90vh] flex flex-col relative">
             <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl shrink-0">
                 <h3 id="group-editor-title" class="font-black text-gray-800">Novo Grupo</h3>
@@ -871,6 +871,7 @@
         const filterItems = (items) => {
             let filtered = items;
             
+            // Exclui rascunhos da visualização do cliente
             filtered = filtered.filter(item => !item.draft);
 
             if(currentSearchQuery) {
@@ -1052,10 +1053,10 @@
                     <div class="aspect-square bg-white relative overflow-hidden group border border-gray-100">
                         <div id="${carouselId}" class="auto-carousel flex w-full h-full overflow-x-auto snap-x snap-mandatory no-scrollbar scroll-smooth" onscroll="window.updateCarouselDots('${carouselId}')">${slides}</div>
                         <button onclick="event.stopPropagation(); window.scrollCarousel('${carouselId}', -1)" class="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-white/80 hover:bg-white text-gray-800 rounded-full flex items-center justify-center shadow backdrop-blur-sm transition-colors z-20">
-                            <i data-lucide="chevron-left" class="w-5 h-5"></i>
+                            <i data-lucide="chevron-left" class="w-5 h-5 pointer-events-none"></i>
                         </button>
                         <button onclick="event.stopPropagation(); window.scrollCarousel('${carouselId}', 1)" class="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-white/80 hover:bg-white text-gray-800 rounded-full flex items-center justify-center shadow backdrop-blur-sm transition-colors z-20">
-                            <i data-lucide="chevron-right" class="w-5 h-5"></i>
+                            <i data-lucide="chevron-right" class="w-5 h-5 pointer-events-none"></i>
                         </button>
                         <div class="absolute top-2 left-2 bg-black/50 text-white text-[10px] font-bold px-2 py-1 rounded-md backdrop-blur-sm z-10 pointer-events-none flex items-center gap-1">
                             <i data-lucide="images" class="w-3 h-3"></i> ${images.length}
@@ -1141,10 +1142,10 @@
                 <div class="aspect-square w-full relative bg-white overflow-hidden border border-gray-100">
                     <div id="${carouselId}" class="auto-carousel flex w-full h-full overflow-x-auto snap-x snap-mandatory no-scrollbar scroll-smooth" onscroll="window.updateCarouselDots('${carouselId}')">${slides}</div>
                     <button onclick="event.stopPropagation(); window.scrollCarousel('${carouselId}', -1)" class="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 hover:bg-white text-gray-800 rounded-full flex items-center justify-center shadow-md backdrop-blur-sm transition-colors z-20">
-                        <i data-lucide="chevron-left" class="w-6 h-6"></i>
+                        <i data-lucide="chevron-left" class="w-6 h-6 pointer-events-none"></i>
                     </button>
                     <button onclick="event.stopPropagation(); window.scrollCarousel('${carouselId}', 1)" class="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 hover:bg-white text-gray-800 rounded-full flex items-center justify-center shadow-md backdrop-blur-sm transition-colors z-20">
-                        <i data-lucide="chevron-right" class="w-6 h-6"></i>
+                        <i data-lucide="chevron-right" class="w-6 h-6 pointer-events-none"></i>
                     </button>
                     <div class="absolute top-3 right-3 bg-black/50 text-white text-xs font-bold px-3 py-1.5 rounded-lg backdrop-blur-sm z-10 pointer-events-none flex items-center gap-1">
                         <i data-lucide="images" class="w-4 h-4"></i> ${images.length} fotos
@@ -1168,7 +1169,7 @@
                     <h1 class="text-2xl sm:text-3xl font-black text-gray-800 leading-tight mb-2">${item.title}</h1>
                     <div class="flex items-end gap-3 mb-6"><span class="text-3xl font-black text-teal-700">${item.price}</span>${item.originalPrice ? `<span class="text-lg text-gray-400 line-through mb-1">${item.originalPrice}</span>` : ''}</div>
                     <p class="text-gray-600 leading-relaxed mb-8 whitespace-pre-wrap">${item.description}</p>
-                    <button onclick="window.addToCart('${item.id}')" class="w-full flex justify-center items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white py-4 px-6 rounded-2xl font-black text-base sm:text-lg uppercase tracking-wide shadow-[0_10px_20px_rgba(15,118,110,0.3)] transition-all hover:-translate-y-1 active:scale-95 mb-4"><i data-lucide="shopping-cart" class="w-6 h-6"></i> Adicionar ao Carrinho</button>
+                    <button onclick="window.addToCart('${item.id}')" class="w-full flex justify-center items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white py-4 px-6 rounded-2xl font-black text-base sm:text-lg uppercase tracking-wide shadow-[0_10px_20px_rgba(15,118,110,0.3)] transition-all hover:-translate-y-1 active:scale-95 mb-4"><i data-lucide="shopping-cart" class="w-6 h-6 pointer-events-none"></i> Adicionar ao Carrinho</button>
                 </div>`;
             lucide.createIcons();
         };
