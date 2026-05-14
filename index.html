@@ -63,13 +63,16 @@
 
     <header class="bg-white shadow-sm sticky top-0 z-40 border-b border-gray-100">
         <div class="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
-            <button onclick="window.showView('home'); window.handleAdminTrigger()" class="flex items-center gap-3 focus:outline-none select-none">
-                <img src="./image_322ea4.png" alt="Logótipo" class="w-14 h-14 object-contain transition-transform active:scale-95 shrink-0 drop-shadow-sm" onerror="this.src='https://placehold.co/100?text=Pet'">
-                <div class="text-left pointer-events-none">
+            
+            <div class="flex items-center gap-3 select-none">
+                <button onclick="window.handleAdminTrigger()" class="focus:outline-none shrink-0 relative z-50 transition-transform active:scale-95">
+                    <img src="./image_322ea4.png" alt="Logótipo" class="w-14 h-14 object-contain drop-shadow-sm" onerror="this.src='https://placehold.co/100?text=Pet'">
+                </button>
+                <div class="text-left cursor-pointer pointer-events-auto" onclick="window.showView('home')">
                     <h1 id="header-store-name" class="text-xl font-black text-teal-800 leading-none">Amigo Pet</h1>
                     <p class="text-[9px] text-gray-500 font-medium leading-tight mt-0.5"><i data-lucide="map-pin" class="w-3 h-3 inline"></i> Atendemos toda a cidade</p>
                 </div>
-            </button>
+            </div>
             
             <div class="flex items-center gap-2 relative z-50">
                 <button onclick="window.shareApp()" class="p-2 text-gray-500 hover:text-teal-700 bg-gray-50 rounded-full transition-colors border border-gray-100 shadow-sm active:scale-95" title="Compartilhar App">
@@ -363,12 +366,6 @@
                         <div id="editor-image-preview" class="flex w-full h-full overflow-x-auto snap-x snap-mandatory no-scrollbar scroll-smooth">
                             <img src="https://placehold.co/600x600?text=Sem+Imagem" class="w-full h-full object-contain bg-white flex-shrink-0 snap-center">
                         </div>
-                        <button type="button" onclick="window.scrollCarousel('editor-image-preview', -1)" class="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-white/80 hover:bg-white text-gray-800 rounded-full flex items-center justify-center shadow backdrop-blur-sm transition-colors z-20">
-                            <i data-lucide="chevron-left" class="w-5 h-5"></i>
-                        </button>
-                        <button type="button" onclick="window.scrollCarousel('editor-image-preview', 1)" class="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-white/80 hover:bg-white text-gray-800 rounded-full flex items-center justify-center shadow backdrop-blur-sm transition-colors z-20">
-                            <i data-lucide="chevron-right" class="w-5 h-5"></i>
-                        </button>
                     </div>
                 </div>
 
@@ -626,8 +623,9 @@
                 btnOk.className = "flex-1 py-3 rounded-xl font-black text-sm text-white shadow-md transition-all " + (actionBtn.color || 'bg-teal-600 hover:bg-teal-700');
                 btnOk.innerText = actionBtn.text;
                 btnOk.onclick = async () => { 
-                    window.closeSystemMessage(); 
+                    // Remove a classe hidden do modal de forma forçada, se o botão de login abrir a aba do google e bugar, o modal não fecha
                     if(actionBtn.onClick) await actionBtn.onClick(); 
+                    else window.closeSystemMessage();
                 };
                 
                 const btnCancel = document.createElement('button');
@@ -675,6 +673,7 @@
                             await signOut(auth);
                             setTimeout(() => window.location.reload(), 3000);
                         } else {
+                            window.closeSystemMessage();
                             window.openAdminDashboard();
                         }
                     } catch (error) { 
@@ -708,7 +707,8 @@
                     window.triggerAdminLoginFlow();
                 }
             }
-            adminClickTimer = setTimeout(() => adminClickCount = 0, 1500);
+            // Aumentei a margem de tempo para dar os 5 cliques com tranquilidade
+            adminClickTimer = setTimeout(() => adminClickCount = 0, 3000);
         };
 
         // ===== FUNÇÕES DA LOJA (NAVEGAÇÃO) =====
@@ -950,7 +950,7 @@
             if(!container) return;
             
             let feedItems = filterItems(window.appItems.filter(item => item.vitrine === true));
-            if(feedItems.length === 0) { container.innerHTML = `<p class="text-center py-10 text-gray-400">A carregar destaques...</p>`; return; }
+            if(feedItems.length === 0) { container.innerHTML = `<p class="text-center py-10 text-gray-400">Nenhum destaque na vitrine no momento.</p>`; return; }
 
             container.innerHTML = feedItems.map(item => {
                 const ytId = window.getYoutubeId(item.youtubeUrl);
@@ -1390,10 +1390,8 @@
         const startApplication = () => {
             try {
                 window.loadCartLocally();
-                window.renderFeed();
-                window.updateActiveNav();
-                window.updateCartUI();
-
+                if (window.lucide) window.lucide.createIcons();
+                
                 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
                 const db = getFirestore(app);
                 const auth = getAuth(app);
