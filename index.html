@@ -8,6 +8,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
+
     <style>
         :root {
             --cor-fundo: #f8fafc;
@@ -43,6 +46,10 @@
         .hidden { display: none !important; }
         
         .modal-overlay { background-color: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px); }
+
+        /* Estilos do Cropper */
+        .cropper-view-box, .cropper-face { border-radius: 8px; }
+        .cropper-modal { background-color: rgba(0, 0, 0, 0.8); }
     </style>
 
     <link rel="manifest" href="/manifest.json" crossorigin="use-credentials">
@@ -63,7 +70,6 @@
 
     <header class="bg-white shadow-sm sticky top-0 z-40 border-b border-gray-100">
         <div class="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
-            
             <div class="flex items-center gap-3 select-none">
                 <button onclick="window.handleAdminTrigger()" class="focus:outline-none shrink-0 relative z-50 transition-transform active:scale-95">
                     <img src="./image_322ea4.png" alt="Logótipo" class="w-14 h-14 object-contain drop-shadow-sm" onerror="this.src='https://placehold.co/100?text=Pet'">
@@ -365,17 +371,11 @@
                         <div id="editor-image-preview" class="flex w-full h-full overflow-x-auto snap-x snap-mandatory no-scrollbar scroll-smooth">
                             <img src="https://placehold.co/600x600?text=Sem+Imagem" class="w-full h-full object-contain bg-white flex-shrink-0 snap-center">
                         </div>
-                        <button type="button" onclick="window.scrollCarousel('editor-image-preview', -1)" class="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-white/80 hover:bg-white text-gray-800 rounded-full flex items-center justify-center shadow backdrop-blur-sm transition-colors z-20">
-                            <i data-lucide="chevron-left" class="w-5 h-5"></i>
-                        </button>
-                        <button type="button" onclick="window.scrollCarousel('editor-image-preview', 1)" class="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-white/80 hover:bg-white text-gray-800 rounded-full flex items-center justify-center shadow backdrop-blur-sm transition-colors z-20">
-                            <i data-lucide="chevron-right" class="w-5 h-5"></i>
-                        </button>
                     </div>
                 </div>
 
                 <div>
-                    <label class="block text-xs font-black text-gray-500 uppercase tracking-widest mb-1">Links das Imagens (Upload via clique no ícone)</label>
+                    <label class="block text-xs font-black text-gray-500 uppercase tracking-widest mb-1">Links das Imagens (Upload Nativo)</label>
                     <div class="space-y-2">
                         <div class="relative">
                             <input type="text" id="item-image-1" oninput="window.updateEditorPreview()" placeholder="Imagem 1 (Principal)" class="w-full bg-gray-50 border border-gray-200 rounded-xl pl-3 pr-10 py-2.5 text-sm outline-none focus:border-teal-500">
@@ -465,7 +465,47 @@
     <div id="uploader-modal" class="hidden fixed inset-0 z-[120] flex items-center justify-center modal-overlay px-2 py-4">
         <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md h-[85vh] relative overflow-hidden flex flex-col">
             <button type="button" onclick="window.closeUploader()" class="absolute top-4 right-4 z-50 text-gray-400 hover:text-gray-800 bg-white rounded-full p-1 shadow-md active:scale-95"><i data-lucide="x" class="w-5 h-5"></i></button>
-            <iframe id="uploader-iframe" src="" class="w-full h-full border-0 bg-white rounded-3xl"></iframe>
+            
+            <div id="uploader-initial-view" class="p-8 text-center flex flex-col justify-center h-full relative">
+                <div class="w-20 h-20 bg-teal-50 text-teal-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm border border-teal-100">
+                    <i data-lucide="image-plus" class="w-10 h-10"></i>
+                </div>
+                <h1 class="text-xl font-black text-gray-800 mb-2">Editor de Imagens</h1>
+                <p class="text-sm text-gray-500 mb-8 px-4">Tire um print ou copie uma imagem e pressione <kbd class="bg-gray-100 border border-gray-300 px-2 py-1 rounded text-gray-800 font-bold mx-1">Ctrl+V</kbd> aqui.</p>
+                
+                <input type="file" id="file-input-traditional" class="hidden" accept="image/*" onchange="window.handleTraditionalUpload(event)">
+                
+                <div id="upload-status-area" onclick="document.getElementById('file-input-traditional').click()" class="h-32 flex flex-col items-center justify-center border-2 border-dashed border-teal-200 rounded-2xl bg-teal-50 mb-4 cursor-pointer hover:bg-teal-100 transition-colors relative group mx-auto w-full max-w-xs">
+                    <i data-lucide="upload" class="w-6 h-6 text-teal-500 mb-2 group-hover:-translate-y-1 transition-transform"></i>
+                    <span id="upload-status-text" class="text-teal-700 font-bold text-sm">Ou clique aqui para enviar</span>
+                    <p class="text-[10px] text-teal-600/70 mt-1 uppercase tracking-widest font-black">Upload ImgBB</p>
+                </div>
+            </div>
+
+            <div id="uploader-crop-view" class="hidden flex flex-col h-full bg-gray-50 pt-10">
+                <div class="p-3 bg-white border-b border-gray-200 shrink-0">
+                    <h2 class="text-sm font-black text-gray-800 text-center">Enquadramento</h2>
+                </div>
+                <div class="flex gap-2 justify-center overflow-x-auto no-scrollbar p-2 bg-white border-b border-gray-100 shrink-0">
+                    <button type="button" onclick="window.setCropRatio(4/5, this)" class="crop-ratio-btn bg-teal-600 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold shadow-sm whitespace-nowrap">4:5 (Padrão)</button>
+                    <button type="button" onclick="window.setCropRatio(1, this)" class="crop-ratio-btn bg-gray-100 text-gray-600 hover:bg-gray-200 px-3 py-1.5 rounded-lg text-[10px] font-bold shadow-sm whitespace-nowrap">1:1</button>
+                    <button type="button" onclick="window.setCropRatio(16/9, this)" class="crop-ratio-btn bg-gray-100 text-gray-600 hover:bg-gray-200 px-3 py-1.5 rounded-lg text-[10px] font-bold shadow-sm whitespace-nowrap">16:9</button>
+                </div>
+                <div class="flex-1 bg-gray-200 w-full relative overflow-hidden min-h-[250px] flex items-center justify-center">
+                    <img id="uploader-image-source" class="max-w-full hidden">
+                </div>
+                <div class="p-3 bg-white border-t border-gray-200 shrink-0 flex gap-2">
+                    <button type="button" onclick="window.resetUploader()" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold py-3 rounded-xl transition-colors text-xs">Cancelar</button>
+                    <button type="button" id="btn-execute-crop" onclick="window.processCropAndUpload()" class="flex-[2] bg-teal-600 hover:bg-teal-700 text-white font-black py-3 rounded-xl shadow-md transition-colors text-xs flex items-center justify-center gap-1">
+                        <i data-lucide="check" class="w-4 h-4"></i> Salvar Imagem
+                    </button>
+                </div>
+            </div>
+
+            <div id="uploader-loading-overlay" class="hidden absolute inset-0 bg-white/90 backdrop-blur-sm z-50 flex flex-col items-center justify-center">
+                <i data-lucide="cloud-upload" class="w-10 h-10 text-teal-600 animate-bounce mb-3"></i>
+                <h3 class="text-sm font-black text-gray-800">A processar imagem...</h3>
+            </div>
         </div>
     </div>
 
@@ -474,7 +514,9 @@
         import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+        // ================= CONFIGURAÇÕES GLOBAIS =================
         const ALLOWED_EMAILS = ["professoragiselle.edu2@gmail.com", "gvconecta2025@gmail.com"];
+        const IMGBB_API_KEY = "eb75e9530b3092570067d4e63d367ad2";
         const appId = 'amigopet-d6992';
 
         const firebaseConfig = {
@@ -486,8 +528,8 @@
             appId: "1:814082291596:web:653e165ec09b9825c0c8a9"
         };
 
-        // INICIALIZAÇÃO IMEDIATA E GLOBAL
-        const app = initializeApp(firebaseConfig);
+        // INICIALIZAÇÃO SÍNCRONA
+        const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
         const auth = getAuth(app);
         const db = getFirestore(app);
 
@@ -501,23 +543,125 @@
         window.currentCatalogType = 'product'; 
         window.currentSearchQuery = '';
         window.currentHistory = ['home'];
+        
+        // ================= UPLOADER NATIVO =================
         window.currentTargetInputId = null;
-        window.sysMsgTimer = null;
+        window.cropperInstance = null;
 
-        // ===== MICRO-FRONTEND UPLOADER =====
         window.openUploader = (inputId) => {
             window.currentTargetInputId = inputId;
-            const iframe = document.getElementById('uploader-iframe');
-            iframe.src = './uploader/index.html?target=' + inputId;
             document.getElementById('uploader-modal').classList.remove('hidden');
+            window.resetUploader();
+            
+            const dropZone = document.getElementById('upload-status-area');
+            dropZone.ondragover = (e) => { e.preventDefault(); dropZone.classList.add('bg-teal-200'); };
+            dropZone.ondragleave = (e) => { e.preventDefault(); dropZone.classList.remove('bg-teal-200'); };
+            dropZone.ondrop = (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('bg-teal-200');
+                if(e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                    const file = e.dataTransfer.files[0];
+                    if(file.type.startsWith('image/')) window.loadImageForCropping(file);
+                }
+            };
         };
 
         window.closeUploader = () => {
             document.getElementById('uploader-modal').classList.add('hidden');
-            document.getElementById('uploader-iframe').src = '';
+            if(window.cropperInstance) { window.cropperInstance.destroy(); window.cropperInstance = null; }
         };
 
-        // ===== UTILITÁRIOS GLOBAIS =====
+        window.resetUploader = () => {
+            document.getElementById('uploader-initial-view').classList.remove('hidden');
+            document.getElementById('uploader-crop-view').classList.add('hidden');
+            document.getElementById('uploader-loading-overlay').classList.add('hidden');
+            const statusArea = document.getElementById('upload-status-area');
+            statusArea.className = "h-32 flex flex-col items-center justify-center border-2 border-dashed border-teal-200 rounded-2xl bg-teal-50 mb-4 cursor-pointer hover:bg-teal-100 transition-colors relative group mx-auto w-full max-w-xs";
+            document.getElementById('upload-status-text').innerText = "Ou clique aqui para enviar";
+            document.getElementById('file-input-traditional').value = "";
+            if(window.cropperInstance) { window.cropperInstance.destroy(); window.cropperInstance = null; }
+        };
+
+        window.handleTraditionalUpload = (e) => {
+            if(e.target.files && e.target.files.length > 0) window.loadImageForCropping(e.target.files[0]);
+        };
+
+        window.addEventListener('paste', (e) => {
+            const modal = document.getElementById('uploader-modal');
+            if (!modal.classList.contains('hidden') && !document.getElementById('uploader-initial-view').classList.contains('hidden')) {
+                const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+                let file = null;
+                for (const item of items) {
+                    if (item.type.indexOf('image') === 0) { file = item.getAsFile(); break; }
+                }
+                if (file) window.loadImageForCropping(file);
+            }
+        });
+
+        window.loadImageForCropping = (file) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = document.getElementById('uploader-image-source');
+                img.src = e.target.result;
+                img.classList.remove('hidden');
+                document.getElementById('uploader-initial-view').classList.add('hidden');
+                document.getElementById('uploader-crop-view').classList.remove('hidden');
+
+                if (window.cropperInstance) window.cropperInstance.destroy();
+                window.cropperInstance = new Cropper(img, { aspectRatio: 4 / 5, viewMode: 1, dragMode: 'move', autoCropArea: 0.9, background: false, guides: true });
+                const btns = document.querySelectorAll('.crop-ratio-btn');
+                if(btns.length > 0) window.setCropRatio(4/5, btns[0]);
+            };
+            reader.readAsDataURL(file);
+        };
+
+        window.setCropRatio = (ratio, btnElement) => {
+            if (window.cropperInstance) window.cropperInstance.setAspectRatio(ratio);
+            document.querySelectorAll('.crop-ratio-btn').forEach(btn => {
+                btn.className = "crop-ratio-btn bg-gray-100 text-gray-600 hover:bg-gray-200 px-3 py-1.5 rounded-lg text-[10px] font-bold shadow-sm whitespace-nowrap";
+            });
+            btnElement.className = "crop-ratio-btn bg-teal-600 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold shadow-sm whitespace-nowrap";
+        };
+
+        window.processCropAndUpload = () => {
+            if (!window.cropperInstance) return;
+            document.getElementById('uploader-loading-overlay').classList.remove('hidden');
+            const btnEx = document.getElementById('btn-execute-crop');
+            if(btnEx) btnEx.disabled = true;
+
+            const canvas = window.cropperInstance.getCroppedCanvas({ maxWidth: 1080, maxHeight: 1080, imageSmoothingEnabled: true, imageSmoothingQuality: 'high' });
+            canvas.toBlob((blob) => { window.uploadBlobToImgBB(blob); }, 'image/webp', 0.85);
+        };
+
+        window.uploadBlobToImgBB = async (imageBlob) => {
+            const formData = new FormData();
+            formData.append('image', imageBlob);
+            try {
+                const response = await fetch("https://api.imgbb.com/1/upload?key=" + IMGBB_API_KEY, { method: 'POST', body: formData });
+                const data = await response.json();
+                if (data.success) {
+                    if(window.currentTargetInputId) {
+                        const targetInput = document.getElementById(window.currentTargetInputId);
+                        if(targetInput) { targetInput.value = data.data.url; window.updateEditorPreview(); }
+                    }
+                    window.closeUploader();
+                    window.showToast("Imagem adicionada!");
+                } else throw new Error("Erro na API");
+            } catch (error) {
+                window.resetUploader();
+                const statusArea = document.getElementById('upload-status-area');
+                const statusText = document.getElementById('upload-status-text');
+                statusText.innerText = "Falha no envio. Tente novamente.";
+                statusText.className = "text-red-500 font-bold text-sm";
+                statusArea.classList.replace('bg-teal-50', 'bg-red-50');
+                statusArea.classList.replace('border-teal-200', 'border-red-200');
+            } finally {
+                const btnEx = document.getElementById('btn-execute-crop');
+                if(btnEx) btnEx.disabled = false;
+            }
+        };
+
+        // ================= UTILITÁRIOS E UI =================
         window.getDriveImageUrl = (url) => { 
             if (!url) return ""; 
             const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/); 
@@ -587,7 +731,6 @@
             });
         }, 3000);
 
-        // ===== SISTEMA DE MENSAGENS BLINDADO =====
         window.showToast = (msg) => {
             let toast = document.getElementById('toast-msg');
             if(!toast) return;
@@ -598,9 +741,9 @@
             setTimeout(() => { toast.classList.remove('opacity-100', 'translate-y-0'); toast.classList.add('opacity-0', 'translate-y-4'); toast.classList.add('pointer-events-none'); }, 3000);
         };
 
-        window.showSystemMessage = (title, text, type = 'info') => {
+        window.sysMsgTimer = null;
+        window.showSystemMessage = (title, text, type = 'info', actionBtn = null) => {
             clearTimeout(window.sysMsgTimer);
-            
             const modal = document.getElementById('msg-modal');
             const box = document.getElementById('msg-modal-box');
             document.getElementById('msg-title').innerText = title;
@@ -614,11 +757,44 @@
             const btnContainer = document.getElementById('msg-buttons');
             btnContainer.innerHTML = '';
             
-            const btnOk = document.createElement('button');
-            btnOk.className = "w-full py-3 rounded-xl font-black text-sm text-white bg-gray-800 hover:bg-gray-900 shadow-md transition-colors";
-            btnOk.innerText = "Entendido";
-            btnOk.onclick = window.closeSystemMessage;
-            btnContainer.appendChild(btnOk);
+            if (Array.isArray(actionBtn)) {
+                btnContainer.className = "flex flex-col gap-2 w-full mt-2";
+                actionBtn.forEach(btn => {
+                    const btnEl = document.createElement('button');
+                    btnEl.className = "w-full py-3 rounded-xl font-black text-sm shadow-sm transition-all " + (btn.class || "bg-gray-100 text-gray-600 hover:bg-gray-200");
+                    btnEl.innerText = btn.text;
+                    btnEl.onclick = async () => { 
+                        window.closeSystemMessage(); 
+                        if(btn.onClick) await btn.onClick(); 
+                    };
+                    btnContainer.appendChild(btnEl);
+                });
+            } else if(actionBtn) {
+                btnContainer.className = "flex gap-3 justify-center mt-2";
+                const btnOk = document.createElement('button');
+                btnOk.className = "flex-1 py-3 rounded-xl font-black text-sm text-white shadow-md transition-all " + (actionBtn.color || 'bg-teal-600 hover:bg-teal-700');
+                btnOk.innerText = actionBtn.text;
+                // Executar a acão antes de fechar o modal
+                btnOk.onclick = async () => { 
+                    if(actionBtn.onClick) await actionBtn.onClick(); 
+                    else window.closeSystemMessage();
+                };
+                
+                const btnCancel = document.createElement('button');
+                btnCancel.className = "flex-1 py-3 rounded-xl font-bold text-sm text-gray-500 bg-gray-100 hover:bg-gray-200 transition-colors";
+                btnCancel.innerText = "Cancelar";
+                btnCancel.onclick = window.closeSystemMessage;
+                
+                btnContainer.appendChild(btnCancel); 
+                btnContainer.appendChild(btnOk);
+            } else {
+                btnContainer.className = "flex gap-3 justify-center mt-2";
+                const btnOk = document.createElement('button');
+                btnOk.className = "w-full py-3 rounded-xl font-black text-sm text-white bg-gray-800 hover:bg-gray-900 shadow-md transition-colors";
+                btnOk.innerText = "Entendido";
+                btnOk.onclick = window.closeSystemMessage;
+                btnContainer.appendChild(btnOk);
+            }
             
             modal.classList.remove('hidden');
             setTimeout(() => { modal.classList.remove('opacity-0'); box.classList.remove('scale-95'); }, 10);
@@ -632,10 +808,13 @@
             window.sysMsgTimer = setTimeout(() => modal.classList.add('hidden'), 300);
         };
 
-        // ===== LOGIN BLINDADO (CHAMADA DIRETA SEM MODAL) =====
+        // ================= AUTENTICAÇÃO E ADMIN =================
         window.executeGoogleLogin = async () => {
             const provider = new GoogleAuthProvider();
+            provider.setCustomParameters({ prompt: 'select_account' }); 
             try {
+                window.closeSystemMessage();
+                window.showToast("A abrir login do Google...");
                 const result = await signInWithPopup(auth, provider);
                 const userEmail = (result.user.email || '').toLowerCase().trim();
                 
@@ -643,11 +822,16 @@
                     window.showSystemMessage("Acesso Negado", "O e-mail " + userEmail + " não possui permissão.", "error");
                     await signOut(auth);
                 } else {
+                    window.showToast("Login autorizado!");
                     window.openAdminDashboard();
                 }
             } catch (error) { 
                 console.error(error);
-                window.showSystemMessage("Erro", "Falha ao fazer login.", "error"); 
+                if(error.code === 'auth/popup-closed-by-user') {
+                    window.showToast("Login cancelado.");
+                } else {
+                    window.showSystemMessage("Erro de Segurança", "O seu navegador bloqueou o acesso. Detalhe: " + error.message, "error"); 
+                }
             }
         };
 
@@ -659,11 +843,10 @@
         let adminClickCount = 0;
         let adminClickTimer;
         
-        // O GATILHO QUE NÃO FALHA: Direto e Rápido
+        // O Gatilho Perfeito: Se não está logado, chama direto a execução.
         window.handleAdminTrigger = () => {
             adminClickCount++;
             clearTimeout(adminClickTimer);
-            
             if (adminClickCount >= 5) {
                 adminClickCount = 0;
                 
@@ -672,14 +855,17 @@
                 if(ALLOWED_EMAILS.includes(email)) {
                     window.openAdminDashboard();
                 } else {
-                    // Chama direto sem perguntar para o pop-up do google não ser bloqueado pelo safari/chrome
-                    window.executeGoogleLogin();
+                    window.showSystemMessage("Área do Lojista", "Faça login com a sua conta Google para gerir a loja.", "info", {
+                        text: "Fazer Login",
+                        color: "bg-teal-700 hover:bg-teal-800",
+                        onClick: window.executeGoogleLogin
+                    });
                 }
             }
-            adminClickTimer = setTimeout(() => adminClickCount = 0, 1500);
+            adminClickTimer = setTimeout(() => adminClickCount = 0, 2000);
         };
 
-        // ===== FUNÇÕES DA LOJA (NAVEGAÇÃO) =====
+        // ================= ROTAS E DADOS DA LOJA =================
         window.showView = (view, type = null) => {
             ['home-view', 'catalog-view', 'detail-view', 'alerts-view', 'cart-view'].forEach(id => document.getElementById(id).classList.add('hidden'));
             
@@ -748,10 +934,7 @@
             }
         };
 
-        window.openLocation = () => {
-            if(window.appSettings.mapsUrl) window.open(window.appSettings.mapsUrl, '_blank');
-            else window.showToast("Localização não definida.");
-        };
+        window.openLocation = () => window.open(window.appSettings.mapsUrl, '_blank');
 
         window.shareApp = async () => {
             const storeName = window.appSettings.storeName || "Amigo Pet";
@@ -801,7 +984,7 @@
             });
         };
 
-        // ===== CARRINHO =====
+        // ===== CARRINHO DE COMPRAS =====
         window.addToCart = (id) => {
             const item = window.appItems.find(x => x.id === id);
             if(!item) return;
@@ -809,16 +992,30 @@
             if(existing) existing.quantity += 1; else window.cart.push({ ...item, quantity: 1 });
             window.saveCartLocally();
             window.updateCartUI();
-            window.showToast("Adicionado ao Carrinho!");
+
+            const cancelLogic = () => {
+                const itemInCart = window.cart.find(x => x.id === id);
+                if(itemInCart) {
+                    if(itemInCart.quantity > 1) itemInCart.quantity -= 1; else window.cart = window.cart.filter(x => x.id !== id);
+                    window.saveCartLocally();
+                    window.updateCartUI();
+                }
+            };
+
+            window.showSystemMessage("Adicionado", `${item.title} adicionado ao carrinho.`, "success", [
+                { text: "Ver Carrinho", class: "bg-teal-600 hover:bg-teal-700 text-white", onClick: () => window.showView('cart') },
+                { text: "Continuar Comprando", class: "bg-teal-50 hover:bg-teal-100 text-teal-700", onClick: () => window.showView('catalog', 'product') },
+                { text: "Cancelar", class: "bg-gray-100 hover:bg-gray-200 text-gray-500", onClick: cancelLogic }
+            ]);
         };
 
         window.clearCart = () => {
-            if(confirm("Tem certeza que deseja remover todos os itens?")) {
-                window.cart = []; 
-                window.saveCartLocally(); 
-                window.updateCartUI(); 
-                window.showToast("Carrinho esvaziado.");
-            }
+            window.showSystemMessage("Esvaziar Carrinho", "Tem certeza que deseja remover todos os itens?", "error", [
+                { text: "Sim", class: "bg-red-600 hover:bg-red-700 text-white", onClick: () => {
+                    window.cart = []; window.saveCartLocally(); window.updateCartUI(); window.showToast("Carrinho esvaziado.");
+                }},
+                { text: "Cancelar", class: "bg-gray-100 hover:bg-gray-200 text-gray-500", onClick: () => {} }
+            ]);
         };
 
         window.updateCartUI = () => {
@@ -887,6 +1084,7 @@
         window.checkoutWhatsApp = () => {
             if(window.cart.length === 0) return;
             let totalValue = 0;
+            // FORMATAÇÃO LIMPA: Apenas \n
             let text = "Olá! Acessei o aplicativo da sua loja e gostaria de fazer o seguinte pedido:\n\n";
             
             window.cart.forEach(item => {
@@ -903,13 +1101,13 @@
             window.open(`https://wa.me/${numeroFormatado}?text=${encodeURIComponent(text)}`, '_blank');
         };
 
-        // ===== RENDERIZAÇÃO VISUAL =====
+        // ===== RENDERIZAÇÃO DA VITRINE E PRODUTOS =====
         window.renderFeed = () => {
             const container = document.getElementById('feed-container');
             if(!container) return;
             
             let feedItems = filterItems(window.appItems.filter(item => item.vitrine === true));
-            if(feedItems.length === 0) { container.innerHTML = `<p class="text-center py-10 text-gray-400">Nenhum destaque na vitrine no momento.</p>`; return; }
+            if(feedItems.length === 0) { container.innerHTML = `<p class="text-center py-10 text-gray-400">A carregar destaques...</p>`; return; }
 
             container.innerHTML = feedItems.map(item => {
                 const ytId = window.getYoutubeId(item.youtubeUrl);
@@ -1019,6 +1217,35 @@
                     <p class="text-gray-600 leading-relaxed mb-8 whitespace-pre-wrap">${item.description}</p>
                     <button onclick="window.addToCart('${item.id}')" class="w-full flex justify-center items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white py-4 px-6 rounded-2xl font-black text-base sm:text-lg uppercase tracking-wide shadow-[0_10px_20px_rgba(15,118,110,0.3)] transition-all active:scale-95 mb-4"><i data-lucide="shopping-cart" class="w-6 h-6 pointer-events-none"></i> Adicionar ao Carrinho</button>
                 </div>`;
+            if (window.lucide) window.lucide.createIcons();
+        };
+
+        // ===== GERENCIAMENTO DE ADMINISTRAÇÃO =====
+        window.openAdminDashboard = () => { 
+            window.isAdminView = true; 
+            document.getElementById('admin-dashboard-modal').classList.remove('hidden'); 
+            window.switchAdminTab('items'); 
+        };
+        
+        window.closeAdminDashboard = () => { window.location.reload(); };
+
+        window.switchAdminTab = (tab) => {
+            ['items', 'groups', 'settings'].forEach(t => {
+                document.getElementById('admin-tab-'+t).classList.add('hidden');
+                document.getElementById('tab-btn-'+t).className = "px-4 py-3 text-sm font-bold text-gray-400 border-b-2 border-transparent whitespace-nowrap shrink-0";
+            });
+            document.getElementById('admin-tab-'+tab).classList.remove('hidden');
+            document.getElementById('tab-btn-'+tab).className = "px-4 py-3 text-sm font-black text-teal-700 border-b-2 border-teal-700 whitespace-nowrap shrink-0";
+            if(tab === 'items') window.renderAdminItems();
+            if(tab === 'groups') window.renderAdminGroups();
+        };
+
+        window.updateEditorPreview = () => {
+            const container = document.getElementById('editor-image-preview');
+            let images = [];
+            for(let i=1; i<=5; i++) { const url = document.getElementById('item-image-'+i).value.trim(); if(url) images.push(window.getDriveImageUrl(url)); }
+            if(images.length === 0) container.innerHTML = `<img src="https://placehold.co/600x600?text=Sem+Imagem" class="w-full h-full object-contain bg-white flex-shrink-0 snap-center">`;
+            else container.innerHTML = images.map(img => `<img src="${img}" class="w-full h-full object-contain bg-white flex-shrink-0 snap-center" onerror="this.onerror=null;this.src='https://placehold.co/600x600?text=Erro'">`).join('');
             if (window.lucide) window.lucide.createIcons();
         };
 
@@ -1225,6 +1452,7 @@
                 text: "Excluir", color: "bg-red-500 hover:bg-red-600", onClick: async () => {
                     try {
                         const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Tempo limite excedido.")), 10000));
+
                         await Promise.race([ deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'items', id)), timeoutPromise ]);
                         window.closeItemEditor();
                         window.showToast("Excluído.");
@@ -1296,6 +1524,7 @@
                 text: "Excluir", color: "bg-red-500 hover:bg-red-600", onClick: async () => {
                     try {
                         const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("O servidor demorou muito a responder.")), 10000));
+                        
                         await Promise.race([ deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'groups', id)), timeoutPromise ]);
                         window.closeGroupEditor();
                         window.showToast("Excluído.");
@@ -1331,7 +1560,7 @@
             finally { if(btn) { btn.innerText = originalBtnText; btn.disabled = false; } }
         };
 
-        // INICIALIZADOR UNIVERSAL
+        // INICIALIZADOR DE EXECUÇÃO RÁPIDA (BLINDADO)
         const initApp = async () => {
             try {
                 window.loadCartLocally();
@@ -1388,19 +1617,35 @@
                     }
                 });
 
-                // VERIFICA ROTA SECRETA
+                // VERIFICA ROTA SECRETA E CRIA BOTÃO FLUTUANTE DE SEGURANÇA
                 onAuthStateChanged(auth, async (user) => {
                     window.currentUser = user;
-                    
+                    const email = (user && user.email) ? user.email.toLowerCase().trim() : '';
                     const urlParams = new URLSearchParams(window.location.search);
                     const isAdminRoute = urlParams.get('admin') === 'true';
 
-                    if (user && user.email && ALLOWED_EMAILS.includes(user.email.toLowerCase().trim())) {
+                    if (ALLOWED_EMAILS.includes(email)) {
+                        // O BOTÃO FLUTUANTE: Acesso garantido ao painel.
+                        if (!document.getElementById('floating-admin-btn')) {
+                            const btn = document.createElement('button');
+                            btn.id = 'floating-admin-btn';
+                            btn.onclick = window.openAdminDashboard;
+                            btn.className = "fixed bottom-24 right-4 bg-teal-800 text-white p-3 rounded-full shadow-2xl z-40 border-2 border-white hover:scale-110 transition-transform active:scale-95 flex items-center gap-2 pr-4 font-bold text-xs";
+                            btn.innerHTML = '<svg class="w-5 h-5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg> <span class="pointer-events-none">Painel</span>';
+                            document.body.appendChild(btn);
+                        }
+
                         if (isAdminRoute && !window.isAdminView) window.openAdminDashboard();
-                    } else if (isAdminRoute) {
-                        window.triggerAdminLoginFlow();
-                    } else if (!user) {
-                        try { await signInAnonymously(auth); } catch(e) {}
+                    } else {
+                        // Apaga o botão se existir
+                        const btn = document.getElementById('floating-admin-btn');
+                        if(btn) btn.remove();
+
+                        if (isAdminRoute) {
+                            window.executeGoogleLogin();
+                        } else if (!user) {
+                            try { await signInAnonymously(auth); } catch(e) {}
+                        }
                     }
                 });
 
