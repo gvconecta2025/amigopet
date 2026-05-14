@@ -75,10 +75,10 @@
                 <button onclick="window.shareApp()" class="p-2 text-gray-500 hover:text-teal-700 bg-gray-50 rounded-full transition-colors border border-gray-100 shadow-sm active:scale-95">
                     <i data-lucide="share-2" class="w-5 h-5 pointer-events-none"></i>
                 </button>
-                <button onclick="window.openLocation()" class="p-2 text-gray-500 hover:text-teal-700 bg-gray-50 rounded-full transition-colors border border-gray-100 shadow-sm active:scale-95">
+                <button onclick="window.openLocation()" class="p-2 text-gray-500 hover:text-teal-700 bg-gray-50 rounded-full transition-colors border border-gray-100 shadow-sm active:scale-95" title="Nossa Loja">
                     <i data-lucide="map-pin" class="w-5 h-5 pointer-events-none"></i>
                 </button>
-                <button onclick="window.showView('cart')" class="relative p-2 text-gray-500 hover:text-teal-700 bg-gray-50 rounded-full transition-colors border border-gray-100 shadow-sm active:scale-95">
+                <button onclick="window.showView('cart')" class="relative p-2 text-gray-500 hover:text-teal-700 bg-gray-50 rounded-full transition-colors border border-gray-100 shadow-sm active:scale-95" title="Carrinho">
                     <i data-lucide="shopping-cart" class="w-5 h-5 pointer-events-none"></i>
                     <span id="cart-badge" class="hidden absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-black w-4 h-4 flex items-center justify-center rounded-full shadow-sm pointer-events-none">0</span>
                 </button>
@@ -265,12 +265,15 @@
                     <div class="bg-white p-5 rounded-2xl border border-gray-200 shadow-sm">
                         <label class="block text-xs font-black text-gray-500 uppercase tracking-widest mb-1">Nome da Loja</label>
                         <input type="text" id="admin-set-storename" placeholder="Ex: Amigo Pet" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-teal-500 mb-4">
+                        
                         <label class="block text-xs font-black text-gray-500 uppercase tracking-widest mb-1">WhatsApp da Loja</label>
                         <p class="text-[10px] text-gray-400 mb-2">Apenas números com DDD.</p>
                         <input type="text" id="admin-set-whatsapp" placeholder="Ex: 5533999069877" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-teal-500 mb-4">
+                        
                         <label class="block text-xs font-black text-gray-500 uppercase tracking-widest mb-1">Link do Google Maps</label>
                         <p class="text-[10px] text-gray-400 mb-2">Para o botão de localização.</p>
                         <input type="text" id="admin-set-maps" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-teal-500 mb-4">
+
                         <label class="block text-xs font-black text-gray-500 uppercase tracking-widest mb-1">Mensagem de Compartilhamento</label>
                         <p class="text-[10px] text-gray-400 mb-2">Texto curto enviado ao partilhar o app.</p>
                         <textarea id="admin-set-sharemsg" rows="2" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-teal-500 mb-6 resize-none"></textarea>
@@ -469,8 +472,10 @@
             messagingSenderId: "814082291596",
             appId: "1:814082291596:web:653e165ec09b9825c0c8a9"
         };
+        
+        // CORREÇÃO CRÍTICA: A VARIÁVEL PERDIDA
+        const appId = 'amigopet-d6992';
 
-        // VARIÁVEIS GLOBAIS ESTÁTICAS
         window.appItems = [];
         window.appGroups = [];
         window.cart = [];
@@ -483,7 +488,6 @@
         window.currentHistory = ['home'];
         window.currentTargetInputId = null;
 
-        // ===== INTEGRAÇÃO COM UPLOADER MICRO-FRONTEND =====
         window.openUploader = (inputId) => {
             window.currentTargetInputId = inputId;
             const iframe = document.getElementById('uploader-iframe');
@@ -495,12 +499,12 @@
             document.getElementById('uploader-modal').classList.add('hidden');
             document.getElementById('uploader-iframe').src = '';
         };
-        // ===================================================
 
+        // Corrigido a string do Google Drive para evitar problemas de template literal
         window.getDriveImageUrl = (url) => { 
             if (!url) return ""; 
             const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/); 
-            return match ? `https://lh3.googleusercontent.com/d/${match[1]}` : url; 
+            return match ? "https://drive.google.com/uc?id=" + match[1] : url; 
         };
         
         window.getYoutubeId = (url) => { 
@@ -749,7 +753,7 @@
             if (navigator.share) {
                 try { await navigator.share({ title: storeName, text: text }); } catch (err) { }
             } else {
-                window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+                window.open("https://wa.me/?text=" + encodeURIComponent(text), '_blank');
             }
         };
 
@@ -897,7 +901,7 @@
             const shortClientId = window.currentUser ? window.generateCodeId('C', window.currentUser.uid) : "C000";
             text += `*Total do Pedido: ${window.formatCurrency(totalValue)}*%0A%0A👤 *Cliente ID:* ${shortClientId}%0A%0AQual o procedimento agora?`;
             let numeroFormatado = window.appSettings.whatsapp.replace(/\D/g, ''); 
-            window.open(`https://wa.me/${numeroFormatado}?text=${encodeURIComponent(text)}`, '_blank');
+            window.open("https://wa.me/" + numeroFormatado + "?text=" + encodeURIComponent(text), '_blank');
         };
 
         window.renderFeed = () => {
@@ -905,7 +909,7 @@
             if(!container) return;
             
             let feedItems = filterItems(window.appItems.filter(item => item.vitrine === true));
-            if(feedItems.length === 0) { container.innerHTML = `<p class="text-center py-10 text-gray-400">Nenhum destaque na vitrine.</p>`; return; }
+            if(feedItems.length === 0) { container.innerHTML = `<p class="text-center py-10 text-gray-400">A carregar destaques...</p>`; return; }
 
             container.innerHTML = feedItems.map(item => {
                 const ytId = window.getYoutubeId(item.youtubeUrl);
@@ -1204,7 +1208,6 @@
                 };
 
                 const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("O servidor demorou muito a responder.")), 10000));
-
                 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
                 const db = getFirestore(app);
 
@@ -1342,7 +1345,7 @@
             finally { if(btn) { btn.innerText = originalBtnText; btn.disabled = false; } }
         };
 
-        // INICIALIZADOR DE EXECUÇÃO IMEDIATA (O "TIRADOR DE TELA BRANCA")
+        // INICIALIZADOR DE EXECUÇÃO IMEDIATA
         const startApplication = () => {
             try {
                 window.loadCartLocally();
@@ -1354,7 +1357,6 @@
                 const db = getFirestore(app);
                 const auth = getAuth(app);
 
-                // OBTENÇÃO DE DADOS (Públicos) - Independente de Login
                 onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'items'), (snapshot) => {
                     window.appItems = []; snapshot.forEach(doc => window.appItems.push({ id: doc.id, ...doc.data() }));
                     window.appItems.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
@@ -1401,20 +1403,18 @@
                     }
                 });
 
-                // AUTENTICAÇÃO (Apenas reage, não bloqueia nada)
                 onAuthStateChanged(auth, async (user) => {
                     window.currentUser = user;
                     if (!user) {
-                        try { await signInAnonymously(auth); } catch(e) { console.warn("Modo Anônimo não ativado/bloqueado."); }
+                        try { await signInAnonymously(auth); } catch(e) {}
                     }
                 });
 
             } catch (err) {
-                console.error("Erro fatal de inicialização:", err);
+                console.error("Erro fatal:", err);
             }
         };
 
-        // GATILHO DIRETO
         startApplication();
 
     </script>
