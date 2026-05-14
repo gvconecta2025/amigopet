@@ -287,7 +287,6 @@
                         <button type="button" id="btn-save-settings" onclick="window.saveSettings()" class="w-full bg-teal-800 text-white py-3 rounded-xl font-black text-sm shadow-md hover:bg-teal-900 active:scale-95 transition-transform">Salvar Ajustes</button>
                     </div>
                 </div>
-
             </div>
         </div>
     </div>
@@ -366,6 +365,12 @@
                         <div id="editor-image-preview" class="flex w-full h-full overflow-x-auto snap-x snap-mandatory no-scrollbar scroll-smooth">
                             <img src="https://placehold.co/600x600?text=Sem+Imagem" class="w-full h-full object-contain bg-white flex-shrink-0 snap-center">
                         </div>
+                        <button type="button" onclick="window.scrollCarousel('editor-image-preview', -1)" class="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-white/80 hover:bg-white text-gray-800 rounded-full flex items-center justify-center shadow backdrop-blur-sm transition-colors z-20">
+                            <i data-lucide="chevron-left" class="w-5 h-5"></i>
+                        </button>
+                        <button type="button" onclick="window.scrollCarousel('editor-image-preview', 1)" class="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-white/80 hover:bg-white text-gray-800 rounded-full flex items-center justify-center shadow backdrop-blur-sm transition-colors z-20">
+                            <i data-lucide="chevron-right" class="w-5 h-5"></i>
+                        </button>
                     </div>
                 </div>
 
@@ -465,7 +470,7 @@
     </div>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getApps, initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
@@ -481,6 +486,7 @@
             appId: "1:814082291596:web:653e165ec09b9825c0c8a9"
         };
 
+        // INICIALIZAÇÃO IMEDIATA E GLOBAL
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
@@ -592,7 +598,7 @@
             setTimeout(() => { toast.classList.remove('opacity-100', 'translate-y-0'); toast.classList.add('opacity-0', 'translate-y-4'); toast.classList.add('pointer-events-none'); }, 3000);
         };
 
-        window.showSystemMessage = (title, text, type = 'info', actionBtn = null) => {
+        window.showSystemMessage = (title, text, type = 'info') => {
             clearTimeout(window.sysMsgTimer);
             
             const modal = document.getElementById('msg-modal');
@@ -608,43 +614,11 @@
             const btnContainer = document.getElementById('msg-buttons');
             btnContainer.innerHTML = '';
             
-            if (Array.isArray(actionBtn)) {
-                btnContainer.className = "flex flex-col gap-2 w-full mt-2";
-                actionBtn.forEach(btn => {
-                    const btnEl = document.createElement('button');
-                    btnEl.className = "w-full py-3 rounded-xl font-black text-sm shadow-sm transition-all " + (btn.class || "bg-gray-100 text-gray-600 hover:bg-gray-200");
-                    btnEl.innerText = btn.text;
-                    btnEl.onclick = async () => { 
-                        window.closeSystemMessage(); 
-                        if(btn.onClick) await btn.onClick(); 
-                    };
-                    btnContainer.appendChild(btnEl);
-                });
-            } else if(actionBtn) {
-                btnContainer.className = "flex gap-3 justify-center mt-2";
-                const btnOk = document.createElement('button');
-                btnOk.className = "flex-1 py-3 rounded-xl font-black text-sm text-white shadow-md transition-all " + (actionBtn.color || 'bg-teal-600 hover:bg-teal-700');
-                btnOk.innerText = actionBtn.text;
-                btnOk.onclick = async () => { 
-                    if(actionBtn.onClick) await actionBtn.onClick(); 
-                    else window.closeSystemMessage();
-                };
-                
-                const btnCancel = document.createElement('button');
-                btnCancel.className = "flex-1 py-3 rounded-xl font-bold text-sm text-gray-500 bg-gray-100 hover:bg-gray-200 transition-colors";
-                btnCancel.innerText = "Cancelar";
-                btnCancel.onclick = window.closeSystemMessage;
-                
-                btnContainer.appendChild(btnCancel); 
-                btnContainer.appendChild(btnOk);
-            } else {
-                btnContainer.className = "flex gap-3 justify-center mt-2";
-                const btnOk = document.createElement('button');
-                btnOk.className = "w-full py-3 rounded-xl font-black text-sm text-white bg-gray-800 hover:bg-gray-900 shadow-md transition-colors";
-                btnOk.innerText = "Entendido";
-                btnOk.onclick = window.closeSystemMessage;
-                btnContainer.appendChild(btnOk);
-            }
+            const btnOk = document.createElement('button');
+            btnOk.className = "w-full py-3 rounded-xl font-black text-sm text-white bg-gray-800 hover:bg-gray-900 shadow-md transition-colors";
+            btnOk.innerText = "Entendido";
+            btnOk.onclick = window.closeSystemMessage;
+            btnContainer.appendChild(btnOk);
             
             modal.classList.remove('hidden');
             setTimeout(() => { modal.classList.remove('opacity-0'); box.classList.remove('scale-95'); }, 10);
@@ -658,29 +632,23 @@
             window.sysMsgTimer = setTimeout(() => modal.classList.add('hidden'), 300);
         };
 
-        // ===== AUTENTICAÇÃO E ROTA SECRETA =====
-        window.triggerAdminLoginFlow = async () => {
-            window.showSystemMessage("Área Restrita", "Acesso exclusivo para a equipe.", "info", {
-                text: "Login Google", color: "bg-blue-600 hover:bg-blue-700", onClick: async () => {
-                    const provider = new GoogleAuthProvider();
-                    try {
-                        const result = await signInWithPopup(auth, provider);
-                        const userEmail = (result.user.email || '').toLowerCase().trim();
-                        
-                        if(!ALLOWED_EMAILS.includes(userEmail)) {
-                            window.showSystemMessage("Acesso Negado", "O e-mail " + userEmail + " não possui permissão.", "error");
-                            await signOut(auth);
-                            setTimeout(() => window.location.reload(), 3000);
-                        } else {
-                            window.closeSystemMessage();
-                            window.openAdminDashboard();
-                        }
-                    } catch (error) { 
-                        console.error(error);
-                        window.showSystemMessage("Erro", "Falha ao fazer login.", "error"); 
-                    }
+        // ===== LOGIN BLINDADO (CHAMADA DIRETA SEM MODAL) =====
+        window.executeGoogleLogin = async () => {
+            const provider = new GoogleAuthProvider();
+            try {
+                const result = await signInWithPopup(auth, provider);
+                const userEmail = (result.user.email || '').toLowerCase().trim();
+                
+                if(!ALLOWED_EMAILS.includes(userEmail)) {
+                    window.showSystemMessage("Acesso Negado", "O e-mail " + userEmail + " não possui permissão.", "error");
+                    await signOut(auth);
+                } else {
+                    window.openAdminDashboard();
                 }
-            });
+            } catch (error) { 
+                console.error(error);
+                window.showSystemMessage("Erro", "Falha ao fazer login.", "error"); 
+            }
         };
 
         window.adminSignOut = async () => { 
@@ -690,33 +658,26 @@
 
         let adminClickCount = 0;
         let adminClickTimer;
+        
+        // O GATILHO QUE NÃO FALHA: Direto e Rápido
         window.handleAdminTrigger = () => {
             adminClickCount++;
             clearTimeout(adminClickTimer);
+            
             if (adminClickCount >= 5) {
                 adminClickCount = 0;
+                
                 const email = (window.currentUser && window.currentUser.email) ? window.currentUser.email.toLowerCase().trim() : '';
-                if(ALLOWED_EMAILS.includes(email)) window.openAdminDashboard();
-                else window.triggerAdminLoginFlow();
+                
+                if(ALLOWED_EMAILS.includes(email)) {
+                    window.openAdminDashboard();
+                } else {
+                    // Chama direto sem perguntar para o pop-up do google não ser bloqueado pelo safari/chrome
+                    window.executeGoogleLogin();
+                }
             }
-            adminClickTimer = setTimeout(() => adminClickCount = 0, 3000);
+            adminClickTimer = setTimeout(() => adminClickCount = 0, 1500);
         };
-
-        // Verifica a Rota Oculta "?admin=true" e dispara a autenticação na hora
-        onAuthStateChanged(auth, async (user) => {
-            window.currentUser = user;
-            
-            const urlParams = new URLSearchParams(window.location.search);
-            const isRequestingAdmin = urlParams.get('admin') === 'true';
-
-            if (user && user.email && ALLOWED_EMAILS.includes(user.email.toLowerCase().trim())) {
-                if (isRequestingAdmin) window.openAdminDashboard();
-            } else if (isRequestingAdmin) {
-                window.triggerAdminLoginFlow();
-            } else if (!user) {
-                try { await signInAnonymously(auth); } catch(e) { console.warn("Modo Anônimo não ativado."); }
-            }
-        });
 
         // ===== FUNÇÕES DA LOJA (NAVEGAÇÃO) =====
         window.showView = (view, type = null) => {
@@ -787,7 +748,10 @@
             }
         };
 
-        window.openLocation = () => window.open(window.appSettings.mapsUrl, '_blank');
+        window.openLocation = () => {
+            if(window.appSettings.mapsUrl) window.open(window.appSettings.mapsUrl, '_blank');
+            else window.showToast("Localização não definida.");
+        };
 
         window.shareApp = async () => {
             const storeName = window.appSettings.storeName || "Amigo Pet";
@@ -845,30 +809,16 @@
             if(existing) existing.quantity += 1; else window.cart.push({ ...item, quantity: 1 });
             window.saveCartLocally();
             window.updateCartUI();
-
-            const cancelLogic = () => {
-                const itemInCart = window.cart.find(x => x.id === id);
-                if(itemInCart) {
-                    if(itemInCart.quantity > 1) itemInCart.quantity -= 1; else window.cart = window.cart.filter(x => x.id !== id);
-                    window.saveCartLocally();
-                    window.updateCartUI();
-                }
-            };
-
-            window.showSystemMessage("Adicionado", `${item.title} adicionado ao carrinho.`, "success", [
-                { text: "Ver Carrinho", class: "bg-teal-600 hover:bg-teal-700 text-white", onClick: () => window.showView('cart') },
-                { text: "Continuar Comprando", class: "bg-teal-50 hover:bg-teal-100 text-teal-700", onClick: () => window.showView('catalog', 'product') },
-                { text: "Cancelar", class: "bg-gray-100 hover:bg-gray-200 text-gray-500", onClick: cancelLogic }
-            ]);
+            window.showToast("Adicionado ao Carrinho!");
         };
 
         window.clearCart = () => {
-            window.showSystemMessage("Esvaziar Carrinho", "Tem certeza que deseja remover todos os itens?", "error", [
-                { text: "Sim", class: "bg-red-600 hover:bg-red-700 text-white", onClick: () => {
-                    window.cart = []; window.saveCartLocally(); window.updateCartUI(); window.showToast("Carrinho esvaziado.");
-                }},
-                { text: "Cancelar", class: "bg-gray-100 hover:bg-gray-200 text-gray-500", onClick: () => {} }
-            ]);
+            if(confirm("Tem certeza que deseja remover todos os itens?")) {
+                window.cart = []; 
+                window.saveCartLocally(); 
+                window.updateCartUI(); 
+                window.showToast("Carrinho esvaziado.");
+            }
         };
 
         window.updateCartUI = () => {
@@ -953,13 +903,13 @@
             window.open(`https://wa.me/${numeroFormatado}?text=${encodeURIComponent(text)}`, '_blank');
         };
 
-        // ===== RENDERIZAÇÃO VISUAL (ALIMENTADA PELO FIREBASE) =====
+        // ===== RENDERIZAÇÃO VISUAL =====
         window.renderFeed = () => {
             const container = document.getElementById('feed-container');
             if(!container) return;
             
             let feedItems = filterItems(window.appItems.filter(item => item.vitrine === true));
-            if(feedItems.length === 0) { container.innerHTML = `<p class="text-center py-10 text-gray-400">Nenhum destaque na vitrine.</p>`; return; }
+            if(feedItems.length === 0) { container.innerHTML = `<p class="text-center py-10 text-gray-400">Nenhum destaque na vitrine no momento.</p>`; return; }
 
             container.innerHTML = feedItems.map(item => {
                 const ytId = window.getYoutubeId(item.youtubeUrl);
@@ -1381,7 +1331,7 @@
             finally { if(btn) { btn.innerText = originalBtnText; btn.disabled = false; } }
         };
 
-        // INICIALIZAÇÃO DA VITRINE E DADOS (BLINDADA)
+        // INICIALIZADOR UNIVERSAL
         const initApp = async () => {
             try {
                 window.loadCartLocally();
@@ -1389,7 +1339,9 @@
                 window.updateActiveNav();
                 window.updateCartUI();
 
-                // PUXA DADOS PÚBLICOS INDEPENDENTE DE LOGIN
+                // LIGAÇÃO DIRETA DOS EVENTOS DE CLIQUE AO TECLADO
+                document.getElementById('searchInput')?.addEventListener('keyup', window.handleSearch);
+
                 onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'items'), (snapshot) => {
                     window.appItems = []; snapshot.forEach(doc => window.appItems.push({ id: doc.id, ...doc.data() }));
                     window.appItems.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
@@ -1436,7 +1388,7 @@
                     }
                 });
 
-                // AUTENTICAÇÃO (Com rota secreta pela URL)
+                // VERIFICA ROTA SECRETA
                 onAuthStateChanged(auth, async (user) => {
                     window.currentUser = user;
                     
@@ -1444,14 +1396,11 @@
                     const isAdminRoute = urlParams.get('admin') === 'true';
 
                     if (user && user.email && ALLOWED_EMAILS.includes(user.email.toLowerCase().trim())) {
-                        // É um administrador já logado
-                        if (isAdminRoute) window.openAdminDashboard();
+                        if (isAdminRoute && !window.isAdminView) window.openAdminDashboard();
                     } else if (isAdminRoute) {
-                        // Tentou acessar via URL, mas não está logado como admin
                         window.triggerAdminLoginFlow();
                     } else if (!user) {
-                        // Usuário comum navegando na vitrine
-                        try { await signInAnonymously(auth); } catch(e) { console.warn("Modo Anônimo não ativado/bloqueado."); }
+                        try { await signInAnonymously(auth); } catch(e) {}
                     }
                 });
 
