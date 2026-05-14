@@ -3,13 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Uploader Otimizado Multi-Formatos</title>
-    
+    <title>Uploader Otimizado</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
-    
     <style>
         .cropper-view-box, .cropper-face { border-radius: 8px; }
         .cropper-modal { background-color: rgba(0, 0, 0, 0.8); }
@@ -189,7 +187,7 @@
                         }
                         if(typeof window.parent.window.closeUploader === 'function') {
                             window.parent.window.closeUploader();
-                            window.parent.window.showToast("Imagem processada!");
+                            window.parent.window.showToast("Imagem adicionada!");
                         }
                     } catch(crossOriginErr) {
                         alert("Imagem gerada (Copie o link): " + finalUrl);
