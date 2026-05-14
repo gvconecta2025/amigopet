@@ -65,7 +65,7 @@
     <script>
         lucide.createIcons();
 
-        // CHAVE DA API IMGBB INSERIDA AQUI (Isolada de conflitos)
+        // CHAVE DA API IMGBB
         const IMGBB_API_KEY = "eb75e9530b3092570067d4e63d367ad2";
 
         const initialView = document.getElementById('initial-view');
@@ -77,11 +77,9 @@
 
         let cropper = null;
 
-        // Descobre em qual campo da loja mãe vamos injetar a imagem
         const urlParams = new URLSearchParams(window.location.search);
         const targetFieldId = urlParams.get('target');
 
-        // Eventos Drag & Drop
         statusArea.ondragover = (e) => { e.preventDefault(); statusArea.classList.add('bg-teal-200'); };
         statusArea.ondragleave = (e) => { e.preventDefault(); statusArea.classList.remove('bg-teal-200'); };
         statusArea.ondrop = (e) => {
@@ -93,7 +91,6 @@
             }
         };
 
-        // Captura o Ctrl+V
         window.addEventListener('paste', (e) => {
             if (!initialView.classList.contains('hidden')) {
                 const items = (e.clipboardData || e.originalEvent.clipboardData).items;
@@ -179,23 +176,19 @@
                 if (data.success) {
                     const finalUrl = data.data.url;
                     
-                    // Magia: Manda a URL para o documento pai e fecha o Iframe
                     if (window.parent && targetFieldId) {
                         const targetInput = window.parent.document.getElementById(targetFieldId);
                         if (targetInput) {
                             targetInput.value = finalUrl;
-                            
-                            // Aciona o updatePreview da loja para aparecer a foto de imediato
                             if(typeof window.parent.window.updateEditorPreview === 'function') {
                                 window.parent.window.updateEditorPreview();
                             }
                         }
                     }
                     
-                    // Manda a loja fechar o modal do uploader
                     if(typeof window.parent.window.closeUploader === 'function') {
                         window.parent.window.closeUploader();
-                        window.parent.window.showToast("Imagem processada!");
+                        window.parent.window.showToast("Imagem adicionada com sucesso!");
                     }
 
                 } else {
