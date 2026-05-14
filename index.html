@@ -8,9 +8,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
-
     <style>
         :root {
             --cor-fundo: #f8fafc;
@@ -46,10 +43,6 @@
         .hidden { display: none !important; }
         
         .modal-overlay { background-color: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px); }
-
-        /* Estilos do Cropper */
-        .cropper-view-box, .cropper-face { border-radius: 8px; }
-        .cropper-modal { background-color: rgba(0, 0, 0, 0.8); }
     </style>
 
     <link rel="manifest" href="/manifest.json" crossorigin="use-credentials">
@@ -70,6 +63,7 @@
 
     <header class="bg-white shadow-sm sticky top-0 z-40 border-b border-gray-100">
         <div class="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
+            
             <div class="flex items-center gap-3 select-none">
                 <button onclick="window.handleAdminTrigger()" class="focus:outline-none shrink-0 relative z-50 transition-transform active:scale-95">
                     <img src="./image_322ea4.png" alt="Logótipo" class="w-14 h-14 object-contain drop-shadow-sm" onerror="this.src='https://placehold.co/100?text=Pet'">
@@ -293,6 +287,7 @@
                         <button type="button" id="btn-save-settings" onclick="window.saveSettings()" class="w-full bg-teal-800 text-white py-3 rounded-xl font-black text-sm shadow-md hover:bg-teal-900 active:scale-95 transition-transform">Salvar Ajustes</button>
                     </div>
                 </div>
+
             </div>
         </div>
     </div>
@@ -465,57 +460,16 @@
     <div id="uploader-modal" class="hidden fixed inset-0 z-[120] flex items-center justify-center modal-overlay px-2 py-4">
         <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md h-[85vh] relative overflow-hidden flex flex-col">
             <button type="button" onclick="window.closeUploader()" class="absolute top-4 right-4 z-50 text-gray-400 hover:text-gray-800 bg-white rounded-full p-1 shadow-md active:scale-95"><i data-lucide="x" class="w-5 h-5"></i></button>
-            
-            <div id="uploader-initial-view" class="p-8 text-center flex flex-col justify-center h-full relative">
-                <div class="w-20 h-20 bg-teal-50 text-teal-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm border border-teal-100">
-                    <i data-lucide="image-plus" class="w-10 h-10"></i>
-                </div>
-                <h1 class="text-xl font-black text-gray-800 mb-2">Editor de Imagens</h1>
-                <p class="text-sm text-gray-500 mb-8 px-4">Tire um print ou copie uma imagem e pressione <kbd class="bg-gray-100 border border-gray-300 px-2 py-1 rounded text-gray-800 font-bold mx-1">Ctrl+V</kbd> aqui.</p>
-                <input type="file" id="file-input-traditional" class="hidden" accept="image/*" onchange="window.handleTraditionalUpload(event)">
-                <div id="upload-status-area" onclick="document.getElementById('file-input-traditional').click()" class="h-32 flex flex-col items-center justify-center border-2 border-dashed border-teal-200 rounded-2xl bg-teal-50 mb-4 cursor-pointer hover:bg-teal-100 transition-colors relative group">
-                    <i data-lucide="upload" class="w-6 h-6 text-teal-500 mb-2 group-hover:-translate-y-1 transition-transform"></i>
-                    <span id="upload-status-text" class="text-teal-700 font-bold text-sm">Ou clique aqui para buscar...</span>
-                    <p class="text-[10px] text-teal-600/70 mt-1 uppercase tracking-widest font-black">Upload Inteligente (ImgBB)</p>
-                </div>
-            </div>
-
-            <div id="uploader-crop-view" class="hidden flex flex-col h-full bg-gray-50 pt-10">
-                <div class="p-4 bg-white border-b border-gray-200 shrink-0">
-                    <h2 class="text-lg font-black text-gray-800 text-center">Ajuste o Enquadramento</h2>
-                </div>
-                <div class="flex gap-2 overflow-x-auto no-scrollbar p-3 bg-white border-b border-gray-100 shrink-0">
-                    <button type="button" onclick="window.setCropRatio(4/5, this)" class="crop-ratio-btn bg-teal-600 text-white px-4 py-1.5 rounded-lg text-xs font-bold shadow-sm whitespace-nowrap">4:5 (Padrão)</button>
-                    <button type="button" onclick="window.setCropRatio(1, this)" class="crop-ratio-btn bg-gray-100 text-gray-600 hover:bg-gray-200 px-4 py-1.5 rounded-lg text-xs font-bold shadow-sm whitespace-nowrap">1:1 (Quadrado)</button>
-                    <button type="button" onclick="window.setCropRatio(3/4, this)" class="crop-ratio-btn bg-gray-100 text-gray-600 hover:bg-gray-200 px-4 py-1.5 rounded-lg text-xs font-bold shadow-sm whitespace-nowrap">3:4</button>
-                    <button type="button" onclick="window.setCropRatio(16/9, this)" class="crop-ratio-btn bg-gray-100 text-gray-600 hover:bg-gray-200 px-4 py-1.5 rounded-lg text-xs font-bold shadow-sm whitespace-nowrap">16:9 (Horizontal)</button>
-                    <button type="button" onclick="window.setCropRatio(NaN, this)" class="crop-ratio-btn bg-gray-100 text-gray-600 hover:bg-gray-200 px-4 py-1.5 rounded-lg text-xs font-bold shadow-sm whitespace-nowrap">Livre</button>
-                </div>
-                <div class="flex-1 bg-gray-200 w-full relative overflow-hidden min-h-[250px]">
-                    <img id="uploader-image-source" class="max-w-full hidden">
-                </div>
-                <div class="p-4 bg-white border-t border-gray-200 shrink-0 flex gap-3">
-                    <button type="button" onclick="window.resetUploader()" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold py-3 rounded-xl transition-colors text-sm">Cancelar</button>
-                    <button type="button" id="btn-execute-crop" onclick="window.processCropAndUpload()" class="flex-1 bg-teal-600 hover:bg-teal-700 text-white font-black py-3 rounded-xl shadow-md transition-colors text-sm flex items-center justify-center gap-2">
-                        <i data-lucide="check" class="w-4 h-4"></i> Salvar Imagem
-                    </button>
-                </div>
-            </div>
-
-            <div id="uploader-loading-overlay" class="hidden absolute inset-0 bg-white/90 backdrop-blur-sm z-50 flex flex-col items-center justify-center">
-                <i data-lucide="cloud-upload" class="w-12 h-12 text-teal-600 animate-bounce mb-4"></i>
-                <h3 class="text-lg font-black text-gray-800">A enviar...</h3>
-            </div>
+            <iframe id="uploader-iframe" src="" class="w-full h-full border-0 bg-white rounded-3xl"></iframe>
         </div>
     </div>
 
     <script type="module">
-        import { getApps, initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const ALLOWED_EMAILS = ["professoragiselle.edu2@gmail.com", "gvconecta2025@gmail.com"];
-        const IMGBB_API_KEY = "eb75e9530b3092570067d4e63d367ad2";
         const appId = 'amigopet-d6992';
 
         const firebaseConfig = {
@@ -543,120 +497,18 @@
         window.currentHistory = ['home'];
         window.currentTargetInputId = null;
         window.sysMsgTimer = null;
-        window.cropperInstance = null;
 
-        // ===== LÓGICA DO UPLOADER (IMGBB + CROPPER) =====
+        // ===== MICRO-FRONTEND UPLOADER =====
         window.openUploader = (inputId) => {
             window.currentTargetInputId = inputId;
+            const iframe = document.getElementById('uploader-iframe');
+            iframe.src = './uploader/index.html?target=' + inputId;
             document.getElementById('uploader-modal').classList.remove('hidden');
-            window.resetUploader();
-            
-            const dropZone = document.getElementById('upload-status-area');
-            dropZone.ondragover = (e) => { e.preventDefault(); dropZone.classList.add('bg-teal-200'); };
-            dropZone.ondragleave = (e) => { e.preventDefault(); dropZone.classList.remove('bg-teal-200'); };
-            dropZone.ondrop = (e) => {
-                e.preventDefault();
-                dropZone.classList.remove('bg-teal-200');
-                if(e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-                    const file = e.dataTransfer.files[0];
-                    if(file.type.startsWith('image/')) window.loadImageForCropping(file);
-                }
-            };
         };
 
         window.closeUploader = () => {
             document.getElementById('uploader-modal').classList.add('hidden');
-            if(window.cropperInstance) { window.cropperInstance.destroy(); window.cropperInstance = null; }
-        };
-
-        window.resetUploader = () => {
-            document.getElementById('uploader-initial-view').classList.remove('hidden');
-            document.getElementById('uploader-crop-view').classList.add('hidden');
-            document.getElementById('uploader-loading-overlay').classList.add('hidden');
-            const statusArea = document.getElementById('upload-status-area');
-            statusArea.className = "h-32 flex flex-col items-center justify-center border-2 border-dashed border-teal-200 rounded-2xl bg-teal-50 mb-4 cursor-pointer hover:bg-teal-100 transition-colors relative group";
-            document.getElementById('upload-status-text').innerText = "Ou clique aqui para buscar...";
-            document.getElementById('file-input-traditional').value = "";
-            if(window.cropperInstance) { window.cropperInstance.destroy(); window.cropperInstance = null; }
-        };
-
-        window.handleTraditionalUpload = (e) => {
-            if(e.target.files && e.target.files.length > 0) window.loadImageForCropping(e.target.files[0]);
-        };
-
-        window.addEventListener('paste', (e) => {
-            const modal = document.getElementById('uploader-modal');
-            if (!modal.classList.contains('hidden') && !document.getElementById('uploader-initial-view').classList.contains('hidden')) {
-                const items = (e.clipboardData || e.originalEvent.clipboardData).items;
-                let file = null;
-                for (const item of items) {
-                    if (item.type.indexOf('image') === 0) { file = item.getAsFile(); break; }
-                }
-                if (file) window.loadImageForCropping(file);
-            }
-        });
-
-        window.loadImageForCropping = (file) => {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const img = document.getElementById('uploader-image-source');
-                img.src = e.target.result;
-                img.classList.remove('hidden');
-                document.getElementById('uploader-initial-view').classList.add('hidden');
-                document.getElementById('uploader-crop-view').classList.remove('hidden');
-
-                if (window.cropperInstance) window.cropperInstance.destroy();
-                window.cropperInstance = new Cropper(img, { aspectRatio: 4 / 5, viewMode: 1, dragMode: 'move', autoCropArea: 0.9, background: false, guides: true });
-                const btns = document.querySelectorAll('.crop-ratio-btn');
-                if(btns.length > 0) window.setCropRatio(4/5, btns[0]);
-            };
-            reader.readAsDataURL(file);
-        };
-
-        window.setCropRatio = (ratio, btnElement) => {
-            if (window.cropperInstance) window.cropperInstance.setAspectRatio(ratio);
-            document.querySelectorAll('.crop-ratio-btn').forEach(btn => {
-                btn.className = "crop-ratio-btn bg-gray-100 text-gray-600 hover:bg-gray-200 px-4 py-1.5 rounded-lg text-xs font-bold shadow-sm whitespace-nowrap";
-            });
-            btnElement.className = "crop-ratio-btn bg-teal-600 text-white px-4 py-1.5 rounded-lg text-xs font-bold shadow-sm whitespace-nowrap";
-        };
-
-        window.processCropAndUpload = () => {
-            if (!window.cropperInstance) return;
-            document.getElementById('uploader-loading-overlay').classList.remove('hidden');
-            const btnEx = document.getElementById('btn-execute-crop');
-            if(btnEx) btnEx.disabled = true;
-
-            const canvas = window.cropperInstance.getCroppedCanvas({ maxWidth: 1080, maxHeight: 1080, imageSmoothingEnabled: true, imageSmoothingQuality: 'high' });
-            canvas.toBlob((blob) => { window.uploadBlobToImgBB(blob); }, 'image/webp', 0.85);
-        };
-
-        window.uploadBlobToImgBB = async (imageBlob) => {
-            const formData = new FormData();
-            formData.append('image', imageBlob);
-            try {
-                const response = await fetch("https://api.imgbb.com/1/upload?key=" + IMGBB_API_KEY, { method: 'POST', body: formData });
-                const data = await response.json();
-                if (data.success) {
-                    if(window.currentTargetInputId) {
-                        const targetInput = document.getElementById(window.currentTargetInputId);
-                        if(targetInput) { targetInput.value = data.data.url; window.updateEditorPreview(); }
-                    }
-                    window.closeUploader();
-                    window.showToast("Imagem adicionada com sucesso!");
-                } else throw new Error("Erro na API");
-            } catch (error) {
-                window.resetUploader();
-                const statusArea = document.getElementById('upload-status-area');
-                const statusText = document.getElementById('upload-status-text');
-                statusText.innerText = "Falha no envio. Tente novamente.";
-                statusText.className = "text-red-500 font-bold text-sm";
-                statusArea.classList.replace('bg-teal-50', 'bg-red-50');
-                statusArea.classList.replace('border-teal-200', 'border-red-200');
-            } finally {
-                const btnEx = document.getElementById('btn-execute-crop');
-                if(btnEx) btnEx.disabled = false;
-            }
+            document.getElementById('uploader-iframe').src = '';
         };
 
         // ===== UTILITÁRIOS GLOBAIS =====
@@ -774,8 +626,8 @@
                 btnOk.className = "flex-1 py-3 rounded-xl font-black text-sm text-white shadow-md transition-all " + (actionBtn.color || 'bg-teal-600 hover:bg-teal-700');
                 btnOk.innerText = actionBtn.text;
                 btnOk.onclick = async () => { 
-                    window.closeSystemMessage(); 
                     if(actionBtn.onClick) await actionBtn.onClick(); 
+                    else window.closeSystemMessage();
                 };
                 
                 const btnCancel = document.createElement('button');
@@ -806,7 +658,7 @@
             window.sysMsgTimer = setTimeout(() => modal.classList.add('hidden'), 300);
         };
 
-        // ===== AUTENTICAÇÃO BLINDADA =====
+        // ===== AUTENTICAÇÃO E ROTA SECRETA =====
         window.triggerAdminLoginFlow = async () => {
             window.showSystemMessage("Área Restrita", "Acesso exclusivo para a equipe.", "info", {
                 text: "Login Google", color: "bg-blue-600 hover:bg-blue-700", onClick: async () => {
@@ -820,6 +672,7 @@
                             await signOut(auth);
                             setTimeout(() => window.location.reload(), 3000);
                         } else {
+                            window.closeSystemMessage();
                             window.openAdminDashboard();
                         }
                     } catch (error) { 
@@ -842,17 +695,28 @@
             clearTimeout(adminClickTimer);
             if (adminClickCount >= 5) {
                 adminClickCount = 0;
-                
                 const email = (window.currentUser && window.currentUser.email) ? window.currentUser.email.toLowerCase().trim() : '';
-                
-                if(ALLOWED_EMAILS.includes(email)) {
-                    window.openAdminDashboard();
-                } else {
-                    window.triggerAdminLoginFlow();
-                }
+                if(ALLOWED_EMAILS.includes(email)) window.openAdminDashboard();
+                else window.triggerAdminLoginFlow();
             }
             adminClickTimer = setTimeout(() => adminClickCount = 0, 3000);
         };
+
+        // Verifica a Rota Oculta "?admin=true" e dispara a autenticação na hora
+        onAuthStateChanged(auth, async (user) => {
+            window.currentUser = user;
+            
+            const urlParams = new URLSearchParams(window.location.search);
+            const isRequestingAdmin = urlParams.get('admin') === 'true';
+
+            if (user && user.email && ALLOWED_EMAILS.includes(user.email.toLowerCase().trim())) {
+                if (isRequestingAdmin) window.openAdminDashboard();
+            } else if (isRequestingAdmin) {
+                window.triggerAdminLoginFlow();
+            } else if (!user) {
+                try { await signInAnonymously(auth); } catch(e) { console.warn("Modo Anônimo não ativado."); }
+            }
+        });
 
         // ===== FUNÇÕES DA LOJA (NAVEGAÇÃO) =====
         window.showView = (view, type = null) => {
@@ -1089,13 +953,13 @@
             window.open(`https://wa.me/${numeroFormatado}?text=${encodeURIComponent(text)}`, '_blank');
         };
 
-        // ===== RENDERIZAÇÃO VISUAL =====
+        // ===== RENDERIZAÇÃO VISUAL (ALIMENTADA PELO FIREBASE) =====
         window.renderFeed = () => {
             const container = document.getElementById('feed-container');
             if(!container) return;
             
             let feedItems = filterItems(window.appItems.filter(item => item.vitrine === true));
-            if(feedItems.length === 0) { container.innerHTML = `<p class="text-center py-10 text-gray-400">A carregar destaques...</p>`; return; }
+            if(feedItems.length === 0) { container.innerHTML = `<p class="text-center py-10 text-gray-400">Nenhum destaque na vitrine.</p>`; return; }
 
             container.innerHTML = feedItems.map(item => {
                 const ytId = window.getYoutubeId(item.youtubeUrl);
@@ -1394,8 +1258,6 @@
                 };
 
                 const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("O servidor demorou muito a responder.")), 10000));
-                const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
-                const db = getFirestore(app);
 
                 if (id) await Promise.race([ updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'items', id), data), timeoutPromise ]);
                 else await Promise.race([ addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'items'), { ...data, createdAt: Date.now() }), timeoutPromise ]);
@@ -1413,9 +1275,6 @@
                 text: "Excluir", color: "bg-red-500 hover:bg-red-600", onClick: async () => {
                     try {
                         const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Tempo limite excedido.")), 10000));
-                        const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
-                        const db = getFirestore(app);
-
                         await Promise.race([ deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'items', id)), timeoutPromise ]);
                         window.closeItemEditor();
                         window.showToast("Excluído.");
@@ -1472,9 +1331,6 @@
                 };
                 const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("O servidor demorou muito a responder.")), 10000));
                 
-                const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
-                const db = getFirestore(app);
-
                 if (id) await Promise.race([ updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'groups', id), data), timeoutPromise ]); 
                 else await Promise.race([ addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'groups'), { ...data, createdAt: Date.now() }), timeoutPromise ]); 
                 
@@ -1490,9 +1346,6 @@
                 text: "Excluir", color: "bg-red-500 hover:bg-red-600", onClick: async () => {
                     try {
                         const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("O servidor demorou muito a responder.")), 10000));
-                        const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
-                        const db = getFirestore(app);
-
                         await Promise.race([ deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'groups', id)), timeoutPromise ]);
                         window.closeGroupEditor();
                         window.showToast("Excluído.");
@@ -1513,9 +1366,6 @@
                 const nameVal = document.getElementById('admin-set-storename').value;
                 const shareVal = document.getElementById('admin-set-sharemsg').value;
 
-                const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
-                const db = getFirestore(app);
-
                 await Promise.race([
                     setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'general'), {
                         whatsapp: waVal,
@@ -1531,19 +1381,15 @@
             finally { if(btn) { btn.innerText = originalBtnText; btn.disabled = false; } }
         };
 
-        // INICIALIZADOR DE EXECUÇÃO IMEDIATA (O "TIRADOR DE TELA BRANCA")
-        const startApplication = () => {
+        // INICIALIZAÇÃO DA VITRINE E DADOS (BLINDADA)
+        const initApp = async () => {
             try {
                 window.loadCartLocally();
                 window.renderFeed();
                 window.updateActiveNav();
                 window.updateCartUI();
 
-                const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
-                const db = getFirestore(app);
-                const auth = getAuth(app);
-
-                // OBTENÇÃO DE DADOS (Públicos) - Independente de Login
+                // PUXA DADOS PÚBLICOS INDEPENDENTE DE LOGIN
                 onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'items'), (snapshot) => {
                     window.appItems = []; snapshot.forEach(doc => window.appItems.push({ id: doc.id, ...doc.data() }));
                     window.appItems.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
@@ -1590,11 +1436,22 @@
                     }
                 });
 
-                // AUTENTICAÇÃO
+                // AUTENTICAÇÃO (Com rota secreta pela URL)
                 onAuthStateChanged(auth, async (user) => {
                     window.currentUser = user;
-                    if (!user) {
-                        try { await signInAnonymously(auth); } catch(e) {}
+                    
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const isAdminRoute = urlParams.get('admin') === 'true';
+
+                    if (user && user.email && ALLOWED_EMAILS.includes(user.email.toLowerCase().trim())) {
+                        // É um administrador já logado
+                        if (isAdminRoute) window.openAdminDashboard();
+                    } else if (isAdminRoute) {
+                        // Tentou acessar via URL, mas não está logado como admin
+                        window.triggerAdminLoginFlow();
+                    } else if (!user) {
+                        // Usuário comum navegando na vitrine
+                        try { await signInAnonymously(auth); } catch(e) { console.warn("Modo Anônimo não ativado/bloqueado."); }
                     }
                 });
 
@@ -1603,8 +1460,11 @@
             }
         };
 
-        // GATILHO DIRETO
-        startApplication();
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initApp);
+        } else {
+            initApp();
+        }
 
     </script>
 </body>
