@@ -57,6 +57,31 @@
                 });
             });
         }
+
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            const btn = document.getElementById('install-btn');
+            if (btn) btn.classList.remove('hidden');
+        });
+
+        window.installApp = async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    document.getElementById('install-btn').classList.add('hidden');
+                }
+                deferredPrompt = null;
+            } else {
+                window.showSystemMessage(
+                    "Instalar o Aplicativo", 
+                    "No Android: Procure 'Instalar Aplicativo' no menu do navegador (3 pontinhos).\n\nNo iPhone (iOS): Toque no botão 'Partilhar' (quadrado com seta) e escolha 'Adicionar à Tela de Início'.\n\nIsso vai instalar a loja como um aplicativo no seu telemóvel!", 
+                    "info"
+                );
+            }
+        };
     </script>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -77,6 +102,9 @@
             <div class="flex items-center gap-2 relative z-50">
                 <button onclick="window.shareApp()" class="p-2 text-gray-500 hover:text-teal-700 bg-gray-50 rounded-full transition-colors border border-gray-100 shadow-sm active:scale-95" title="Compartilhar App">
                     <i data-lucide="share-2" class="w-5 h-5 pointer-events-none"></i>
+                </button>
+                <button id="install-btn" onclick="window.installApp()" class="px-3 py-1.5 bg-teal-50 text-teal-700 text-xs font-bold rounded-lg border border-teal-200 hover:bg-teal-100 transition-colors shadow-sm hidden active:scale-95">
+                    Instalar App
                 </button>
                 <button onclick="window.openLocation()" class="p-2 text-gray-500 hover:text-teal-700 bg-gray-50 rounded-full transition-colors border border-gray-100 shadow-sm active:scale-95" title="Nossa Loja">
                     <i data-lucide="map-pin" class="w-5 h-5 pointer-events-none"></i>
@@ -366,6 +394,12 @@
                         <div id="editor-image-preview" class="flex w-full h-full overflow-x-auto snap-x snap-mandatory no-scrollbar scroll-smooth">
                             <img src="https://placehold.co/600x600?text=Sem+Imagem" class="w-full h-full object-contain bg-white flex-shrink-0 snap-center">
                         </div>
+                        <button type="button" onclick="window.scrollCarousel('editor-image-preview', -1)" class="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-white/80 hover:bg-white text-gray-800 rounded-full flex items-center justify-center shadow backdrop-blur-sm transition-colors z-20">
+                            <i data-lucide="chevron-left" class="w-5 h-5"></i>
+                        </button>
+                        <button type="button" onclick="window.scrollCarousel('editor-image-preview', 1)" class="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-white/80 hover:bg-white text-gray-800 rounded-full flex items-center justify-center shadow backdrop-blur-sm transition-colors z-20">
+                            <i data-lucide="chevron-right" class="w-5 h-5"></i>
+                        </button>
                     </div>
                 </div>
 
@@ -465,11 +499,10 @@
     </div>
 
     <script type="module">
-        import { getApps, initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // CONFIGURAÇÕES GLOBAIS E DE SEGURANÇA
         const ALLOWED_EMAILS = ["professoragiselle.edu2@gmail.com", "gvconecta2025@gmail.com"];
         const appId = 'amigopet-d6992';
 
@@ -481,6 +514,11 @@
             messagingSenderId: "814082291596",
             appId: "1:814082291596:web:653e165ec09b9825c0c8a9"
         };
+
+        // INICIALIZAÇÃO IMEDIATA E GLOBAL (Isto resolve o "branco" e o "falha no Google Auth")
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
 
         window.appItems = [];
         window.appGroups = [];
@@ -611,10 +649,7 @@
                     const btnEl = document.createElement('button');
                     btnEl.className = "w-full py-3 rounded-xl font-black text-sm shadow-sm transition-all " + (btn.class || "bg-gray-100 text-gray-600 hover:bg-gray-200");
                     btnEl.innerText = btn.text;
-                    btnEl.onclick = async () => { 
-                        window.closeSystemMessage(); 
-                        if(btn.onClick) await btn.onClick(); 
-                    };
+                    btnEl.onclick = () => { window.closeSystemMessage(); if(btn.onClick) btn.onClick(); };
                     btnContainer.appendChild(btnEl);
                 });
             } else if(actionBtn) {
@@ -622,11 +657,8 @@
                 const btnOk = document.createElement('button');
                 btnOk.className = "flex-1 py-3 rounded-xl font-black text-sm text-white shadow-md transition-all " + (actionBtn.color || 'bg-teal-600 hover:bg-teal-700');
                 btnOk.innerText = actionBtn.text;
-                btnOk.onclick = async () => { 
-                    // Remove a classe hidden do modal de forma forçada, se o botão de login abrir a aba do google e bugar, o modal não fecha
-                    if(actionBtn.onClick) await actionBtn.onClick(); 
-                    else window.closeSystemMessage();
-                };
+                // Executar a ação antes de fechar impede que os bloqueadores de popup anulem o clique do google
+                btnOk.onclick = () => { window.closeSystemMessage(); if(actionBtn.onClick) actionBtn.onClick(); };
                 
                 const btnCancel = document.createElement('button');
                 btnCancel.className = "flex-1 py-3 rounded-xl font-bold text-sm text-gray-500 bg-gray-100 hover:bg-gray-200 transition-colors";
@@ -662,10 +694,7 @@
                 text: "Login Google", color: "bg-blue-600 hover:bg-blue-700", onClick: async () => {
                     const provider = new GoogleAuthProvider();
                     try {
-                        const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
-                        const auth = getAuth(app);
                         const result = await signInWithPopup(auth, provider);
-                        
                         const userEmail = (result.user.email || '').toLowerCase().trim();
                         
                         if(!ALLOWED_EMAILS.includes(userEmail)) {
@@ -673,7 +702,6 @@
                             await signOut(auth);
                             setTimeout(() => window.location.reload(), 3000);
                         } else {
-                            window.closeSystemMessage();
                             window.openAdminDashboard();
                         }
                     } catch (error) { 
@@ -685,8 +713,6 @@
         };
 
         window.adminSignOut = async () => { 
-            const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
-            const auth = getAuth(app);
             await signOut(auth); 
             window.location.reload(); 
         };
@@ -707,11 +733,10 @@
                     window.triggerAdminLoginFlow();
                 }
             }
-            // Aumentei a margem de tempo para dar os 5 cliques com tranquilidade
             adminClickTimer = setTimeout(() => adminClickCount = 0, 3000);
         };
 
-        // ===== FUNÇÕES DA LOJA (NAVEGAÇÃO) =====
+        // ===== NAVEGAÇÃO DA LOJA =====
         window.showView = (view, type = null) => {
             ['home-view', 'catalog-view', 'detail-view', 'alerts-view', 'cart-view'].forEach(id => document.getElementById(id).classList.add('hidden'));
             
@@ -931,12 +956,14 @@
             if(window.cart.length === 0) return;
             let totalValue = 0;
             let text = "Olá! Acessei o aplicativo da sua loja e gostaria de fazer o seguinte pedido:\n\n";
+            
             window.cart.forEach(item => {
                 const itemPrice = window.parseCurrency(item.price);
                 const subtotal = itemPrice * item.quantity;
                 totalValue += subtotal;
                 text += `🐾 ${item.quantity}x *${item.title}*\n  ID: ${window.getShortId(item)}\n  Un: ${window.formatCurrency(itemPrice)} | Subtotal: ${window.formatCurrency(subtotal)}\n\n`;
             });
+
             const shortClientId = window.currentUser ? window.generateCodeId('C', window.currentUser.uid) : "C000";
             text += `*Total do Pedido: ${window.formatCurrency(totalValue)}*\n\n👤 *Cliente ID:* ${shortClientId}\n\nQual o procedimento agora?`;
             
@@ -1249,8 +1276,6 @@
                 };
 
                 const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("O servidor demorou muito a responder.")), 10000));
-                const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
-                const db = getFirestore(app);
 
                 if (id) await Promise.race([ updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'items', id), data), timeoutPromise ]);
                 else await Promise.race([ addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'items'), { ...data, createdAt: Date.now() }), timeoutPromise ]);
@@ -1268,8 +1293,6 @@
                 text: "Excluir", color: "bg-red-500 hover:bg-red-600", onClick: async () => {
                     try {
                         const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Tempo limite excedido.")), 10000));
-                        const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
-                        const db = getFirestore(app);
 
                         await Promise.race([ deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'items', id)), timeoutPromise ]);
                         window.closeItemEditor();
@@ -1327,9 +1350,6 @@
                 };
                 const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("O servidor demorou muito a responder.")), 10000));
                 
-                const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
-                const db = getFirestore(app);
-
                 if (id) await Promise.race([ updateDoc(doc(db, 'artifacts', appId, 'public', 'data', 'groups', id), data), timeoutPromise ]); 
                 else await Promise.race([ addDoc(collection(db, 'artifacts', appId, 'public', 'data', 'groups'), { ...data, createdAt: Date.now() }), timeoutPromise ]); 
                 
@@ -1345,8 +1365,6 @@
                 text: "Excluir", color: "bg-red-500 hover:bg-red-600", onClick: async () => {
                     try {
                         const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("O servidor demorou muito a responder.")), 10000));
-                        const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
-                        const db = getFirestore(app);
 
                         await Promise.race([ deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'groups', id)), timeoutPromise ]);
                         window.closeGroupEditor();
@@ -1368,9 +1386,6 @@
                 const nameVal = document.getElementById('admin-set-storename').value;
                 const shareVal = document.getElementById('admin-set-sharemsg').value;
 
-                const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
-                const db = getFirestore(app);
-
                 await Promise.race([
                     setDoc(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'general'), {
                         whatsapp: waVal,
@@ -1386,17 +1401,30 @@
             finally { if(btn) { btn.innerText = originalBtnText; btn.disabled = false; } }
         };
 
-        // INICIALIZADOR DE EXECUÇÃO IMEDIATA (O "TIRADOR DE TELA BRANCA")
-        const startApplication = () => {
+        // INICIALIZAÇÃO DA VITRINE E DADOS
+        window.onload = async () => {
+            window.loadCartLocally();
+            if (window.lucide) window.lucide.createIcons();
+            
+            window.renderFeed();
+            window.updateActiveNav();
+            window.updateCartUI();
+            
             try {
-                window.loadCartLocally();
-                if (window.lucide) window.lucide.createIcons();
-                
-                const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
-                const db = getFirestore(app);
-                const auth = getAuth(app);
+                if (!auth.currentUser) await signInAnonymously(auth);
+            } catch(e) { console.error("Auth erro:", e); }
 
-                // OBTENÇÃO DE DADOS (Públicos) - Independente de Login
+            onAuthStateChanged(auth, async (user) => {
+                if (!user) {
+                    try { await signInAnonymously(auth); } catch(e) {}
+                    return; 
+                }
+
+                window.currentUser = user;
+
+                if (window.isFirebaseListening) return;
+                window.isFirebaseListening = true;
+
                 onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'items'), (snapshot) => {
                     window.appItems = []; snapshot.forEach(doc => window.appItems.push({ id: doc.id, ...doc.data() }));
                     window.appItems.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
@@ -1431,6 +1459,7 @@
                         }
                         if(data.shareMessage) window.appSettings.shareMessage = data.shareMessage;
                     }
+                    
                     if(window.isAdminView) {
                         const waInput = document.getElementById('admin-set-whatsapp');
                         const mapsInput = document.getElementById('admin-set-maps');
@@ -1442,22 +1471,8 @@
                         if (shareInput) shareInput.value = window.appSettings.shareMessage || '';
                     }
                 });
-
-                // AUTENTICAÇÃO (Apenas reage, não bloqueia nada)
-                onAuthStateChanged(auth, async (user) => {
-                    window.currentUser = user;
-                    if (!user) {
-                        try { await signInAnonymously(auth); } catch(e) { console.warn("Modo Anônimo não ativado/bloqueado."); }
-                    }
-                });
-
-            } catch (err) {
-                console.error("Erro fatal de inicialização:", err);
-            }
+            });
         };
-
-        // GATILHO DIRETO
-        startApplication();
 
     </script>
 </body>
