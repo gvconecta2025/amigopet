@@ -7,7 +7,7 @@
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    
+
     <style>
         :root {
             --cor-fundo: #f8fafc;
@@ -299,6 +299,7 @@
                             <input type="text" id="adminSearchInput" onkeyup="window.renderAdminItems()" placeholder="Buscar no sistema..." class="w-full bg-white border border-gray-200 text-gray-700 text-sm rounded-xl pl-9 pr-4 py-2.5 outline-none shadow-sm focus:border-teal-500 transition-colors">
                         </div>
                     </div>
+
                     <div id="admin-items-list" class="grid grid-cols-1 md:grid-cols-2 gap-4 pb-4"></div>
                 </div>
 
@@ -421,16 +422,24 @@
                     <label class="block text-xs font-black text-gray-500 uppercase tracking-widest mb-1">Links das Imagens (Upload via clique)</label>
                     <div class="space-y-2">
                         <div class="relative">
-                            <input type="text" id="item-image-1" oninput="window.updateEditorPreview()" placeholder="Imagem 1 (Principal)" class="w-full bg-gray-50 border border-gray-200 rounded-xl pl-3 pr-10 py-2.5 text-sm outline-none focus:border-teal-500">
+                            <input type="text" id="item-image-1" oninput="window.updateEditorPreview()" placeholder="Link Imagem 1 (Principal)" class="w-full bg-gray-50 border border-gray-200 rounded-xl pl-3 pr-10 py-2.5 text-sm outline-none focus:border-teal-500">
                             <button type="button" onclick="window.openUploader('item-image-1')" class="absolute right-2 top-1/2 -translate-y-1/2 text-teal-600 hover:text-teal-800 bg-teal-50 p-1.5 rounded-lg active:scale-95 transition-transform"><i data-lucide="upload" class="w-4 h-4"></i></button>
                         </div>
                         <div class="relative">
-                            <input type="text" id="item-image-2" oninput="window.updateEditorPreview()" placeholder="Imagem 2" class="w-full bg-gray-50 border border-gray-200 rounded-xl pl-3 pr-10 py-2.5 text-sm outline-none focus:border-teal-500">
+                            <input type="text" id="item-image-2" oninput="window.updateEditorPreview()" placeholder="Link Imagem 2" class="w-full bg-gray-50 border border-gray-200 rounded-xl pl-3 pr-10 py-2.5 text-sm outline-none focus:border-teal-500">
                             <button type="button" onclick="window.openUploader('item-image-2')" class="absolute right-2 top-1/2 -translate-y-1/2 text-teal-600 hover:text-teal-800 bg-teal-50 p-1.5 rounded-lg active:scale-95 transition-transform"><i data-lucide="upload" class="w-4 h-4"></i></button>
                         </div>
                         <div class="relative">
-                            <input type="text" id="item-image-3" oninput="window.updateEditorPreview()" placeholder="Imagem 3" class="w-full bg-gray-50 border border-gray-200 rounded-xl pl-3 pr-10 py-2.5 text-sm outline-none focus:border-teal-500">
+                            <input type="text" id="item-image-3" oninput="window.updateEditorPreview()" placeholder="Link Imagem 3" class="w-full bg-gray-50 border border-gray-200 rounded-xl pl-3 pr-10 py-2.5 text-sm outline-none focus:border-teal-500">
                             <button type="button" onclick="window.openUploader('item-image-3')" class="absolute right-2 top-1/2 -translate-y-1/2 text-teal-600 hover:text-teal-800 bg-teal-50 p-1.5 rounded-lg active:scale-95 transition-transform"><i data-lucide="upload" class="w-4 h-4"></i></button>
+                        </div>
+                        <div class="relative">
+                            <input type="text" id="item-image-4" oninput="window.updateEditorPreview()" placeholder="Link Imagem 4" class="w-full bg-gray-50 border border-gray-200 rounded-xl pl-3 pr-10 py-2.5 text-sm outline-none focus:border-teal-500">
+                            <button type="button" onclick="window.openUploader('item-image-4')" class="absolute right-2 top-1/2 -translate-y-1/2 text-teal-600 hover:text-teal-800 bg-teal-50 p-1.5 rounded-lg active:scale-95 transition-transform"><i data-lucide="upload" class="w-4 h-4"></i></button>
+                        </div>
+                        <div class="relative">
+                            <input type="text" id="item-image-5" oninput="window.updateEditorPreview()" placeholder="Link Imagem 5" class="w-full bg-gray-50 border border-gray-200 rounded-xl pl-3 pr-10 py-2.5 text-sm outline-none focus:border-teal-500">
+                            <button type="button" onclick="window.openUploader('item-image-5')" class="absolute right-2 top-1/2 -translate-y-1/2 text-teal-600 hover:text-teal-800 bg-teal-50 p-1.5 rounded-lg active:scale-95 transition-transform"><i data-lucide="upload" class="w-4 h-4"></i></button>
                         </div>
                     </div>
                 </div>
@@ -473,7 +482,6 @@
         import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // CONFIGURAÇÕES GLOBAIS
         const ADMIN_EMAIL = "professoragiselle.edu2@gmail.com"; 
         
         const firebaseConfig = {
@@ -503,7 +511,6 @@
         let isAdminView = false;
 
         // ===== INTEGRAÇÃO COM UPLOADER MICRO-FRONTEND =====
-        
         window.openUploader = (inputId) => {
             const iframe = document.getElementById('uploader-iframe');
             iframe.src = './uploader/index.html?target=' + inputId;
@@ -514,26 +521,25 @@
             document.getElementById('uploader-modal').classList.add('hidden');
             document.getElementById('uploader-iframe').src = '';
         };
-
         // ===================================================
-
-        let currentSearchQuery = '';
-        let currentHistory = [];
 
         window.getDriveImageUrl = (url) => { 
             if (!url) return ""; 
             const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/); 
             return match ? `https://lh3.googleusercontent.com/d/${match[1]}` : url; 
         };
+        
         window.getYoutubeId = (url) => { 
             if (!url) return null;
             const match = url.match(/^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/); 
             return (match && match[2].length === 11) ? match[2] : null; 
         };
+        
         window.parseCurrency = (str) => {
             if(!str) return 0;
             return parseFloat(str.replace(/[^\d,.-]/g, '').replace(/\./g, '').replace(',', '.'));
         };
+        
         window.formatCurrency = (num) => num.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
         window.generateCodeId = (prefix, firebaseId) => {
@@ -650,7 +656,7 @@
                         const result = await signInWithPopup(auth, provider);
                         const userEmail = (result.user.email || '').toLowerCase();
                         if(userEmail !== ADMIN_EMAIL.toLowerCase()) {
-                            window.showSystemMessage("Acesso Negado", "Este e-mail não possui permissão de administrador.", "error");
+                            window.showSystemMessage("Acesso Negado", "Este e-mail não possui permissão.", "error");
                             await signOut(auth);
                             setTimeout(() => window.location.reload(), 2500);
                         } else {
@@ -677,94 +683,30 @@
             adminClickTimer = setTimeout(() => adminClickCount = 0, 1500);
         };
 
-        window.onload = async () => {
-            window.loadCartLocally();
-            if (window.lucide) window.lucide.createIcons();
-            
-            window.renderFeed();
-            window.updateActiveNav();
-            window.updateCartUI();
-            
-            try { if (!auth.currentUser) await signInAnonymously(auth); } catch(e) {}
-
-            onAuthStateChanged(auth, async (user) => {
-                if (!user) {
-                    try { await signInAnonymously(auth); } catch(e) {}
-                    return; 
-                }
-                window.currentUser = user;
-                if (window.isFirebaseListening) return;
-                window.isFirebaseListening = true;
-
-                onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'items'), (snapshot) => {
-                    window.appItems = []; snapshot.forEach(doc => window.appItems.push({ id: doc.id, ...doc.data() }));
-                    window.appItems.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-                    if(!isAdminView) {
-                        if(currentView === 'home') window.renderFeed();
-                        if(currentView === 'catalog') window.renderCatalog();
-                        if(currentView === 'detail' && window.currentDetailId) window.openDetail(window.currentDetailId);
-                    } else window.renderAdminItems();
-                });
-
-                onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'groups'), (snapshot) => {
-                    window.appGroups = []; snapshot.forEach(doc => window.appGroups.push({ id: doc.id, ...doc.data() }));
-                    window.appGroups.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-                    if(currentView === 'alerts' && !isAdminView) window.renderAlerts();
-                    if(isAdminView) window.renderAdminGroups();
-                });
-
-                onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'general'), (docSnap) => {
-                    if(docSnap.exists()) {
-                        const data = docSnap.data();
-                        if(data.whatsapp) window.appSettings.whatsapp = data.whatsapp;
-                        if(data.mapsUrl) window.appSettings.mapsUrl = data.mapsUrl;
-                        if(data.storeName) {
-                            window.appSettings.storeName = data.storeName;
-                            const headerName = document.getElementById('header-store-name');
-                            if(headerName) headerName.innerText = data.storeName;
-                            const pageTitle = document.getElementById('page-title');
-                            if(pageTitle) pageTitle.innerText = data.storeName;
-                        }
-                        if(data.shareMessage) window.appSettings.shareMessage = data.shareMessage;
-                    }
-                    if(isAdminView) {
-                        const waInput = document.getElementById('admin-set-whatsapp');
-                        const mapsInput = document.getElementById('admin-set-maps');
-                        const nameInput = document.getElementById('admin-set-storename');
-                        const shareInput = document.getElementById('admin-set-sharemsg');
-                        if (waInput) waInput.value = window.appSettings.whatsapp || '';
-                        if (mapsInput) mapsInput.value = window.appSettings.mapsUrl || '';
-                        if (nameInput) nameInput.value = window.appSettings.storeName || '';
-                        if (shareInput) shareInput.value = window.appSettings.shareMessage || '';
-                    }
-                });
-            });
-        };
-
         window.showView = (view, type = null) => {
             ['home-view', 'catalog-view', 'detail-view', 'alerts-view', 'cart-view'].forEach(id => document.getElementById(id).classList.add('hidden'));
             if(view !== 'detail' && view !== 'cart') { document.getElementById('searchInput').value = ''; window.currentSearchQuery = ''; }
 
-            if (view === 'home') { document.getElementById('home-view').classList.remove('hidden'); window.renderFeed(); currentHistory = ['home']; } 
+            if (view === 'home') { document.getElementById('home-view').classList.remove('hidden'); window.renderFeed(); window.currentHistory = ['home']; } 
             else if (view === 'catalog') {
-                currentCatalogType = type;
+                window.currentCatalogType = type;
                 const titleObj = document.getElementById('catalog-title'); const subObj = document.getElementById('catalog-subtitle');
                 if(type === 'product') { titleObj.innerHTML = `<i data-lucide="shopping-bag" class="w-6 h-6 text-teal-600"></i> Produtos`; subObj.innerText = "Nossa vitrine de rações, brinquedos e acessórios."; } 
                 else { titleObj.innerHTML = `<i data-lucide="scissors" class="w-6 h-6 text-teal-600"></i> Serviços`; subObj.innerText = "Banho, tosa, veterinário e muito mais."; }
-                document.getElementById('catalog-view').classList.remove('hidden'); window.renderCatalog(); currentHistory = ['catalog', type]; if (window.lucide) window.lucide.createIcons();
+                document.getElementById('catalog-view').classList.remove('hidden'); window.renderCatalog(); window.currentHistory = ['catalog', type]; if (window.lucide) window.lucide.createIcons();
             }
-            else if (view === 'alerts') { document.getElementById('alerts-view').classList.remove('hidden'); window.renderAlerts(); currentHistory = ['alerts']; }
-            else if (view === 'cart') { document.getElementById('cart-view').classList.remove('hidden'); window.updateCartUI(); currentHistory = ['cart']; }
-            currentView = view; window.updateActiveNav(view, type); window.scrollTo(0, 0);
+            else if (view === 'alerts') { document.getElementById('alerts-view').classList.remove('hidden'); window.renderAlerts(); window.currentHistory = ['alerts']; }
+            else if (view === 'cart') { document.getElementById('cart-view').classList.remove('hidden'); window.updateCartUI(); window.currentHistory = ['cart']; }
+            window.currentView = view; window.updateActiveNav(view, type); window.scrollTo(0, 0);
         };
 
         window.goBack = () => {
-            if(currentHistory[0] === 'home') window.showView('home');
-            else if(currentHistory[0] === 'catalog') window.showView('catalog', currentHistory[1]);
+            if(window.currentHistory && window.currentHistory[0] === 'home') window.showView('home');
+            else if(window.currentHistory && window.currentHistory[0] === 'catalog') window.showView('catalog', window.currentHistory[1]);
             else window.showView('home'); 
         };
 
-        window.updateActiveNav = (view = currentView, type = currentCatalogType) => {
+        window.updateActiveNav = (view = window.currentView, type = window.currentCatalogType) => {
             document.querySelectorAll('.nav-btn').forEach(btn => {
                 btn.classList.remove('text-teal-700', 'text-[#25D366]');
                 btn.classList.add('text-gray-400');
@@ -802,9 +744,9 @@
 
         window.handleSearch = (e) => {
             window.currentSearchQuery = e.target.value.toLowerCase();
-            if((currentView === 'home' || currentView === 'alerts') && window.currentSearchQuery.length > 0) window.showView('catalog', 'product');
-            else if (currentView === 'catalog') window.renderCatalog();
-            else if (currentView === 'home') window.renderFeed();
+            if((window.currentView === 'home' || window.currentView === 'alerts') && window.currentSearchQuery.length > 0) window.showView('catalog', 'product');
+            else if (window.currentView === 'catalog') window.renderCatalog();
+            else if (window.currentView === 'home') window.renderFeed();
         };
         
         window.filterByTag = (tag) => { document.getElementById('searchInput').value = tag; window.currentSearchQuery = tag.toLowerCase(); window.renderCatalog(); };
@@ -989,14 +931,17 @@
 
         window.renderCatalog = () => {
             const container = document.getElementById('catalog-container');
-            let items = filterItems(window.appItems.filter(item => window.currentSearchQuery ? (item.type === 'product' || item.type === 'service') : item.type === currentCatalogType));
+            let items = filterItems(window.appItems.filter(item => window.currentSearchQuery ? (item.type === 'product' || item.type === 'service') : item.type === window.currentCatalogType));
             if(items.length === 0) { container.innerHTML = `<div class="col-span-full py-10 text-center"><p class="text-gray-400">Nenhum item encontrado.</p></div>`; return; }
 
             container.innerHTML = items.map(item => {
                 const imgUrl = item.images && item.images.length > 0 ? window.getDriveImageUrl(item.images[0]) : window.getDriveImageUrl(item.image);
+                const isCarousel = item.images && item.images.length > 1;
+
                 return `
                 <div onclick="window.openDetail('${item.id}')" class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden cursor-pointer group flex flex-col h-full relative hover:border-teal-500 transition-colors">
                     ${item.type === 'offer' ? `<div class="absolute top-2 right-2 bg-orange-500 text-white text-[9px] font-black px-2 py-0.5 rounded-md shadow uppercase tracking-wider z-10">Oferta</div>` : ''}
+                    ${isCarousel ? `<div class="absolute top-2 left-2 bg-black/50 text-white text-[9px] font-bold px-1.5 py-0.5 rounded z-10 pointer-events-none flex items-center gap-1"><i data-lucide="images" class="w-3 h-3"></i></div>` : ''}
                     <div class="aspect-square bg-white relative overflow-hidden border-b border-gray-50"><img src="${imgUrl}" class="w-full h-full object-contain bg-white group-hover:scale-105 transition-transform duration-500" onerror="this.onerror=null;this.src='https://placehold.co/300x300?text=Imagem'"></div>
                     <div class="p-3 flex flex-col flex-grow">
                         <div class="flex justify-between items-start gap-1 mb-1"><h3 class="text-sm font-bold text-gray-800 leading-tight line-clamp-2">${item.title}</h3></div>
@@ -1012,7 +957,7 @@
             window.currentDetailId = id; 
             const item = window.appItems.find(x => x.id === id); if(!item) return;
             
-            ['home-view', 'catalog-view', 'alerts-view', 'cart-view'].forEach(vid => document.getElementById(vid).classList.add('hidden')); document.getElementById('detail-view').classList.remove('hidden'); currentView = 'detail'; window.scrollTo(0, 0);
+            ['home-view', 'catalog-view', 'alerts-view', 'cart-view'].forEach(vid => document.getElementById(vid).classList.add('hidden')); document.getElementById('detail-view').classList.remove('hidden'); window.currentView = 'detail'; window.scrollTo(0, 0);
             
             const container = document.getElementById('detail-container');
             const ytId = window.getYoutubeId(item.youtubeUrl);
@@ -1241,7 +1186,7 @@
 
                 const id = document.getElementById('edit-item-id').value;
                 const tagsArray = document.getElementById('item-tags').value.split(',').map(t => t.trim()).filter(t => t);
-                const isPermanent = document.querySelector('input[name="item_permanent"]:checked').value === "true"; 
+                const isPermanent = document.querySelector('input[name="item_permanent"]:checked')?.value === "true"; 
                 
                 const expDateStr = document.getElementById('item-expiration').value;
                 let expiresAt = null;
@@ -1391,6 +1336,83 @@
             } catch(e) { window.showSystemMessage("Erro", e.message, "error"); } 
             finally { if(btn) { btn.innerText = originalBtnText; btn.disabled = false; } }
         };
+
+        // INICIALIZADOR BLINDADO (Sem depender de window.onload)
+        const initApp = async () => {
+            window.loadCartLocally();
+            if (window.lucide) window.lucide.createIcons();
+            
+            window.renderFeed();
+            window.updateActiveNav();
+            window.updateCartUI();
+            
+            try { if (!auth.currentUser) await signInAnonymously(auth); } catch(e) {}
+
+            onAuthStateChanged(auth, async (user) => {
+                if (!user) {
+                    try { await signInAnonymously(auth); } catch(e) {}
+                    return; 
+                }
+
+                window.currentUser = user;
+
+                if (window.isFirebaseListening) return;
+                window.isFirebaseListening = true;
+
+                onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'items'), (snapshot) => {
+                    window.appItems = []; snapshot.forEach(doc => window.appItems.push({ id: doc.id, ...doc.data() }));
+                    window.appItems.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+                    
+                    if(!isAdminView) {
+                        if(currentView === 'home') window.renderFeed();
+                        if(currentView === 'catalog') window.renderCatalog();
+                        if(currentView === 'detail' && window.currentDetailId) window.openDetail(window.currentDetailId);
+                    } else {
+                        window.renderAdminItems();
+                    }
+                });
+
+                onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'groups'), (snapshot) => {
+                    window.appGroups = []; snapshot.forEach(doc => window.appGroups.push({ id: doc.id, ...doc.data() }));
+                    window.appGroups.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+                    if(currentView === 'alerts' && !isAdminView) window.renderAlerts();
+                    if(isAdminView) window.renderAdminGroups();
+                });
+
+                onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'general'), (docSnap) => {
+                    if(docSnap.exists()) {
+                        const data = docSnap.data();
+                        if(data.whatsapp) window.appSettings.whatsapp = data.whatsapp;
+                        if(data.mapsUrl) window.appSettings.mapsUrl = data.mapsUrl;
+                        if(data.storeName) {
+                            window.appSettings.storeName = data.storeName;
+                            const headerName = document.getElementById('header-store-name');
+                            if(headerName) headerName.innerText = data.storeName;
+                            const pageTitle = document.getElementById('page-title');
+                            if(pageTitle) pageTitle.innerText = data.storeName;
+                        }
+                        if(data.shareMessage) window.appSettings.shareMessage = data.shareMessage;
+                    }
+                    
+                    if(isAdminView) {
+                        const waInput = document.getElementById('admin-set-whatsapp');
+                        const mapsInput = document.getElementById('admin-set-maps');
+                        const nameInput = document.getElementById('admin-set-storename');
+                        const shareInput = document.getElementById('admin-set-sharemsg');
+                        if (waInput) waInput.value = window.appSettings.whatsapp || '';
+                        if (mapsInput) mapsInput.value = window.appSettings.mapsUrl || '';
+                        if (nameInput) nameInput.value = window.appSettings.storeName || '';
+                        if (shareInput) shareInput.value = window.appSettings.shareMessage || '';
+                    }
+                });
+            });
+        };
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initApp);
+        } else {
+            initApp();
+        }
 
     </script>
 </body>
