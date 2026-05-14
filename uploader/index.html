@@ -4,10 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Uploader Otimizado Multi-Formatos</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
+    
     <style>
         .cropper-view-box, .cropper-face { border-radius: 8px; }
         .cropper-modal { background-color: rgba(0, 0, 0, 0.8); }
@@ -18,19 +20,19 @@
 <body class="bg-white min-h-screen m-0 p-0 overflow-hidden flex flex-col items-center justify-center">
 
     <div id="initial-view" class="p-6 text-center w-full max-w-sm flex flex-col items-center justify-center h-full">
-        <div class="w-16 h-16 bg-teal-50 text-teal-600 rounded-full flex items-center justify-center mb-4">
+        <div class="w-16 h-16 bg-teal-50 text-teal-600 rounded-full flex items-center justify-center mb-4 mx-auto">
             <i data-lucide="scissors" class="w-8 h-8"></i>
         </div>
         
         <h1 class="text-xl font-black text-gray-800 mb-2">Editor Rápido</h1>
         <p class="text-xs text-gray-500 mb-6">Tire um print ou copie uma imagem e pressione <kbd class="bg-gray-100 border border-gray-300 px-1 py-0.5 rounded text-gray-800 font-bold mx-1">Ctrl+V</kbd> aqui.</p>
 
-        <input type="file" id="file-input-traditional" class="hidden" accept="image/*" onchange="handleTraditionalUpload(event)">
+        <input type="file" id="file-input-traditional" class="hidden" accept="image/*" onchange="window.handleTraditionalUpload(event)">
         
-        <div id="status-area" onclick="document.getElementById('file-input-traditional').click()" class="w-full h-32 flex flex-col items-center justify-center border-2 border-dashed border-teal-200 rounded-2xl bg-teal-50 cursor-pointer hover:bg-teal-100 transition-colors">
+        <div id="status-area" onclick="document.getElementById('file-input-traditional').click()" class="w-full h-32 flex flex-col items-center justify-center border-2 border-dashed border-teal-200 rounded-2xl bg-teal-50 cursor-pointer hover:bg-teal-100 transition-colors mx-auto">
             <i data-lucide="upload" class="w-6 h-6 text-teal-500 mb-2"></i>
             <span id="status-text" class="text-teal-700 font-bold text-sm">Ou clique aqui para enviar</span>
-            <p class="text-[10px] text-teal-600/70 mt-1 uppercase tracking-widest font-black">Upload ImgBB</p>
+            <p class="text-[10px] text-teal-600/70 mt-1 uppercase tracking-widest font-black">Upload Inteligente (ImgBB)</p>
         </div>
     </div>
 
@@ -40,18 +42,18 @@
         </div>
 
         <div class="flex justify-center gap-2 overflow-x-auto no-scrollbar p-2 bg-white border-b border-gray-100 shrink-0">
-            <button onclick="setAspectRatio(4/5, this)" class="ratio-btn bg-teal-600 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold shadow-sm whitespace-nowrap">4:5 (Padrão)</button>
-            <button onclick="setAspectRatio(1, this)" class="ratio-btn bg-gray-100 text-gray-600 px-3 py-1.5 rounded-lg text-[10px] font-bold shadow-sm whitespace-nowrap">1:1</button>
-            <button onclick="setAspectRatio(16/9, this)" class="ratio-btn bg-gray-100 text-gray-600 px-3 py-1.5 rounded-lg text-[10px] font-bold shadow-sm whitespace-nowrap">16:9</button>
+            <button onclick="window.setAspectRatio(4/5, this)" class="ratio-btn bg-teal-600 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold shadow-sm whitespace-nowrap">4:5 (Padrão)</button>
+            <button onclick="window.setAspectRatio(1, this)" class="ratio-btn bg-gray-100 text-gray-600 px-3 py-1.5 rounded-lg text-[10px] font-bold shadow-sm whitespace-nowrap">1:1</button>
+            <button onclick="window.setAspectRatio(16/9, this)" class="ratio-btn bg-gray-100 text-gray-600 px-3 py-1.5 rounded-lg text-[10px] font-bold shadow-sm whitespace-nowrap">16:9</button>
         </div>
         
         <div class="flex-1 bg-gray-200 w-full relative overflow-hidden">
-            <img id="image-to-crop" class="max-w-full hidden">
+            <img id="image-to-crop" class="max-w-full hidden block mx-auto">
         </div>
 
         <div class="p-3 bg-white border-t border-gray-200 shrink-0 flex gap-2">
-            <button onclick="cancelCrop()" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold py-3 rounded-xl text-xs transition-colors">Cancelar</button>
-            <button id="btn-execute-crop" onclick="executeCropAndUpload()" class="flex-[2] bg-teal-600 hover:bg-teal-700 text-white font-black py-3 rounded-xl shadow-md text-xs flex items-center justify-center gap-1 transition-colors">
+            <button onclick="window.cancelCrop()" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold py-3 rounded-xl text-xs transition-colors">Cancelar</button>
+            <button id="btn-execute-crop" onclick="window.executeCropAndUpload()" class="flex-[2] bg-teal-600 hover:bg-teal-700 text-white font-black py-3 rounded-xl shadow-md text-xs flex items-center justify-center gap-1 transition-colors">
                 <i data-lucide="check" class="w-4 h-4"></i> Recortar & Salvar
             </button>
         </div>
@@ -65,7 +67,6 @@
     <script>
         lucide.createIcons();
 
-        // CHAVE DA API IMGBB
         const IMGBB_API_KEY = "eb75e9530b3092570067d4e63d367ad2";
 
         const initialView = document.getElementById('initial-view');
@@ -87,7 +88,7 @@
             statusArea.classList.remove('bg-teal-200');
             if(e.dataTransfer.files && e.dataTransfer.files.length > 0) {
                 const file = e.dataTransfer.files[0];
-                if(file.type.startsWith('image/')) loadImageForCropping(file);
+                if(file.type.startsWith('image/')) window.loadImageForCropping(file);
             }
         };
 
@@ -98,15 +99,15 @@
                 for (const item of items) {
                     if (item.type.indexOf('image') === 0) { file = item.getAsFile(); break; }
                 }
-                if (file) loadImageForCropping(file);
+                if (file) window.loadImageForCropping(file);
             }
         });
 
-        function handleTraditionalUpload(e) {
-            if(e.target.files && e.target.files.length > 0) loadImageForCropping(e.target.files[0]);
+        window.handleTraditionalUpload = (e) => {
+            if(e.target.files && e.target.files.length > 0) window.loadImageForCropping(e.target.files[0]);
         }
 
-        function loadImageForCropping(file) {
+        window.loadImageForCropping = (file) => {
             const reader = new FileReader();
             reader.onload = (e) => {
                 imageToCrop.src = e.target.result;
@@ -128,7 +129,7 @@
             reader.readAsDataURL(file);
         }
 
-        function setAspectRatio(ratio, btnElement) {
+        window.setAspectRatio = (ratio, btnElement) => {
             if (cropper) cropper.setAspectRatio(ratio);
             document.querySelectorAll('.ratio-btn').forEach(btn => {
                 btn.className = "ratio-btn bg-gray-100 text-gray-600 px-3 py-1.5 rounded-lg text-[10px] font-bold shadow-sm whitespace-nowrap";
@@ -136,17 +137,17 @@
             btnElement.className = "ratio-btn bg-teal-600 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold shadow-sm whitespace-nowrap";
         }
 
-        function cancelCrop() {
+        window.cancelCrop = () => {
             if (cropper) cropper.destroy();
             imageToCrop.src = '';
             cropView.classList.add('hidden');
             initialView.classList.remove('hidden');
             
             const btns = document.querySelectorAll('.ratio-btn');
-            if(btns.length > 0) setAspectRatio(4/5, btns[0]);
+            if(btns.length > 0) window.setAspectRatio(4/5, btns[0]);
         }
 
-        function executeCropAndUpload() {
+        window.executeCropAndUpload = () => {
             if (!cropper) return;
             loadingOverlay.classList.remove('hidden');
             document.getElementById('btn-execute-crop').disabled = true;
@@ -158,10 +159,10 @@
                 imageSmoothingQuality: 'high',
             });
 
-            canvas.toBlob((blob) => { uploadToImgBB(blob); }, 'image/webp', 0.85);
+            canvas.toBlob((blob) => { window.uploadToImgBB(blob); }, 'image/webp', 0.85);
         }
 
-        async function uploadToImgBB(imageBlob) {
+        window.uploadToImgBB = async (imageBlob) => {
             const formData = new FormData();
             formData.append('image', imageBlob);
 
@@ -176,19 +177,22 @@
                 if (data.success) {
                     const finalUrl = data.data.url;
                     
-                    if (window.parent && targetFieldId) {
-                        const targetInput = window.parent.document.getElementById(targetFieldId);
-                        if (targetInput) {
-                            targetInput.value = finalUrl;
-                            if(typeof window.parent.window.updateEditorPreview === 'function') {
-                                window.parent.window.updateEditorPreview();
+                    try {
+                        if (window.parent && targetFieldId) {
+                            const targetInput = window.parent.document.getElementById(targetFieldId);
+                            if (targetInput) {
+                                targetInput.value = finalUrl;
+                                if(typeof window.parent.window.updateEditorPreview === 'function') {
+                                    window.parent.window.updateEditorPreview();
+                                }
                             }
                         }
-                    }
-                    
-                    if(typeof window.parent.window.closeUploader === 'function') {
-                        window.parent.window.closeUploader();
-                        window.parent.window.showToast("Imagem adicionada com sucesso!");
+                        if(typeof window.parent.window.closeUploader === 'function') {
+                            window.parent.window.closeUploader();
+                            window.parent.window.showToast("Imagem processada!");
+                        }
+                    } catch(crossOriginErr) {
+                        alert("Imagem gerada (Copie o link): " + finalUrl);
                     }
 
                 } else {
@@ -196,7 +200,7 @@
                 }
             } catch (error) {
                 loadingOverlay.classList.add('hidden');
-                cancelCrop();
+                window.cancelCrop();
                 statusText.innerText = "Erro ao enviar. Tente de novo.";
                 statusText.className = "text-red-500 font-bold text-sm";
                 statusArea.classList.replace('bg-teal-50', 'bg-red-50');
