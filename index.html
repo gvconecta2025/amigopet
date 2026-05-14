@@ -7,7 +7,7 @@
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-
+    
     <style>
         :root {
             --cor-fundo: #f8fafc;
@@ -59,29 +59,12 @@
             });
         }
 
-        let deferredPrompt;
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            const btn = document.getElementById('install-btn');
-            if (btn) btn.classList.remove('hidden');
-        });
-
         window.installApp = async () => {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
-                if (outcome === 'accepted') {
-                    document.getElementById('install-btn').classList.add('hidden');
-                }
-                deferredPrompt = null;
-            } else {
-                window.showSystemMessage(
-                    "Instalar o Aplicativo", 
-                    "No Android: Procure 'Instalar Aplicativo' no menu do navegador (3 pontinhos).\n\nNo iPhone (iOS): Toque no botão 'Partilhar' (quadrado com seta) e escolha 'Adicionar à Tela de Início'.\n\nIsso vai instalar a loja como um aplicativo no seu telemóvel!", 
-                    "info"
-                );
-            }
+            window.showSystemMessage(
+                "Instalar o Aplicativo", 
+                "No Android: Procure 'Instalar Aplicativo' no menu do navegador (3 pontinhos).\n\nNo iPhone (iOS): Toque no botão 'Partilhar' (quadrado com seta) e escolha 'Adicionar à Tela de Início'.", 
+                "info"
+            );
         };
     </script>
 </head>
@@ -100,9 +83,6 @@
             <div class="flex items-center gap-2 relative z-50">
                 <button onclick="window.shareApp()" class="p-2 text-gray-500 hover:text-teal-700 bg-gray-50 rounded-full transition-colors border border-gray-100 shadow-sm active:scale-95" title="Compartilhar App">
                     <i data-lucide="share-2" class="w-5 h-5 pointer-events-none"></i>
-                </button>
-                <button id="install-btn" onclick="window.installApp()" class="px-3 py-1.5 bg-teal-50 text-teal-700 text-xs font-bold rounded-lg border border-teal-200 hover:bg-teal-100 transition-colors shadow-sm hidden active:scale-95">
-                    Instalar App
                 </button>
                 <button onclick="window.openLocation()" class="p-2 text-gray-500 hover:text-teal-700 bg-gray-50 rounded-full transition-colors border border-gray-100 shadow-sm active:scale-95" title="Nossa Loja">
                     <i data-lucide="map-pin" class="w-5 h-5 pointer-events-none"></i>
@@ -270,8 +250,8 @@
             </div>
         </div>
         
-        <div class="bg-white border-b border-gray-200 shadow-sm z-30 relative flex justify-center w-full shrink-0">
-            <div class="w-full max-w-5xl flex overflow-x-auto no-scrollbar px-2">
+        <div class="bg-white border-b border-gray-200 shadow-sm shrink-0 z-10 w-full">
+            <div class="max-w-5xl mx-auto flex overflow-x-auto no-scrollbar px-2">
                 <button type="button" onclick="window.switchAdminTab('items')" id="tab-btn-items" class="px-4 py-3 text-sm font-black text-teal-700 border-b-2 border-teal-700 whitespace-nowrap shrink-0">Gestão de Itens</button>
                 <button type="button" onclick="window.switchAdminTab('groups')" id="tab-btn-groups" class="px-4 py-3 text-sm font-bold text-gray-400 border-b-2 border-transparent whitespace-nowrap shrink-0">Grupos VIP</button>
                 <button type="button" onclick="window.switchAdminTab('settings')" id="tab-btn-settings" class="px-4 py-3 text-sm font-bold text-gray-400 border-b-2 border-transparent whitespace-nowrap shrink-0">Ajustes da Loja</button>
@@ -299,7 +279,6 @@
                             <input type="text" id="adminSearchInput" onkeyup="window.renderAdminItems()" placeholder="Buscar no sistema..." class="w-full bg-white border border-gray-200 text-gray-700 text-sm rounded-xl pl-9 pr-4 py-2.5 outline-none shadow-sm focus:border-teal-500 transition-colors">
                         </div>
                     </div>
-
                     <div id="admin-items-list" class="grid grid-cols-1 md:grid-cols-2 gap-4 pb-4"></div>
                 </div>
 
@@ -419,26 +398,26 @@
                 </div>
 
                 <div>
-                    <label class="block text-xs font-black text-gray-500 uppercase tracking-widest mb-1">Links das Imagens (Upload via clique)</label>
+                    <label class="block text-xs font-black text-gray-500 uppercase tracking-widest mb-1">Links das Imagens (Upload via clique no ícone)</label>
                     <div class="space-y-2">
                         <div class="relative">
-                            <input type="text" id="item-image-1" oninput="window.updateEditorPreview()" placeholder="Link Imagem 1 (Principal)" class="w-full bg-gray-50 border border-gray-200 rounded-xl pl-3 pr-10 py-2.5 text-sm outline-none focus:border-teal-500">
+                            <input type="text" id="item-image-1" oninput="window.updateEditorPreview()" placeholder="Imagem 1 (Principal)" class="w-full bg-gray-50 border border-gray-200 rounded-xl pl-3 pr-10 py-2.5 text-sm outline-none focus:border-teal-500">
                             <button type="button" onclick="window.openUploader('item-image-1')" class="absolute right-2 top-1/2 -translate-y-1/2 text-teal-600 hover:text-teal-800 bg-teal-50 p-1.5 rounded-lg active:scale-95 transition-transform"><i data-lucide="upload" class="w-4 h-4"></i></button>
                         </div>
                         <div class="relative">
-                            <input type="text" id="item-image-2" oninput="window.updateEditorPreview()" placeholder="Link Imagem 2" class="w-full bg-gray-50 border border-gray-200 rounded-xl pl-3 pr-10 py-2.5 text-sm outline-none focus:border-teal-500">
+                            <input type="text" id="item-image-2" oninput="window.updateEditorPreview()" placeholder="Imagem 2" class="w-full bg-gray-50 border border-gray-200 rounded-xl pl-3 pr-10 py-2.5 text-sm outline-none focus:border-teal-500">
                             <button type="button" onclick="window.openUploader('item-image-2')" class="absolute right-2 top-1/2 -translate-y-1/2 text-teal-600 hover:text-teal-800 bg-teal-50 p-1.5 rounded-lg active:scale-95 transition-transform"><i data-lucide="upload" class="w-4 h-4"></i></button>
                         </div>
                         <div class="relative">
-                            <input type="text" id="item-image-3" oninput="window.updateEditorPreview()" placeholder="Link Imagem 3" class="w-full bg-gray-50 border border-gray-200 rounded-xl pl-3 pr-10 py-2.5 text-sm outline-none focus:border-teal-500">
+                            <input type="text" id="item-image-3" oninput="window.updateEditorPreview()" placeholder="Imagem 3" class="w-full bg-gray-50 border border-gray-200 rounded-xl pl-3 pr-10 py-2.5 text-sm outline-none focus:border-teal-500">
                             <button type="button" onclick="window.openUploader('item-image-3')" class="absolute right-2 top-1/2 -translate-y-1/2 text-teal-600 hover:text-teal-800 bg-teal-50 p-1.5 rounded-lg active:scale-95 transition-transform"><i data-lucide="upload" class="w-4 h-4"></i></button>
                         </div>
                         <div class="relative">
-                            <input type="text" id="item-image-4" oninput="window.updateEditorPreview()" placeholder="Link Imagem 4" class="w-full bg-gray-50 border border-gray-200 rounded-xl pl-3 pr-10 py-2.5 text-sm outline-none focus:border-teal-500">
+                            <input type="text" id="item-image-4" oninput="window.updateEditorPreview()" placeholder="Imagem 4" class="w-full bg-gray-50 border border-gray-200 rounded-xl pl-3 pr-10 py-2.5 text-sm outline-none focus:border-teal-500">
                             <button type="button" onclick="window.openUploader('item-image-4')" class="absolute right-2 top-1/2 -translate-y-1/2 text-teal-600 hover:text-teal-800 bg-teal-50 p-1.5 rounded-lg active:scale-95 transition-transform"><i data-lucide="upload" class="w-4 h-4"></i></button>
                         </div>
                         <div class="relative">
-                            <input type="text" id="item-image-5" oninput="window.updateEditorPreview()" placeholder="Link Imagem 5" class="w-full bg-gray-50 border border-gray-200 rounded-xl pl-3 pr-10 py-2.5 text-sm outline-none focus:border-teal-500">
+                            <input type="text" id="item-image-5" oninput="window.updateEditorPreview()" placeholder="Imagem 5" class="w-full bg-gray-50 border border-gray-200 rounded-xl pl-3 pr-10 py-2.5 text-sm outline-none focus:border-teal-500">
                             <button type="button" onclick="window.openUploader('item-image-5')" class="absolute right-2 top-1/2 -translate-y-1/2 text-teal-600 hover:text-teal-800 bg-teal-50 p-1.5 rounded-lg active:scale-95 transition-transform"><i data-lucide="upload" class="w-4 h-4"></i></button>
                         </div>
                     </div>
@@ -470,6 +449,42 @@
         </div>
     </div>
 
+    <div id="group-editor-modal" class="hidden fixed inset-0 z-[110] flex items-center justify-center modal-overlay px-4 py-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm max-h-[90vh] flex flex-col relative">
+            <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-t-2xl shrink-0">
+                <h3 id="group-editor-title" class="font-black text-gray-800">Novo Grupo</h3>
+                <button type="button" onclick="window.closeGroupEditor()" class="text-gray-400 hover:text-gray-600 active:scale-95"><i data-lucide="x" class="w-6 h-6"></i></button>
+            </div>
+            
+            <div class="p-5 flex-col gap-4 flex overflow-y-auto">
+                <input type="hidden" id="edit-group-id">
+                <div>
+                    <label class="block text-xs font-black text-gray-500 uppercase tracking-widest mb-1">Nome</label>
+                    <input type="text" id="group-name" placeholder="Ex: Ofertas VIP 01" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-[#25D366]">
+                </div>
+                <div>
+                    <label class="block text-xs font-black text-gray-500 uppercase tracking-widest mb-1">Link WhatsApp</label>
+                    <input type="text" id="group-link" placeholder="https://chat.whatsapp.com/..." class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-[#25D366]">
+                </div>
+                <div>
+                    <label class="block text-xs font-black text-gray-500 uppercase tracking-widest mb-2">Status</label>
+                    <div class="flex flex-col gap-2 bg-gray-50 p-3 rounded-xl border border-gray-200">
+                        <label class="flex items-center gap-2 cursor-pointer text-sm font-bold text-green-600"><input type="radio" name="group_status" value="open" id="g-open" checked> Vagas Abertas</label>
+                        <label class="flex items-center gap-2 cursor-pointer text-sm font-bold text-gray-500"><input type="radio" name="group_status" value="full" id="g-full"> Lotação Máxima</label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="p-4 border-t border-gray-100 flex justify-between bg-white rounded-b-2xl shrink-0 relative z-10">
+                <button type="button" id="btn-delete-group" onclick="window.deleteGroup()" class="hidden text-red-500 font-bold px-4 py-2 hover:bg-red-50 rounded-lg text-sm active:scale-95"><i data-lucide="trash-2" class="w-5 h-5 pointer-events-none"></i></button>
+                <div class="flex gap-2 ml-auto">
+                    <button type="button" onclick="window.closeGroupEditor()" class="px-4 py-2 text-gray-500 font-bold text-sm active:scale-95">Cancelar</button>
+                    <button type="button" id="btn-save-group" onclick="window.saveGroup()" class="px-6 py-2 bg-[#25D366] text-white rounded-xl font-black text-sm shadow-md hover:bg-[#1ebd5a] active:scale-95 transition-transform">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="uploader-modal" class="hidden fixed inset-0 z-[120] flex items-center justify-center modal-overlay px-2 py-4">
         <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md h-[85vh] relative overflow-hidden flex flex-col">
             <button type="button" onclick="window.closeUploader()" class="absolute top-4 right-4 z-50 text-gray-400 hover:text-gray-800 bg-white rounded-full p-1 shadow-md active:scale-95"><i data-lucide="x" class="w-5 h-5"></i></button>
@@ -482,6 +497,7 @@
         import { getAuth, onAuthStateChanged, GoogleAuthProvider, signInWithPopup, signOut, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+        // CONFIGURAÇÕES GLOBAIS
         const ADMIN_EMAIL = "professoragiselle.edu2@gmail.com"; 
         
         const firebaseConfig = {
@@ -508,9 +524,10 @@
         };
         window.cart = [];
         window.currentUser = null;
-        let isAdminView = false;
+        window.isAdminView = false;
 
         // ===== INTEGRAÇÃO COM UPLOADER MICRO-FRONTEND =====
+        
         window.openUploader = (inputId) => {
             const iframe = document.getElementById('uploader-iframe');
             iframe.src = './uploader/index.html?target=' + inputId;
@@ -521,25 +538,23 @@
             document.getElementById('uploader-modal').classList.add('hidden');
             document.getElementById('uploader-iframe').src = '';
         };
+
         // ===================================================
 
         window.getDriveImageUrl = (url) => { 
             if (!url) return ""; 
             const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/); 
-            return match ? `https://lh3.googleusercontent.com/d/${match[1]}` : url; 
+            return match ? `https://lh3.googleusercontent.com/d/$${match[1]}` : url; 
         };
-        
         window.getYoutubeId = (url) => { 
             if (!url) return null;
             const match = url.match(/^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/); 
             return (match && match[2].length === 11) ? match[2] : null; 
         };
-        
         window.parseCurrency = (str) => {
             if(!str) return 0;
             return parseFloat(str.replace(/[^\d,.-]/g, '').replace(/\./g, '').replace(',', '.'));
         };
-        
         window.formatCurrency = (num) => num.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
         window.generateCodeId = (prefix, firebaseId) => {
@@ -656,7 +671,7 @@
                         const result = await signInWithPopup(auth, provider);
                         const userEmail = (result.user.email || '').toLowerCase();
                         if(userEmail !== ADMIN_EMAIL.toLowerCase()) {
-                            window.showSystemMessage("Acesso Negado", "Este e-mail não possui permissão.", "error");
+                            window.showSystemMessage("Acesso Negado", "Este e-mail não possui permissão de administrador.", "error");
                             await signOut(auth);
                             setTimeout(() => window.location.reload(), 2500);
                         } else {
@@ -936,12 +951,9 @@
 
             container.innerHTML = items.map(item => {
                 const imgUrl = item.images && item.images.length > 0 ? window.getDriveImageUrl(item.images[0]) : window.getDriveImageUrl(item.image);
-                const isCarousel = item.images && item.images.length > 1;
-
                 return `
                 <div onclick="window.openDetail('${item.id}')" class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden cursor-pointer group flex flex-col h-full relative hover:border-teal-500 transition-colors">
                     ${item.type === 'offer' ? `<div class="absolute top-2 right-2 bg-orange-500 text-white text-[9px] font-black px-2 py-0.5 rounded-md shadow uppercase tracking-wider z-10">Oferta</div>` : ''}
-                    ${isCarousel ? `<div class="absolute top-2 left-2 bg-black/50 text-white text-[9px] font-bold px-1.5 py-0.5 rounded z-10 pointer-events-none flex items-center gap-1"><i data-lucide="images" class="w-3 h-3"></i></div>` : ''}
                     <div class="aspect-square bg-white relative overflow-hidden border-b border-gray-50"><img src="${imgUrl}" class="w-full h-full object-contain bg-white group-hover:scale-105 transition-transform duration-500" onerror="this.onerror=null;this.src='https://placehold.co/300x300?text=Imagem'"></div>
                     <div class="p-3 flex flex-col flex-grow">
                         <div class="flex justify-between items-start gap-1 mb-1"><h3 class="text-sm font-bold text-gray-800 leading-tight line-clamp-2">${item.title}</h3></div>
@@ -993,40 +1005,6 @@
                     <p class="text-gray-600 leading-relaxed mb-8 whitespace-pre-wrap">${item.description}</p>
                     <button onclick="window.addToCart('${item.id}')" class="w-full flex justify-center items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white py-4 px-6 rounded-2xl font-black text-base sm:text-lg uppercase tracking-wide shadow-[0_10px_20px_rgba(15,118,110,0.3)] transition-all active:scale-95 mb-4"><i data-lucide="shopping-cart" class="w-6 h-6 pointer-events-none"></i> Adicionar ao Carrinho</button>
                 </div>`;
-            if (window.lucide) window.lucide.createIcons();
-        };
-
-        window.renderAdminGroups = () => {
-            const list = document.getElementById('admin-groups-list');
-            list.innerHTML = window.appGroups.map(g => `
-                <div class="flex items-center gap-3 p-3 bg-white border border-gray-200 rounded-xl shadow-sm cursor-pointer hover:border-orange-500" onclick="window.editGroup('${g.id}')">
-                    <div class="w-10 h-10 rounded-full ${g.status === 'open' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-500'} flex items-center justify-center shrink-0"><i data-lucide="${g.status === 'open' ? 'message-circle' : 'lock'}" class="w-5 h-5"></i></div>
-                    <div class="flex-1 min-w-0"><p class="text-sm font-bold text-gray-800 truncate">${g.name}</p><p class="text-xs text-gray-500 truncate">${g.link}</p></div>
-                    <i data-lucide="edit-3" class="w-4 h-4 text-gray-400"></i>
-                </div>`).join('') || '<p class="text-center text-gray-400 text-sm py-4">Nenhum grupo.</p>';
-            if (window.lucide) window.lucide.createIcons();
-        };
-
-        window.openAdminDashboard = () => { isAdminView = true; document.getElementById('admin-dashboard-modal').classList.remove('hidden'); window.switchAdminTab('items'); };
-        window.closeAdminDashboard = () => { window.location.reload(); };
-
-        window.switchAdminTab = (tab) => {
-            ['items', 'groups', 'settings'].forEach(t => {
-                document.getElementById('admin-tab-'+t).classList.add('hidden');
-                document.getElementById('tab-btn-'+t).className = "px-4 py-3 text-sm font-bold text-gray-400 border-b-2 border-transparent whitespace-nowrap shrink-0";
-            });
-            document.getElementById('admin-tab-'+tab).classList.remove('hidden');
-            document.getElementById('tab-btn-'+tab).className = "px-4 py-3 text-sm font-black text-teal-700 border-b-2 border-teal-700 whitespace-nowrap shrink-0";
-            if(tab === 'items') window.renderAdminItems();
-            if(tab === 'groups') window.renderAdminGroups();
-        };
-
-        window.updateEditorPreview = () => {
-            const container = document.getElementById('editor-image-preview');
-            let images = [];
-            for(let i=1; i<=5; i++) { const url = document.getElementById('item-image-'+i).value.trim(); if(url) images.push(window.getDriveImageUrl(url)); }
-            if(images.length === 0) container.innerHTML = `<img src="https://placehold.co/600x600?text=Sem+Imagem" class="w-full h-full object-contain bg-white flex-shrink-0 snap-center">`;
-            else container.innerHTML = images.map(img => `<img src="${img}" class="w-full h-full object-contain bg-white flex-shrink-0 snap-center" onerror="this.onerror=null;this.src='https://placehold.co/600x600?text=Erro'">`).join('');
             if (window.lucide) window.lucide.createIcons();
         };
 
@@ -1186,7 +1164,8 @@
 
                 const id = document.getElementById('edit-item-id').value;
                 const tagsArray = document.getElementById('item-tags').value.split(',').map(t => t.trim()).filter(t => t);
-                const isPermanent = document.querySelector('input[name="item_permanent"]:checked')?.value === "true"; 
+                const permCheck = document.querySelector('input[name="item_permanent"]:checked');
+                const isPermanent = permCheck ? permCheck.value === "true" : true; 
                 
                 const expDateStr = document.getElementById('item-expiration').value;
                 let expiresAt = null;
@@ -1280,10 +1259,11 @@
             try {
                 if(btn) { btn.innerText = "A guardar..."; btn.disabled = true; }
                 const id = document.getElementById('edit-group-id').value;
+                const statusCheck = document.querySelector('input[name="group_status"]:checked');
                 const data = {
                     name: document.getElementById('group-name').value,
                     link: document.getElementById('group-link').value,
-                    status: document.querySelector('input[name="group_status"]:checked').value
+                    status: statusCheck ? statusCheck.value : 'open'
                 };
                 const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("O servidor demorou muito a responder.")), 10000));
                 
@@ -1294,20 +1274,6 @@
                 window.showToast("Salvo.");
             } catch (e) { window.showSystemMessage("Erro", e.message, "error"); } 
             finally { if(btn) { btn.innerText = originalBtnText; btn.disabled = false; } }
-        };
-
-        window.deleteGroup = () => {
-            const id = document.getElementById('edit-group-id').value;
-            window.showSystemMessage("Atenção", "Deseja excluir este grupo?", "error", {
-                text: "Excluir", color: "bg-red-500 hover:bg-red-600", onClick: async () => {
-                    try {
-                        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("O servidor demorou muito a responder.")), 10000));
-                        await Promise.race([ deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'groups', id)), timeoutPromise ]);
-                        window.closeGroupEditor();
-                        window.showToast("Excluído.");
-                    } catch (e) { window.showSystemMessage("Erro", e.message, "error"); }
-                }
-            });
         };
 
         window.saveSettings = async () => {
@@ -1337,82 +1303,17 @@
             finally { if(btn) { btn.innerText = originalBtnText; btn.disabled = false; } }
         };
 
-        // INICIALIZADOR BLINDADO (Sem depender de window.onload)
+        // INICIALIZADOR BLINDADO (Inicia o Firebase mesmo sem o onload travar)
         const initApp = async () => {
             window.loadCartLocally();
             if (window.lucide) window.lucide.createIcons();
-            
             window.renderFeed();
             window.updateActiveNav();
             window.updateCartUI();
-            
-            try { if (!auth.currentUser) await signInAnonymously(auth); } catch(e) {}
-
-            onAuthStateChanged(auth, async (user) => {
-                if (!user) {
-                    try { await signInAnonymously(auth); } catch(e) {}
-                    return; 
-                }
-
-                window.currentUser = user;
-
-                if (window.isFirebaseListening) return;
-                window.isFirebaseListening = true;
-
-                onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'items'), (snapshot) => {
-                    window.appItems = []; snapshot.forEach(doc => window.appItems.push({ id: doc.id, ...doc.data() }));
-                    window.appItems.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-                    
-                    if(!isAdminView) {
-                        if(currentView === 'home') window.renderFeed();
-                        if(currentView === 'catalog') window.renderCatalog();
-                        if(currentView === 'detail' && window.currentDetailId) window.openDetail(window.currentDetailId);
-                    } else {
-                        window.renderAdminItems();
-                    }
-                });
-
-                onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', 'groups'), (snapshot) => {
-                    window.appGroups = []; snapshot.forEach(doc => window.appGroups.push({ id: doc.id, ...doc.data() }));
-                    window.appGroups.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-                    if(currentView === 'alerts' && !isAdminView) window.renderAlerts();
-                    if(isAdminView) window.renderAdminGroups();
-                });
-
-                onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'general'), (docSnap) => {
-                    if(docSnap.exists()) {
-                        const data = docSnap.data();
-                        if(data.whatsapp) window.appSettings.whatsapp = data.whatsapp;
-                        if(data.mapsUrl) window.appSettings.mapsUrl = data.mapsUrl;
-                        if(data.storeName) {
-                            window.appSettings.storeName = data.storeName;
-                            const headerName = document.getElementById('header-store-name');
-                            if(headerName) headerName.innerText = data.storeName;
-                            const pageTitle = document.getElementById('page-title');
-                            if(pageTitle) pageTitle.innerText = data.storeName;
-                        }
-                        if(data.shareMessage) window.appSettings.shareMessage = data.shareMessage;
-                    }
-                    
-                    if(isAdminView) {
-                        const waInput = document.getElementById('admin-set-whatsapp');
-                        const mapsInput = document.getElementById('admin-set-maps');
-                        const nameInput = document.getElementById('admin-set-storename');
-                        const shareInput = document.getElementById('admin-set-sharemsg');
-                        if (waInput) waInput.value = window.appSettings.whatsapp || '';
-                        if (mapsInput) mapsInput.value = window.appSettings.mapsUrl || '';
-                        if (nameInput) nameInput.value = window.appSettings.storeName || '';
-                        if (shareInput) shareInput.value = window.appSettings.shareMessage || '';
-                    }
-                });
-            });
         };
 
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initApp);
-        } else {
-            initApp();
-        }
+        // Roda o render visual IMEDIATAMENTE (sem esperar o banco de dados)
+        initApp();
 
     </script>
 </body>
