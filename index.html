@@ -263,7 +263,6 @@
 
     <div id="toast-msg" class="fixed bottom-24 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-5 py-2.5 rounded-full shadow-2xl text-sm font-bold flex items-center gap-2 z-[9999] transition-all duration-300 opacity-0 translate-y-4 pointer-events-none"></div>
 
-
     <div id="admin-dashboard-modal" class="hidden fixed inset-0 z-[100] flex flex-col bg-gray-50 slide-up-animation">
         
         <div class="bg-teal-800 text-white px-4 py-4 flex justify-between items-center shadow-md pt-safe shrink-0 z-20">
@@ -428,7 +427,7 @@
                 </div>
 
                 <div>
-                    <label class="block text-xs font-black text-gray-500 uppercase tracking-widest mb-1">Arquivos / Imagens (Clique para Upload Direto)</label>
+                    <label class="block text-xs font-black text-gray-500 uppercase tracking-widest mb-1">Links das Imagens (Drive/Web - Até 5 fotos)</label>
                     <div class="space-y-2">
                         <div class="relative">
                             <input type="text" id="item-image-1" oninput="window.updateEditorPreview()" placeholder="Link Imagem 1 (Principal)" class="w-full bg-gray-50 border border-gray-200 rounded-xl pl-3 pr-10 py-2.5 text-sm outline-none focus:border-teal-500">
@@ -614,7 +613,6 @@
             document.getElementById('uploader-modal').classList.remove('hidden');
             window.resetUploader();
             
-            // Adicionar evento de arrastar e soltar (Drag and Drop)
             const dropZone = document.getElementById('upload-status-area');
             dropZone.ondragover = (e) => { e.preventDefault(); dropZone.classList.add('bg-teal-200'); };
             dropZone.ondragleave = (e) => { e.preventDefault(); dropZone.classList.remove('bg-teal-200'); };
@@ -750,9 +748,6 @@
 
         // ===== FIM UPLOADER =====
 
-        let currentSearchQuery = '';
-        let currentHistory = [];
-
         window.getDriveImageUrl = (url) => { 
             if (!url) return ""; 
             const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/); 
@@ -820,14 +815,13 @@
             });
         };
 
-        // Motor Global de Carrosséis Automáticos (3 segundos)
         if(window.carouselInterval) clearInterval(window.carouselInterval);
         window.carouselInterval = setInterval(() => {
             document.querySelectorAll('.auto-carousel').forEach(container => {
-                if(container.matches(':hover')) return; // Pausa se o rato estiver em cima
+                if(container.matches(':hover')) return; 
                 let maxScroll = container.scrollWidth - container.clientWidth;
                 if (container.scrollLeft >= maxScroll - 5) {
-                    container.scrollTo({left: 0, behavior: 'smooth'}); // Volta ao início
+                    container.scrollTo({left: 0, behavior: 'smooth'}); 
                 } else {
                     container.scrollBy({ left: container.clientWidth, behavior: 'smooth' });
                 }
@@ -836,15 +830,10 @@
 
         window.showToast = (msg) => {
             let toast = document.getElementById('toast-msg');
-            if (!toast) {
-                toast = document.createElement('div');
-                toast.id = 'toast-msg';
-                toast.className = 'fixed bottom-24 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-5 py-2.5 rounded-full shadow-2xl text-sm font-bold flex items-center gap-2 z-[9999] transition-all duration-300 opacity-0 translate-y-4 pointer-events-none';
-                document.body.appendChild(toast);
-            }
             toast.innerHTML = `<i data-lucide="check-circle" class="w-5 h-5 text-[#25D366]"></i> ${msg}`;
             if (window.lucide) window.lucide.createIcons();
 
+            toast.classList.remove('pointer-events-none');
             setTimeout(() => {
                 toast.classList.remove('opacity-0', 'translate-y-4');
                 toast.classList.add('opacity-100', 'translate-y-0');
@@ -853,6 +842,7 @@
             setTimeout(() => {
                 toast.classList.remove('opacity-100', 'translate-y-0');
                 toast.classList.add('opacity-0', 'translate-y-4');
+                toast.classList.add('pointer-events-none');
             }, 3000);
         };
 
@@ -963,7 +953,6 @@
             window.loadCartLocally();
             if (window.lucide) window.lucide.createIcons();
             
-            // Correção de Escopo Vital (Adicionado window. para evitar ReferenceError no modo estrito)
             window.renderFeed();
             window.updateActiveNav();
             window.updateCartUI();
@@ -1038,7 +1027,7 @@
 
         window.showView = (view, type = null) => {
             ['home-view', 'catalog-view', 'detail-view', 'alerts-view', 'cart-view'].forEach(id => document.getElementById(id).classList.add('hidden'));
-            if(view !== 'detail' && view !== 'cart') { document.getElementById('searchInput').value = ''; currentSearchQuery = ''; }
+            if(view !== 'detail' && view !== 'cart') { document.getElementById('searchInput').value = ''; window.currentSearchQuery = ''; }
 
             if (view === 'home') { document.getElementById('home-view').classList.remove('hidden'); window.renderFeed(); currentHistory = ['home']; } 
             else if (view === 'catalog') {
@@ -1105,26 +1094,25 @@
         };
 
         window.handleSearch = (e) => {
-            currentSearchQuery = e.target.value.toLowerCase();
-            if((currentView === 'home' || currentView === 'alerts') && currentSearchQuery.length > 0) window.showView('catalog', 'product');
+            window.currentSearchQuery = e.target.value.toLowerCase();
+            if((currentView === 'home' || currentView === 'alerts') && window.currentSearchQuery.length > 0) window.showView('catalog', 'product');
             else if (currentView === 'catalog') window.renderCatalog();
             else if (currentView === 'home') window.renderFeed();
         };
         
         window.filterByTag = (tag) => { 
             document.getElementById('searchInput').value = tag; 
-            currentSearchQuery = tag.toLowerCase(); 
+            window.currentSearchQuery = tag.toLowerCase(); 
             window.renderCatalog(); 
         };
         
         const filterItems = (items) => {
             let filtered = items;
             
-            // Exclui rascunhos da visualização do cliente
-            filtered = filtered.filter(item => !item.draft);
+            filtered = filtered.filter(item => item.draft !== true);
 
-            if(currentSearchQuery) {
-                const q = currentSearchQuery.toLowerCase();
+            if(window.currentSearchQuery) {
+                const q = window.currentSearchQuery.toLowerCase();
                 filtered = filtered.filter(item => {
                     const shortId = window.getShortId(item).toLowerCase();
                     const titleMatch = (item.title || '').toLowerCase().includes(q);
@@ -1134,7 +1122,7 @@
             }
             const now = Date.now();
             filtered = filtered.filter(item => {
-                if (item.permanent) return true;
+                if (item.permanent === true || item.permanent === undefined) return true;
                 if (item.expiresAt && item.expiresAt >= now) return true;
                 return false; 
             });
@@ -1177,7 +1165,7 @@
                     window.cart = [];
                     window.saveCartLocally();
                     window.updateCartUI();
-                    window.showSystemMessage("Carrinho Vazio", "Todos os itens foram removidos.", "success");
+                    window.showToast("Carrinho esvaziado.");
                 }},
                 { text: "Cancelar", class: "bg-gray-100 hover:bg-gray-200 text-gray-500", onClick: () => {} }
             ]);
@@ -1345,7 +1333,7 @@
 
         window.renderCatalog = () => {
             const container = document.getElementById('catalog-container');
-            let items = filterItems(window.appItems.filter(item => currentSearchQuery ? (item.type === 'product' || item.type === 'service') : item.type === currentCatalogType));
+            let items = filterItems(window.appItems.filter(item => window.currentSearchQuery ? (item.type === 'product' || item.type === 'service') : item.type === currentCatalogType));
             
             if(items.length === 0) { container.innerHTML = `<div class="col-span-full py-10 text-center"><p class="text-gray-400">Nenhum item encontrado.</p></div>`; return; }
 
@@ -1423,17 +1411,16 @@
             if (window.lucide) window.lucide.createIcons();
         };
 
-        window.renderAlerts = () => {
-            const container = document.getElementById('groups-container');
-            if(window.appGroups.length === 0) { container.innerHTML = `<p class="text-center text-gray-400">Nenhum grupo disponível.</p>`; return; }
-            container.innerHTML = window.appGroups.map(g => {
-                if(g.status === 'full') return `<a href="#" onclick="return false;" class="flex items-center justify-between bg-white p-4 rounded-xl shadow-sm border border-gray-200 opacity-60"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-gray-500"><i data-lucide="lock" class="w-5 h-5"></i></div><div><p class="font-bold text-gray-800">${g.name}</p><p class="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Lotação Máxima</p></div></div><button class="bg-gray-200 text-gray-500 px-4 py-2 rounded-lg text-sm font-bold cursor-not-allowed">Lotado</button></a>`;
-                return `<a href="${g.link.startsWith('http') ? g.link : 'https://'+g.link}" target="_blank" class="flex items-center justify-between bg-white p-4 rounded-xl shadow-sm border border-green-200 hover:border-green-500 transition-all group"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-[#dcf8c6] flex items-center justify-center text-[#25D366]"><i data-lucide="message-circle" class="w-5 h-5"></i></div><div><p class="font-bold text-gray-800">${g.name}</p><p class="text-[10px] text-[#25D366] font-bold uppercase tracking-widest">Vagas Abertas</p></div></div><button class="bg-[#25D366] text-white px-4 py-2 rounded-lg text-sm font-bold shadow-md hover:bg-[#1ebd5a] transition-colors">Entrar</button></a>`;
-            }).join('');
+        window.renderAdminGroups = () => {
+            const list = document.getElementById('admin-groups-list');
+            list.innerHTML = window.appGroups.map(g => `
+                <div class="flex items-center gap-3 p-3 bg-white border border-gray-200 rounded-xl shadow-sm cursor-pointer hover:border-orange-500" onclick="window.editGroup('${g.id}')">
+                    <div class="w-10 h-10 rounded-full ${g.status === 'open' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-500'} flex items-center justify-center shrink-0"><i data-lucide="${g.status === 'open' ? 'message-circle' : 'lock'}" class="w-5 h-5"></i></div>
+                    <div class="flex-1 min-w-0"><p class="text-sm font-bold text-gray-800 truncate">${g.name}</p><p class="text-xs text-gray-500 truncate">${g.link}</p></div>
+                    <i data-lucide="edit-3" class="w-4 h-4 text-gray-400"></i>
+                </div>`).join('') || '<p class="text-center text-gray-400 text-sm py-4">Nenhum grupo.</p>';
             if (window.lucide) window.lucide.createIcons();
         };
-
-        // ====== FUNÇÕES DO PAINEL DE ADMINISTRAÇÃO ======
 
         window.openAdminDashboard = () => {
             isAdminView = true;
@@ -1716,17 +1703,6 @@
                     }
                 }
             });
-        };
-
-        window.renderAdminGroups = () => {
-            const list = document.getElementById('admin-groups-list');
-            list.innerHTML = window.appGroups.map(g => `
-                <div class="flex items-center gap-3 p-3 bg-white border border-gray-200 rounded-xl shadow-sm cursor-pointer hover:border-orange-500" onclick="window.editGroup('${g.id}')">
-                    <div class="w-10 h-10 rounded-full ${g.status === 'open' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-500'} flex items-center justify-center shrink-0"><i data-lucide="${g.status === 'open' ? 'message-circle' : 'lock'}" class="w-5 h-5"></i></div>
-                    <div class="flex-1 min-w-0"><p class="text-sm font-bold text-gray-800 truncate">${g.name}</p><p class="text-xs text-gray-500 truncate">${g.link}</p></div>
-                    <i data-lucide="edit-3" class="w-4 h-4 text-gray-400"></i>
-                </div>`).join('') || '<p class="text-center text-gray-400 text-sm py-4">Nenhum grupo.</p>';
-            if (window.lucide) window.lucide.createIcons();
         };
 
         window.openGroupEditor = () => {
